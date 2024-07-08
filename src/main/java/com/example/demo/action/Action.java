@@ -41,10 +41,10 @@ public class Action {
     private Long leaderId;
 
     @ManyToMany(mappedBy = "actions", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Volunteer> volunteers = new HashSet<>();
+    private Set<Volunteer> volunteers = new HashSet<>(); // T R
 
     @ManyToMany(mappedBy = "actions", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Volunteer> determined;
+    private Set<Volunteer> determined; // T
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "preferences_id", nullable = false)

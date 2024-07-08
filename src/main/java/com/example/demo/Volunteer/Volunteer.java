@@ -23,8 +23,8 @@ public class Volunteer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long volunteerId;
-
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private VolunteerRole role;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "volunteer_details_id", referencedColumnName = "volunteerId")

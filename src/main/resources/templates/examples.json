@@ -1,7 +1,7 @@
 [
   {
     "volunteerId": 1,
-    "role": "LEADER",
+    "role": "LEADER", 
     "volunteerDetails": {
       "volunteerId": 1,
       "name": "John",
@@ -16,6 +16,7 @@
       "postalNumber": "12345",
       "sex": "M"
     },
+    "lim": "10",
     "preferences": {
       "preferenceId": 1,
       "T": [
@@ -202,5 +203,125 @@
         }
       }
     ]
+  },
+
+
+  ///////////////////////////////////////////////////////////////////
+
+
+  {
+    "scheduleId": 1,
+    "action": {
+      "actionId": 1,
+      "heading": "Community Cleanup",
+      "description": "A community event to clean up the local park.",
+      "status": "Scheduled",
+      "beg": "2024-08-01T10:00:00",
+      "end": "2024-08-01T14:00:00",
+      "needMin": 5,
+      "needMax": 20,
+      "leaderId": 1,
+      "volunteers": [
+        {
+          "volunteerId": 2,
+          "role": "Participant",
+          "volunteerDetails": {
+            "volunteerId": 2,
+            "name": "Jane",
+            "lastname": "Smith",
+            "email": "jane.smith@example.com",
+            "phone": "987654321",
+            "dateOfBirth": "1995-05-15",
+            "city": "Town",
+            "street": "Broadway",
+            "houseNumber": "20",
+            "apartmentNumber": "2",
+            "postalNumber": "54321",
+            "sex": "F"
+          },
+          "preferences": {
+            "preferenceId": 1,
+            "T": [
+              {
+                "actionId": 1,
+                "heading": "Community Cleanup"
+              }
+            ],
+            "R": [
+              {
+                "actionId": 1,
+                "heading": "Community Cleanup"
+              }
+            ],
+            "N": []
+          }
+        },
+        {
+          "volunteerId": 3,
+          "role": "Helper",
+          "volunteerDetails": {
+            "volunteerId": 3,
+            "name": "Bob",
+            "lastname": "Brown",
+            "email": "bob.brown@example.com",
+            "phone": "555123456",
+            "dateOfBirth": "1988-07-10",
+            "city": "Village",
+            "street": "Oak Street",
+            "houseNumber": "15",
+            "apartmentNumber": "1",
+            "postalNumber": "67890",
+            "sex": "M"
+          },
+          "preferences": {
+            "preferenceId": 2,
+            "T": [],
+            "R": [
+              {
+                "actionId": 1,
+                "heading": "Community Cleanup"
+              }
+            ],
+            "N": []
+          }
+        }
+      ],
+      "determined": [
+        {
+          "volunteerId": 2,
+          "role": "Participant",
+          "volunteerDetails": {
+            "volunteerId": 2,
+            "name": "Jane",
+            "lastname": "Smith",
+            "email": "jane.smith@example.com",
+            "phone": "987654321",
+            "dateOfBirth": "1995-05-15",
+            "city": "Town",
+            "street": "Broadway",
+            "houseNumber": "20",
+            "apartmentNumber": "2",
+            "postalNumber": "54321",
+            "sex": "F"
+          },
+          "preferences": {
+            "preferenceId": 1,
+            "T": [
+              {
+                "actionId": 1,
+                "heading": "Community Cleanup"
+              }
+            ],
+            "R": [
+              {
+                "actionId": 1,
+                "heading": "Community Cleanup"
+              }
+            ],
+            "N": []
+          }
+        }
+      ]
+    }
   }
 ]

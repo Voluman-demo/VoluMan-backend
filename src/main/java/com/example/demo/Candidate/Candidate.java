@@ -25,6 +25,7 @@ public class Candidate {
     private String phone;
     private Date dateOfBirth;
     private String street;
+    private String city;
     private String houseNumber;
     private String apartmentNumber;
     private String postalNumber;

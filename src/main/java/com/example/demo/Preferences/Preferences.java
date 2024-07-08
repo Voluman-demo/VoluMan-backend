@@ -21,12 +21,12 @@ public class Preferences {
     private Long preferenceId;
 
     @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL)
-    List<Action> T;
+    private List<Action> T;
 
     @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL)
-    List<Action> R;
+    private List<Action> R;
 
     @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL)
-    List<Action> N;
+    private List<Action> N;
 
 }
