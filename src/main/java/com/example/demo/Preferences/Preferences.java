@@ -2,31 +2,50 @@ package com.example.demo.Preferences;
 
 import com.example.demo.action.Action;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Table(name = "preferences")
 public class Preferences {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long preferenceId;
 
-    @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL)
-    private List<Action> T;
+ /*   @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Action> T = new ArrayList<>();
 
-    @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL)
-    private List<Action> R;
+    @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Action> R = new ArrayList<>();
 
-    @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL)
-    private List<Action> N;
+    @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Action> N = new ArrayList<>();*/
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "preferences_action",
+            joinColumns = @JoinColumn(name = "preference_id"),
+            inverseJoinColumns = @JoinColumn(name = "action_id")
+    )
+    private Set<Action> T = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "preferences_action",
+            joinColumns = @JoinColumn(name = "preference_id"),
+            inverseJoinColumns = @JoinColumn(name = "action_id")
+    )
+    private Set<Action> R = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "preferences_action",
+            joinColumns = @JoinColumn(name = "preference_id"),
+            inverseJoinColumns = @JoinColumn(name = "action_id")
+    )
+    private Set<Action> N = new HashSet<>();
 
 }

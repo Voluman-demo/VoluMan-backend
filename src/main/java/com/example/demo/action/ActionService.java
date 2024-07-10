@@ -2,7 +2,7 @@ package com.example.demo.action;
 
 import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerRepository;
-import com.example.demo.Volunteer.VolunteerRole;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -35,43 +35,51 @@ public class ActionService {
         return actionRepository.findById(idAction).map(Action::getHeading);
     }
 
-    public Action addAction(Action actionReq,Long adminId) {
-        if (!volunteerRepository.existsByVolunteerIdAndRole(adminId, VolunteerRole.ADMIN)) {
-            throw new RuntimeException("Admin not found");
-        }
-
-        Action action = new Action();
-        action.setHeading(actionReq.getHeading());
-        action.setDescription(actionReq.getDescription());
-        action.setLeaderId(actionReq.getLeaderId());
-        action.setStatus(ActionStatus.OPEN);
-
+    public Action addAction(Action action) {
         return actionRepository.save(action);
     }
 
-    public void closeAction(Long idAction, Long adminId) {
-        if (!volunteerRepository.existsByVolunteerIdAndRole(adminId, VolunteerRole.ADMIN)) {
-            throw new RuntimeException("Admin not found");
-        }
+    public Action createAndAddAction(AddActionRequest request) {
+        Action action = new Action();
+        action.setHeading(request.heading());
+        action.setDescription(request.description());
+        action.setStatus(request.status());
+        action.setBeg(request.beg());
+        action.setEnd(request.end());
+        action.setNeedMin(request.needMin());
+        action.setNeedMax(request.needMax());
+        action.setLeaderId(getLeader(request.leaderId()).get().getVolunteerId());
 
-        Action action = actionRepository.findById(idAction).orElseThrow(() -> new RuntimeException("Action not found"));
-        action.setStatus(ActionStatus.CLOSED);
-        actionRepository.save(action);
+        return addAction(action);
     }
 
-    public void changeDescription(Long idAction, Long leaderId, String description) {
-        Volunteer leader = volunteerRepository.findById(leaderId)
-                .orElseThrow(() -> new RuntimeException("Leader not found"));
 
-        Action action = actionRepository.findById(idAction)
-                .orElseThrow(() -> new RuntimeException("Action not found"));
+    @Transactional
+    public void closeAction(Long idAction, Long adminId) {
+        Optional<Action> optionalAction = getActionById(idAction);
 
-        if (!action.getLeaderId().equals(leaderId)) {
-            throw new RuntimeException("Unauthorized");
+        if (optionalAction.isPresent()) {
+            Action action = optionalAction.get();
+            action.setStatus(ActionStatus.CLOSED);
+            actionRepository.save(action);
+        }
         }
 
-        action.setDescription(description);
-        actionRepository.save(action);
+    @Transactional
+    public void changeDescription(Long idAction, Long leaderId, String description) { //DONE
+
+        Optional<Action> optionalAction = getActionById(idAction);
+
+        if (optionalAction.isPresent()) {
+            Action action = optionalAction.get();
+            action.setDescription(description);
+            actionRepository.save(action);
+        }
+
+    }
+
+    public Optional<Volunteer> getLeader(Long leaderId) {
+        return volunteerRepository.findById(leaderId);
     }
 }
 

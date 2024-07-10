@@ -4,25 +4,20 @@ import com.example.demo.Interval.Interval;
 import com.example.demo.Preferences.Preferences;
 import com.example.demo.action.Action;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Table(name = "volunteer")
 public class Volunteer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long volunteerId;
+
     @Enumerated(EnumType.STRING)
     private VolunteerRole role;
 
@@ -34,7 +29,7 @@ public class Volunteer {
     @JoinColumn(name = "preferences_id", referencedColumnName = "preferenceId")
     private Preferences preferences;
 
-    @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Interval> availabilities;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

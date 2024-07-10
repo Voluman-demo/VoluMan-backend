@@ -1,6 +1,7 @@
 package com.example.demo.Candidate;
 
 import com.example.demo.Volunteer.VolunteerService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -16,11 +17,14 @@ public class CandidateService {
         this.candidateRepository = candidateRepository;
     }
 
+    @Transactional
     public void acceptCandidate(Optional<Candidate> candidate) {
         volunteerService.addVolunteer(candidate);
         candidateRepository.delete(candidate.get());
 
     }
+
+    @Transactional
     public void refuseCandidate(Optional<Candidate> candidate) {
         candidateRepository.delete(candidate.get());
     }

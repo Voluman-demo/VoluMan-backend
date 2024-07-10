@@ -9,10 +9,6 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
 @Table(name = "availability")
 public class Availability {

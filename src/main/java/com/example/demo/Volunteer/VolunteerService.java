@@ -61,7 +61,7 @@ public class VolunteerService {
 
     }
     public void degradeLeader(Long idVolunteer) {
-        Optional<Volunteer> volunteer = volunteerRepository.findByVolunteerIdAndRole(idVolunteer, VolunteerRole.VOLUNTEER);
+        Optional<Volunteer> volunteer = volunteerRepository.findByVolunteerIdAndRole(idVolunteer, VolunteerRole.LEADER);
         if (volunteer.isPresent()) {
             Volunteer volunteerEntity = volunteer.get();
             volunteerEntity.setRole(VolunteerRole.VOLUNTEER);

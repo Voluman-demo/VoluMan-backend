@@ -1,15 +1,10 @@
 package com.example.demo.Schedule;
 
-import com.example.demo.Preferences.Preferences;
 import com.example.demo.action.Action;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @Data
 @Table(name = "schedule")
 public class Schedule {

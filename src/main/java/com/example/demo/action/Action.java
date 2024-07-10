@@ -3,21 +3,15 @@ package com.example.demo.action;
 import com.example.demo.Preferences.Preferences;
 import com.example.demo.Volunteer.Volunteer;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
-@Table(name = "Action")
+@Data
+@Table(name = "action")
 public class Action {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,15 +28,20 @@ public class Action {
 
     private Long needMin;
     private Long needMax;
-    private Long leaderId;
+    private Long leaderId; //TODO pomyslec
 
     @ManyToMany(mappedBy = "actions", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private Set<Volunteer> volunteers = new HashSet<>();
 
     @ManyToMany(mappedBy = "actions", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<Volunteer> determined;
+    private Set<Volunteer> determined = new HashSet<>();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "preferences_id", nullable = false)
-    private Preferences preferences;
+    @ManyToMany(mappedBy = "T", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Preferences> preferencesT = new HashSet<>();
+
+    @ManyToMany(mappedBy = "R", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Preferences> preferencesR = new HashSet<>();
+
+    @ManyToMany(mappedBy = "N", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<Preferences> preferencesN = new HashSet<>();
 }

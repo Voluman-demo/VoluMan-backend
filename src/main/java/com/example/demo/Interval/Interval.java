@@ -3,18 +3,12 @@ package com.example.demo.Interval;
 import com.example.demo.Volunteer.Availability;
 import com.example.demo.Volunteer.Volunteer;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.sql.Timestamp;
 
 @Entity
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 @Table(name = "time_interval") // Changed table name
 public class Interval {
     @Id
@@ -31,5 +25,5 @@ public class Interval {
 
     @ManyToOne
     @JoinColumn(name = "volunteer_id")
-    private Volunteer volunteer; // Added this line
+    private Volunteer volunteer;
 }
