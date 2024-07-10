@@ -42,10 +42,10 @@ public class ActionController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("")
-    public ResponseEntity<?> addAction(@RequestBody Action action) {
+    @PostMapping("/addAction")
+    public ResponseEntity<?> addAction(@RequestBody Action action,@RequestParam Long adminId) {
         try {
-            Action newAction = actionService.addAction(action);
+            Action newAction = actionService.addAction(action,adminId);
             return ResponseEntity.status(HttpStatus.CREATED).body(newAction);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());

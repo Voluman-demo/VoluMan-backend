@@ -35,7 +35,7 @@ public class VolunteerController {
 
     @GetMapping("/{idVolunteer}/leader")
     public ResponseEntity<Volunteer> getVolunteerLeader(@PathVariable Long idVolunteer) {
-        Optional<Volunteer> leader = volunteerRepository.findByRoleAndVolunteerId(idVolunteer, VolunteerRole.LEADER);
+        Optional<Volunteer> leader = volunteerRepository.findByVolunteerIdAndRole(idVolunteer, VolunteerRole.LEADER);
         if (leader.isPresent()) {
             return ResponseEntity.ok(leader.get());
         }
@@ -53,7 +53,10 @@ public class VolunteerController {
 
 
     @PutMapping("/{idVolunteer}/promote")
-    public ResponseEntity<Volunteer> promoteToLeader(@PathVariable Long idVolunteer) {
+    public ResponseEntity<Volunteer> promoteToLeader(@PathVariable Long idVolunteer, @RequestParam Long adminId) {
+        if (!volunteerRepository.existsByVolunteerIdAndRole(adminId, VolunteerRole.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Zwrot odpowiedzi 403 Forbidden, gdy użytkownik nie jest adminem
+        }
         Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
 
         if (volunteer.isPresent()) {
@@ -63,8 +66,11 @@ public class VolunteerController {
         return ResponseEntity.notFound().build();
     }
 
-    @PutMapping("/{idVolunteer}/promote")
-    public ResponseEntity<Volunteer> degradeLeader(@PathVariable Long idVolunteer) {
+    @PutMapping("/{idVolunteer}/degrade")
+    public ResponseEntity<Volunteer> degradeLeader(@PathVariable Long idVolunteer, @RequestParam Long adminId) {
+        if (!volunteerRepository.existsByVolunteerIdAndRole(adminId, VolunteerRole.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Zwrot odpowiedzi 403 Forbidden, gdy użytkownik nie jest adminem
+        }
         Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
 
         if (volunteer.isPresent()) {
@@ -75,7 +81,10 @@ public class VolunteerController {
     }
 
     @DeleteMapping("/{idVolunteer}/delete")
-    public ResponseEntity<Void> deleteVolunteer(@PathVariable Long idVolunteer) {
+    public ResponseEntity<Void> deleteVolunteer(@PathVariable Long idVolunteer, @RequestParam Long adminId) {
+        if (!volunteerRepository.existsByVolunteerIdAndRole(adminId, VolunteerRole.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Zwrot odpowiedzi 403 Forbidden, gdy użytkownik nie jest adminem
+        }
         Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
         if (volunteer.isPresent()) {
             volunteerRepository.deleteById(idVolunteer);

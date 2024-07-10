@@ -2,6 +2,7 @@ package com.example.demo.action;
 
 import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerRepository;
+import com.example.demo.Volunteer.VolunteerRole;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -34,27 +35,27 @@ public class ActionService {
         return actionRepository.findById(idAction).map(Action::getHeading);
     }
 
-    public Action addAction(Action actionReq) {
-//        if (!volunteerRepository.existsById(leaderId)) {
-//            throw new RuntimeException("Leader not found");
-//        }
+    public Action addAction(Action actionReq,Long adminId) {
+        if (!volunteerRepository.existsByVolunteerIdAndRole(adminId, VolunteerRole.ADMIN)) {
+            throw new RuntimeException("Admin not found");
+        }
 
         Action action = new Action();
         action.setHeading(actionReq.getHeading());
         action.setDescription(actionReq.getDescription());
         action.setLeaderId(actionReq.getLeaderId());
-        action.setStatus("OPEN");
+        action.setStatus(ActionStatus.OPEN);
 
         return actionRepository.save(action);
     }
 
     public void closeAction(Long idAction, Long adminId) {
-        if (!adminRepository.existsById(adminId)) {
+        if (!volunteerRepository.existsByVolunteerIdAndRole(adminId, VolunteerRole.ADMIN)) {
             throw new RuntimeException("Admin not found");
         }
 
         Action action = actionRepository.findById(idAction).orElseThrow(() -> new RuntimeException("Action not found"));
-        action.setStatus("CLOSED");
+        action.setStatus(ActionStatus.CLOSED);
         actionRepository.save(action);
     }
 

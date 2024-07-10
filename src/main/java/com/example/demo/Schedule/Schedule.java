@@ -11,7 +11,7 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-//@Table(name = "schedule")
+@Table(name = "schedule")
 public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,7 +19,7 @@ public class Schedule {
     private Long scheduleId;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "action_id", referencedColumnName = "id")
+    @JoinColumn(name = "action_id", referencedColumnName = "action_id")
     private Action action;
 
 //    @OneToOne(fetch = FetchType.LAZY)

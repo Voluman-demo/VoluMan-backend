@@ -52,7 +52,7 @@ public class VolunteerService {
     }
 
     public void promoteToLeader(Long idVolunteer) {
-        Optional<Volunteer> volunteer = volunteerRepository.findByRoleAndVolunteerId(idVolunteer, VolunteerRole.VOLUNTEER);
+        Optional<Volunteer> volunteer = volunteerRepository.findByVolunteerIdAndRole(idVolunteer, VolunteerRole.VOLUNTEER);
         if (volunteer.isPresent()) {
             Volunteer volunteerEntity = volunteer.get();
             volunteerEntity.setRole(VolunteerRole.LEADER);
@@ -61,7 +61,7 @@ public class VolunteerService {
 
     }
     public void degradeLeader(Long idVolunteer) {
-        Optional<Volunteer> volunteer = volunteerRepository.findByRoleAndVolunteerId(idVolunteer, VolunteerRole.VOLUNTEER);
+        Optional<Volunteer> volunteer = volunteerRepository.findByVolunteerIdAndRole(idVolunteer, VolunteerRole.VOLUNTEER);
         if (volunteer.isPresent()) {
             Volunteer volunteerEntity = volunteer.get();
             volunteerEntity.setRole(VolunteerRole.VOLUNTEER);

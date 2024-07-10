@@ -31,9 +31,8 @@ public class Volunteer {
     private VolunteerDetails volunteerDetails;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "preferences_id", referencedColumnName = "id")
+    @JoinColumn(name = "preferences_id", referencedColumnName = "preferenceId")
     private Preferences preferences;
-
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL)
     private List<Interval> availabilities;
@@ -45,5 +44,4 @@ public class Volunteer {
             inverseJoinColumns = @JoinColumn(name = "action_id")
     )
     private Set<Action> actions = new HashSet<>();
-
 }
