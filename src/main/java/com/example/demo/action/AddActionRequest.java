@@ -1,17 +1,13 @@
 package com.example.demo.action;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 public record AddActionRequest(
         Long adminId,
         String heading,
         String description,
         ActionStatus status,
-        LocalDateTime beg,
-        LocalDateTime end,
-        Long needMin,
-        Long needMax,
+        LocalDate startDay,
+        LocalDate endDay,
         Long leaderId
-
-) {
-}
+) {}

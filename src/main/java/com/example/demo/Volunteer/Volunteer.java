@@ -1,11 +1,11 @@
 package com.example.demo.Volunteer;
 
-import com.example.demo.Interval.Interval;
 import com.example.demo.Preferences.Preferences;
 import com.example.demo.action.Action;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,6 +21,8 @@ public class Volunteer {
     @Enumerated(EnumType.STRING)
     private VolunteerRole role;
 
+    private Long limitOfHours; // do przedyskutowania
+
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "volunteer_details_id", referencedColumnName = "volunteerId")
     private VolunteerDetails volunteerDetails;
@@ -30,7 +32,7 @@ public class Volunteer {
     private Preferences preferences;
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Interval> availabilities;
+    private List<Availability> availabilities = new ArrayList<>();
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
@@ -39,4 +41,7 @@ public class Volunteer {
             inverseJoinColumns = @JoinColumn(name = "action_id")
     )
     private Set<Action> actions = new HashSet<>();
+
+    @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Duty> duties = new HashSet<>();
 }

@@ -24,8 +24,9 @@ public class VolunteerService {
             Volunteer volunteer = new Volunteer();
             volunteer.setVolunteerDetails(volunteerDetails);
             volunteer.setRole(VolunteerRole.VOLUNTEER);
+            volunteer.setLimitOfHours(null);
 
-            // Inicjalizacja pustych obiektów
+//          Inicjalizacja pustych obiektów
             volunteer.setPreferences(new Preferences());
             volunteer.setAvailabilities(new ArrayList<>());
             volunteer.setActions(new HashSet<>());

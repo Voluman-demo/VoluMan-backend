@@ -18,6 +18,7 @@ public class CandidateController {
     private final CandidateRepository candidateRepository;
     private final CandidateService candidateService;
     private final VolunteerRepository volunteerRepository;
+    
     public CandidateController(CandidateRepository candidateRepository, CandidateService candidateService, VolunteerRepository volunteerRepository) {
         this.candidateRepository = candidateRepository;
         this.candidateService = candidateService;

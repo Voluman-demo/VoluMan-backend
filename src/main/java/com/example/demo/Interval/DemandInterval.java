@@ -1,6 +1,7 @@
 package com.example.demo.Interval;
 
 
+import com.example.demo.action.Demand;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -8,8 +9,8 @@ import java.sql.Timestamp;
 
 @Entity
 @Data
-@Table(name = "action_interval") // Changed table name
-public class ActionInterval {
+@Table(name = "demand_interval")
+public class DemandInterval {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "interval_id")
@@ -21,4 +22,8 @@ public class ActionInterval {
     private Long needMin;
     private Long needMax;
 
+
+    @ManyToOne
+    @JoinColumn(name = "demand_id")
+    private Demand demand;
 }

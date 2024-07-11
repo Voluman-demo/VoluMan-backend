@@ -1,12 +1,12 @@
 package com.example.demo.Volunteer;
 
 
-import com.example.demo.Interval.Interval;
+import com.example.demo.Interval.AvailabilityInterval;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.Data;
 
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDate;
+import java.util.Set;
 
 @Entity
 @Data
@@ -17,13 +17,13 @@ public class Availability {
     @Column(name = "availability_id")
     private Long availabilityId;
 
-    private Date date;
+    private LocalDate date;
 
     @ManyToOne
     @JoinColumn(name = "volunteer_id")
     private Volunteer volunteer;
 
     @OneToMany(mappedBy = "availability", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Interval> slots;
+    private Set<AvailabilityInterval> slots;
 }
 

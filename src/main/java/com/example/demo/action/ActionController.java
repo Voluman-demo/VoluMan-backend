@@ -5,7 +5,6 @@ import com.example.demo.Volunteer.VolunteerRole;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 
@@ -36,21 +35,21 @@ public class ActionController {
     }
 
     @GetMapping("/{idAction}/description")
-    public ResponseEntity<String> getActionDesc(@PathVariable("idAction") Long idAction) { //DONE
-        return actionService.getActionDescription(idAction)
+    public ResponseEntity<DescriptionResponse> getActionDesc(@PathVariable("idAction") Long idAction) { //DONE
+        return actionService.getActionDescription(idAction).map(DescriptionResponse::new)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{idAction}/heading")
-    public ResponseEntity<String> getActionHeading(@PathVariable("idAction") Long idAction) { //DONE
-        return actionService.getActionHeading(idAction)
+    public ResponseEntity<HeadingResponse> getActionHeading(@PathVariable("idAction") Long idAction) { //DONE
+        return actionService.getActionHeading(idAction).map(HeadingResponse::new)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("")
-    public ResponseEntity<?> addAction(@RequestBody AddActionRequest request) {
+    public ResponseEntity<?> addAction(@RequestBody AddActionRequest request) { //DONE
         if(actionService.getLeader(request.leaderId()).isEmpty()){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -63,7 +62,7 @@ public class ActionController {
     }
 
     @PutMapping("/{idAction}/description")
-    public ResponseEntity<?> changeDescription(@PathVariable("idAction") Long idAction, @RequestBody ChangeDescriptionRequest request) {
+    public ResponseEntity<?> changeDescription(@PathVariable("idAction") Long idAction, @RequestBody ChangeDescriptionRequest request) { //DONE
         if(!volunteerRepository.existsByVolunteerIdAndRole(request.leaderId(), VolunteerRole.LEADER)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -71,20 +70,20 @@ public class ActionController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         try {
-            actionService.changeDescription(idAction, request.leaderId(), request.description());
+            actionService.changeDescription(idAction, request.description());
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    @PostMapping("/{idAction}/close")
+    @PutMapping("/{idAction}/close")
     public ResponseEntity<?> closeAction(@PathVariable("idAction") Long idAction, @RequestBody CloseActionRequest request) { //DONE
         if(!volunteerRepository.existsByVolunteerIdAndRole(request.adminId(), VolunteerRole.ADMIN)){
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         if(!actionRepository.existsById(idAction)){
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         try {
             actionService.closeAction(idAction, request.adminId());

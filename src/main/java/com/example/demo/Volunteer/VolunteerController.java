@@ -53,7 +53,12 @@ public class VolunteerController {
         if (!volunteerRepository.existsByVolunteerIdAndRole(request.adminId(), VolunteerRole.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        if(volunteerRepository.existsByVolunteerIdAndRole(idVolunteer, VolunteerRole.LEADER)){
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+
+        }
         Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
+
         if (volunteer.isPresent()) {
             volunteerService.promoteToLeader(idVolunteer);
             return ResponseEntity.ok().build();
@@ -66,6 +71,11 @@ public class VolunteerController {
         if (!volunteerRepository.existsByVolunteerIdAndRole(request.adminId(), VolunteerRole.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        if(volunteerRepository.existsByVolunteerIdAndRole(idVolunteer, VolunteerRole.VOLUNTEER)){
+            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+
+        }
+
         Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
         if (volunteer.isPresent()) {
             volunteerService.degradeLeader(idVolunteer);
@@ -77,7 +87,7 @@ public class VolunteerController {
     @DeleteMapping("/{idVolunteer}")
     public ResponseEntity<Void> deleteVolunteer(@PathVariable Long idVolunteer, @RequestBody AdminRequest request) { //DONE
         if (!volunteerRepository.existsByVolunteerIdAndRole(request.adminId(), VolunteerRole.ADMIN)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // Zwrot odpowiedzi 403 Forbidden, gdy użytkownik nie jest adminem
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
         if (volunteer.isPresent()) {

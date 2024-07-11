@@ -1,0 +1,16 @@
+2024-07-11 15:05:53.177244+02:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Błąd składniowy w wyrażeniu SQL "INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id) \000d\000aVALUES (1, 'ADMIN', 1, NULL)\000d\000a\000d\000a[*]INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex) \000d\000aVALUES ('Lukasz', 'W', 'jan.kowalski@example.com', '123-456-789', '1980-01-01', 'Warszawa', 'Polna', '1', '1A', '00-001', 'M')"
+Syntax error in SQL statement "INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id) \000d\000aVALUES (1, 'ADMIN', 1, NULL)\000d\000a\000d\000a[*]INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex) \000d\000aVALUES ('Lukasz', 'W', 'jan.kowalski@example.com', '123-456-789', '1980-01-01', 'Warszawa', 'Polna', '1', '1A', '00-001', 'M')"; SQL statement:
+INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id) 
+VALUES (1, 'ADMIN', 1, NULL)
+
+INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex) 
+VALUES ('Lukasz', 'W', 'jan.kowalski@example.com', '123-456-789', '1980-01-01', 'Warszawa', 'Polna', '1', '1A', '00-001', 'M') [42000-224]
+2024-07-11 15:05:53.184404+02:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Błąd składniowy w wyrażeniu SQL "INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id) \000d\000aVALUES (2, 'LEADER', 2, NULL)\000d\000a\000d\000a[*]INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex) \000d\000aVALUES ('Klaudiusz', 'S', 'jan.kowalski@example.com', '123-456-789', '1980-01-01', 'Warszawa', 'Polna', '1', '1A', '00-001', 'M')"
+Syntax error in SQL statement "INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id) \000d\000aVALUES (2, 'LEADER', 2, NULL)\000d\000a\000d\000a[*]INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex) \000d\000aVALUES ('Klaudiusz', 'S', 'jan.kowalski@example.com', '123-456-789', '1980-01-01', 'Warszawa', 'Polna', '1', '1A', '00-001', 'M')"; SQL statement:
+INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id) 
+VALUES (2, 'LEADER', 2, NULL)
+
+INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex) 
+VALUES ('Klaudiusz', 'S', 'jan.kowalski@example.com', '123-456-789', '1980-01-01', 'Warszawa', 'Polna', '1', '1A', '00-001', 'M') [42000-224]

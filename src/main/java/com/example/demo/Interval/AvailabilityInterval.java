@@ -9,8 +9,8 @@ import java.sql.Timestamp;
 
 @Entity
 @Data
-@Table(name = "time_interval") // Changed table name
-public class Interval {
+@Table(name = "availability_interval")
+public class AvailabilityInterval {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "interval_id")
@@ -22,8 +22,4 @@ public class Interval {
     @ManyToOne
     @JoinColumn(name = "availability_id")
     private Availability availability;
-
-    @ManyToOne
-    @JoinColumn(name = "volunteer_id")
-    private Volunteer volunteer;
 }

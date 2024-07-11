@@ -1,7 +1,6 @@
 package com.example.demo.action;
 
-import com.example.demo.Volunteer.Volunteer;
-import com.example.demo.Volunteer.VolunteerRepository;
+import com.example.demo.Volunteer.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -44,11 +43,9 @@ public class ActionService {
         action.setHeading(request.heading());
         action.setDescription(request.description());
         action.setStatus(request.status());
-        action.setBeg(request.beg());
-        action.setEnd(request.end());
-        action.setNeedMin(request.needMin());
-        action.setNeedMax(request.needMax());
-        action.setLeaderId(getLeader(request.leaderId()).get().getVolunteerId());
+        action.setStartDay(request.startDay());
+        action.setEndDay(request.endDay());
+        action.setLeader(getLeaderDto(request.leaderId()).get());
 
         return addAction(action);
     }
@@ -66,7 +63,7 @@ public class ActionService {
         }
 
     @Transactional
-    public void changeDescription(Long idAction, Long leaderId, String description) { //DONE
+    public void changeDescription(Long idAction, String description) { //DONE
 
         Optional<Action> optionalAction = getActionById(idAction);
 
@@ -80,6 +77,21 @@ public class ActionService {
 
     public Optional<Volunteer> getLeader(Long leaderId) {
         return volunteerRepository.findById(leaderId);
+    }
+
+    public Optional<LeaderDto> getLeaderDto(Long leaderId) {
+        return volunteerRepository.findById(leaderId)
+                .filter(volunteer -> volunteer.getRole() == VolunteerRole.LEADER)
+                .map(volunteer -> {
+                    VolunteerDetails details = volunteer.getVolunteerDetails();
+                    return new LeaderDto(
+                            volunteer.getVolunteerId(),
+                            details.getName(),
+                            details.getLastname(),
+                            details.getEmail(),
+                            details.getPhone()
+                    );
+                });
     }
 }
 
