@@ -30,6 +30,7 @@ class CandidateControllerTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
     }
 
     @Test
