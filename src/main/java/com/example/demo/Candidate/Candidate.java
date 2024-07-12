@@ -6,7 +6,10 @@ import lombok.*;
 import java.util.Date;
 
 @Entity
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Table(name = "candidate")
 public class Candidate {
     @Id

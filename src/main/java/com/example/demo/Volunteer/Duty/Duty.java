@@ -1,15 +1,19 @@
-package com.example.demo.Volunteer;
+package com.example.demo.Volunteer.Duty;
 
 import com.example.demo.Interval.DutyInterval;
+import com.example.demo.Volunteer.Volunteer;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Table(name = "duty")
 public class Duty {
     @Id

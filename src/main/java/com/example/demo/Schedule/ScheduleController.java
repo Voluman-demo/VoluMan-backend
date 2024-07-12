@@ -23,6 +23,13 @@ public class ScheduleController {
     }
 
 
+//    @GetMapping("/{year}/{week}/actions/{actionId}")
+//    public ResponseEntity<Schedule> getSchedule(@PathVariable("year") int year, @PathVariable("week") int week, @PathVariable("actionId") int actionId) {
+//        //validacja
+//
+//        return ResponseEntity.ok(scheduleService.showSchedule(year, week, actionId));
+//    }
+
     @PostMapping("/actions/{actionId}")
     public ResponseEntity<?> choosePref(@PathVariable("actionId") Long actionId, @RequestBody ActionDecisionRequest actionDecisionRequest) {
         try {
@@ -39,13 +46,32 @@ public class ScheduleController {
         }
     }
 
-        @PostMapping("/actions/need/{actionId}")
-        public ResponseEntity<?> chooseNeed (@PathVariable("actionId") Long actionId,@RequestBody ActionNeedRequest actionNeedRequest) {
-
+    @PostMapping("/{year}/{week}/actions/{actionId}")
+    public ResponseEntity<?> chooseNeed(@PathVariable("year") int year, @PathVariable("week") int week, @PathVariable("actionId") Long actionId, @RequestBody ActionNeedRequest actionNeedRequest) {
+        try {
+            scheduleService.scheduleWeeklyAction(actionId, year, week, actionNeedRequest);
             return ResponseEntity.ok().build();
-
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
+    }
 
+    @PostMapping("/{year}/{week}/volunteers/{volunteerId}")
+    public ResponseEntity<?> chooseAvail(@PathVariable("year") int year, @PathVariable("week") int week, @PathVariable("volunteerId") Long volunteerId, @RequestBody VolunteerAvailRequest volunteerAvailRequest) {
+        try {
+            scheduleService.chooseAvailabilities(volunteerId, year, week, volunteerAvailRequest);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/{year}/{week}/schedule")
+    public ResponseEntity<?> generateSchedule(@PathVariable("year") int year, @PathVariable("week") int week, @RequestBody GenerateScheduleRequest generateScheduleRequest) {
+        //walidacja
+
+        scheduleService.generateSchedule(generateScheduleRequest.getDay());
+    }
 
 }
 

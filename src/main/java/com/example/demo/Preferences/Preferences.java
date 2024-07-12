@@ -2,13 +2,16 @@ package com.example.demo.Preferences;
 
 import com.example.demo.action.Action;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Table(name = "preferences")
 public class Preferences {
     @Id

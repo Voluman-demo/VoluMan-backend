@@ -1,7 +1,5 @@
 package com.example.demo.Schedule;
 
-
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,25 +9,23 @@ import java.util.List;
 
 @Getter
 @Setter
-public class ActionNeedRequest {
-    private Long leaderId;
-    private List<DayRequest> days;
+public class VolunteerAvailRequest {
+    private Long limitOfHours;
+    private List<DayAvailabilityRequest> days;
 
     @Getter
     @Setter
-    public static class DayRequest {
+    public static class DayAvailabilityRequest {
         private LocalDate date;
-        private List<SlotRequest> slots;
-
+        private List<AvailabilitySlotRequest> slots;
     }
 
     @Getter
     @Setter
-    public static class SlotRequest {
+    public static class AvailabilitySlotRequest {
         private LocalTime startTime;
         private LocalTime endTime;
-        private Long needMin;
-        private Long needMax;
-
     }
 }
+
+

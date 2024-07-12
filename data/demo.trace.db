@@ -1,16 +1,117 @@
 2024-07-11 15:05:53.177244+02:00 jdbc[14]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Błąd składniowy w wyrażeniu SQL "INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id) \000d\000aVALUES (1, 'ADMIN', 1, NULL)\000d\000a\000d\000a[*]INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex) \000d\000aVALUES ('Lukasz', 'W', 'jan.kowalski@example.com', '123-456-789', '1980-01-01', 'Warszawa', 'Polna', '1', '1A', '00-001', 'M')"
 Syntax error in SQL statement "INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id) \000d\000aVALUES (1, 'ADMIN', 1, NULL)\000d\000a\000d\000a[*]INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex) \000d\000aVALUES ('Lukasz', 'W', 'jan.kowalski@example.com', '123-456-789', '1980-01-01', 'Warszawa', 'Polna', '1', '1A', '00-001', 'M')"; SQL statement:
-INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id) 
+INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id)
 VALUES (1, 'ADMIN', 1, NULL)
 
-INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex) 
+INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex)
 VALUES ('Lukasz', 'W', 'jan.kowalski@example.com', '123-456-789', '1980-01-01', 'Warszawa', 'Polna', '1', '1A', '00-001', 'M') [42000-224]
 2024-07-11 15:05:53.184404+02:00 jdbc[14]: exception
 org.h2.jdbc.JdbcSQLSyntaxErrorException: Błąd składniowy w wyrażeniu SQL "INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id) \000d\000aVALUES (2, 'LEADER', 2, NULL)\000d\000a\000d\000a[*]INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex) \000d\000aVALUES ('Klaudiusz', 'S', 'jan.kowalski@example.com', '123-456-789', '1980-01-01', 'Warszawa', 'Polna', '1', '1A', '00-001', 'M')"
 Syntax error in SQL statement "INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id) \000d\000aVALUES (2, 'LEADER', 2, NULL)\000d\000a\000d\000a[*]INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex) \000d\000aVALUES ('Klaudiusz', 'S', 'jan.kowalski@example.com', '123-456-789', '1980-01-01', 'Warszawa', 'Polna', '1', '1A', '00-001', 'M')"; SQL statement:
-INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id) 
+INSERT INTO volunteer (volunteer_id, role, volunteer_details_id, preferences_id)
 VALUES (2, 'LEADER', 2, NULL)
 
-INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex) 
+INSERT INTO volunteer_details (name, lastname, email, phone, date_of_birth, city, street, house_number, apartment_number, postal_number, sex)
 VALUES ('Klaudiusz', 'S', 'jan.kowalski@example.com', '123-456-789', '1980-01-01', 'Warszawa', 'Polna', '1', '1A', '00-001', 'M') [42000-224]
+2024-07-12 10:39:19.883409+02:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLDataException: Błąd konwersji danych "'OPEN' (ACTION: ""STATUS"" TINYINT)"
+Data conversion error converting "'OPEN' (ACTION: ""STATUS"" TINYINT)"; SQL statement:
+update action
+set status = 'OPEN'
+where action_id = 1 [22018-224]
+2024-07-12 10:39:41.747319+02:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Kolumna "OPEN" nie istnieje
+Column "OPEN" not found; SQL statement:
+update action
+set status = "OPEN"
+where action_id = 1 [42122-224]
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:514)
+	at org.h2.message.DbException.getJdbcSQLException(DbException.java:489)
+	at org.h2.message.DbException.get(DbException.java:223)
+	at org.h2.message.DbException.get(DbException.java:199)
+	at org.h2.expression.ExpressionColumn.getColumnException(ExpressionColumn.java:244)
+	at org.h2.expression.ExpressionColumn.optimizeOther(ExpressionColumn.java:226)
+	at org.h2.expression.ExpressionColumn.optimize(ExpressionColumn.java:213)
+	at org.h2.command.dml.SetClauseList$SetSimple.mapAndOptimize(SetClauseList.java:409)
+	at org.h2.command.dml.SetClauseList.mapAndOptimize(SetClauseList.java:219)
+	at org.h2.command.dml.Update.doPrepare(Update.java:132)
+	at org.h2.command.dml.DataChangeStatement.prepare(DataChangeStatement.java:37)
+	at org.h2.command.Parser.prepareCommand(Parser.java:489)
+	at org.h2.engine.SessionLocal.prepareLocal(SessionLocal.java:639)
+	at org.h2.engine.SessionLocal.prepareCommand(SessionLocal.java:559)
+	at org.h2.jdbc.JdbcConnection.prepareCommand(JdbcConnection.java:1166)
+	at org.h2.jdbc.JdbcStatement.executeInternal(JdbcStatement.java:245)
+	at org.h2.jdbc.JdbcStatement.execute(JdbcStatement.java:231)
+	at org.h2.server.web.WebApp.getResult(WebApp.java:1345)
+	at org.h2.server.web.WebApp.query(WebApp.java:1143)
+	at org.h2.server.web.WebApp.query(WebApp.java:1119)
+	at org.h2.server.web.WebApp.process(WebApp.java:245)
+	at org.h2.server.web.WebApp.processRequest(WebApp.java:177)
+	at org.h2.server.web.JakartaWebServlet.doGet(JakartaWebServlet.java:129)
+	at org.h2.server.web.JakartaWebServlet.doPost(JakartaWebServlet.java:166)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:590)
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201)
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116)
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164)
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140)
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167)
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90)
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482)
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115)
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93)
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74)
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344)
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:389)
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63)
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:904)
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741)
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190)
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
+	at java.base/java.lang.Thread.run(Thread.java:1570)
+2024-07-12 10:40:02.204604+02:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLDataException: Błąd konwersji danych "'OPEN' (ACTION: ""STATUS"" TINYINT)"
+Data conversion error converting "'OPEN' (ACTION: ""STATUS"" TINYINT)"; SQL statement:
+update action
+set status = 'OPEN'
+where action_id = 1 [22018-224]
+2024-07-12 10:40:14.422381+02:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Błąd składniowy w wyrażeniu SQL "update [*]table action\000d\000aset status = 'OPEN'\000d\000awhere action_id = 1"; oczekiwano "identifier"
+Syntax error in SQL statement "update [*]table action\000d\000aset status = 'OPEN'\000d\000awhere action_id = 1"; expected "identifier"; SQL statement:
+update table action
+set status = 'OPEN'
+where action_id = 1 [42001-224]
+2024-07-12 10:40:44.058394+02:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLDataException: Błąd konwersji danych "'OPEN' (ACTION: ""STATUS"" TINYINT)"
+Data conversion error converting "'OPEN' (ACTION: ""STATUS"" TINYINT)"; SQL statement:
+UPDATE action
+SET status = 'OPEN'
+WHERE action_id = 1 [22018-224]
+2024-07-12 10:41:20.758872+02:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLDataException: Błąd konwersji danych "'OPEN' (ACTION: ""STATUS"" TINYINT)"
+Data conversion error converting "'OPEN' (ACTION: ""STATUS"" TINYINT)"; SQL statement:
+UPDATE action
+SET status = 'OPEN'
+WHERE action_id = 1 [22018-224]
+2024-07-12 10:42:09.076946+02:00 jdbc[14]: exception
+org.h2.jdbc.JdbcSQLDataException: Błąd konwersji danych "'OPEN' (ACTION: ""STATUS"" TINYINT)"
+Data conversion error converting "'OPEN' (ACTION: ""STATUS"" TINYINT)"; SQL statement:
+UPDATE action
+SET status = 'OPEN'
+WHERE action_id = 1 [22018-224]

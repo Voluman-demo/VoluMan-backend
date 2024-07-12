@@ -1,14 +1,16 @@
 package com.example.demo.Interval;
 
-import com.example.demo.Volunteer.Duty;
-import com.example.demo.action.Demand;
+import com.example.demo.Volunteer.Duty.Duty;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
-import java.sql.Timestamp;
+import java.time.LocalTime;
 
 @Entity
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Table(name = "duty_interval")
 public class DutyInterval {
     @Id
@@ -16,8 +18,8 @@ public class DutyInterval {
     @Column(name = "interval_id")
     private Long intervalId;
 
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private LocalTime startTime;
+    private LocalTime endTime;
 
     private String status;
 

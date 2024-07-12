@@ -1,14 +1,20 @@
 package com.example.demo.Interval;
 
 
-import com.example.demo.action.Demand;
+import com.example.demo.action.demand.Demand;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.sql.Timestamp;
+import java.time.LocalTime;
 
 @Entity
-@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
 @Table(name = "demand_interval")
 public class DemandInterval {
     @Id
@@ -16,14 +22,14 @@ public class DemandInterval {
     @Column(name = "interval_id")
     private Long intervalId;
 
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private LocalTime startTime;
+    private LocalTime endTime;
 
     private Long needMin;
     private Long needMax;
 
-
     @ManyToOne
     @JoinColumn(name = "demand_id")
+    @JsonBackReference // Odwrotny odnośnik, ignorowany przy serializacji
     private Demand demand;
 }

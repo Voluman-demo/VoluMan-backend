@@ -1,11 +1,11 @@
 package com.example.demo.Interval;
 
-import com.example.demo.Volunteer.Availability;
-import com.example.demo.Volunteer.Volunteer;
+import com.example.demo.Volunteer.Availability.Availability;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.sql.Timestamp;
+import java.time.LocalTime;
 
 @Entity
 @Data
@@ -16,10 +16,11 @@ public class AvailabilityInterval {
     @Column(name = "interval_id")
     private Long intervalId;
 
-    private Timestamp startTime;
-    private Timestamp endTime;
+    private LocalTime startTime;
+    private LocalTime endTime;
 
     @ManyToOne
     @JoinColumn(name = "availability_id")
+    @JsonBackReference // Zarządzany odnośnik dla serializacji
     private Availability availability;
 }
