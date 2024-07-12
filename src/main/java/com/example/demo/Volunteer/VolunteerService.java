@@ -2,6 +2,10 @@ package com.example.demo.Volunteer;
 
 import com.example.demo.Candidate.Candidate;
 import com.example.demo.Preferences.Preferences;
+import com.example.demo.Schedule.Decision;
+import com.example.demo.action.Action;
+import com.example.demo.action.ActionRepository;
+import com.example.demo.action.ActionService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,9 +16,13 @@ import java.util.Optional;
 public class VolunteerService {
 
     private final VolunteerRepository volunteerRepository;
+    private final ActionService actionService;
+    private final ActionRepository actionRepository;
 
-    public VolunteerService(VolunteerRepository volunteerRepository) {
+    public VolunteerService(VolunteerRepository volunteerRepository, ActionService actionService, ActionRepository actionRepository, ActionRepository actionRepository1) {
         this.volunteerRepository = volunteerRepository;
+        this.actionService = actionService;
+        this.actionRepository = actionRepository1;
     }
 
     public void addVolunteer(Optional<Candidate> candidate) {
@@ -67,6 +75,26 @@ public class VolunteerService {
             Volunteer volunteerEntity = volunteer.get();
             volunteerEntity.setRole(VolunteerRole.VOLUNTEER);
             volunteerRepository.save(volunteerEntity);
+        }
+    }
+
+    public void addPreferences(Long actionId, Long volunteerId, Decision decision) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+
+        if (volunteer.isPresent()) {
+            Volunteer volunteerEntity = volunteer.get();
+            Optional<Action> action = actionService.getActionById(actionId);
+            if(action.isPresent()){
+                if(decision == Decision.T){
+                    volunteerEntity.getPreferences().getT().add(action.get());
+                }
+                if(decision == Decision.R){
+                    volunteerEntity.getPreferences().getT().add(action.get());
+                }
+                if(decision == Decision.N){
+                    volunteerEntity.getPreferences().getT().add(action.get());
+                }
+            }
         }
     }
 }

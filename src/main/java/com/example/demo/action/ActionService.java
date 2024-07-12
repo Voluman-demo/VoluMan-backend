@@ -93,5 +93,23 @@ public class ActionService {
                     );
                 });
     }
+
+    public void addDetermined(Long actionId, Long volunteerId) {
+        Optional<Action> actionOptional = actionRepository.findById(actionId);
+        if (actionOptional.isPresent()) {
+            Optional<Volunteer> volunteerOptional = volunteerRepository.findById(volunteerId);
+
+            volunteerOptional.ifPresent(volunteer -> actionOptional.get().getDetermined().add(volunteer));
+        }
+    }
+
+    public void addVolunteer(Long actionId, Long volunteerId) {
+        Optional<Action> actionOptional = actionRepository.findById(actionId);
+        if (actionOptional.isPresent()) {
+            Optional<Volunteer> volunteerOptional = volunteerRepository.findById(volunteerId);
+
+            volunteerOptional.ifPresent(volunteer -> actionOptional.get().getVolunteers().add(volunteer));
+        }
+    }
 }
 
