@@ -31,15 +31,15 @@ public class ScheduleController {
 //    }
 
     @PostMapping("/actions/{actionId}")
-    public ResponseEntity<?> choosePref(@PathVariable("actionId") Long actionId, @RequestBody ActionDecisionRequest actionDecisionRequest) {
+    public ResponseEntity<?> choosePref(@PathVariable("actionId") Long actionId, @RequestBody ActionPrefRequest actionPrefRequest) {
         try {
             if (!actionRepository.existsById(actionId)) {
                 return ResponseEntity.notFound().build();
             }
-            if (!volunteerRepository.existsById(actionDecisionRequest.volunteerId)) {
+            if (!volunteerRepository.existsById(actionPrefRequest.volunteerId)) {
                 return ResponseEntity.notFound().build();
             }
-            scheduleService.choosePref(actionId, actionDecisionRequest);
+            scheduleService.choosePref(actionId, actionPrefRequest);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -49,7 +49,7 @@ public class ScheduleController {
     @PostMapping("/{year}/{week}/actions/{actionId}")
     public ResponseEntity<?> chooseNeed(@PathVariable("year") int year, @PathVariable("week") int week, @PathVariable("actionId") Long actionId, @RequestBody ActionNeedRequest actionNeedRequest) {
         try {
-            scheduleService.scheduleWeeklyAction(actionId, year, week, actionNeedRequest);
+            scheduleService.scheduleNeedAction(actionId, year, week, actionNeedRequest);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -70,7 +70,8 @@ public class ScheduleController {
     public ResponseEntity<?> generateSchedule(@PathVariable("year") int year, @PathVariable("week") int week, @RequestBody GenerateScheduleRequest generateScheduleRequest) {
         //walidacja
 
-        scheduleService.generateSchedule(generateScheduleRequest.getDay());
+        scheduleService.generateSchedule(generateScheduleRequest.date());
+        return ResponseEntity.ok().build();
     }
 
 }

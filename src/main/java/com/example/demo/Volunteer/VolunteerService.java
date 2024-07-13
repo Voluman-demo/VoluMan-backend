@@ -19,10 +19,10 @@ public class VolunteerService {
     private final ActionService actionService;
     private final ActionRepository actionRepository;
 
-    public VolunteerService(VolunteerRepository volunteerRepository, ActionService actionService, ActionRepository actionRepository, ActionRepository actionRepository1) {
+    public VolunteerService(VolunteerRepository volunteerRepository, ActionService actionService, ActionRepository actionRepository) {
         this.volunteerRepository = volunteerRepository;
         this.actionService = actionService;
-        this.actionRepository = actionRepository1;
+        this.actionRepository = actionRepository;
     }
 
     public void addVolunteer(Optional<Candidate> candidate) {
@@ -32,7 +32,7 @@ public class VolunteerService {
             Volunteer volunteer = new Volunteer();
             volunteer.setVolunteerDetails(volunteerDetails);
             volunteer.setRole(VolunteerRole.VOLUNTEER);
-            volunteer.setLimitOfHours(null);
+            volunteer.setLimitOfWeeklyHours(null);
 
 //          Inicjalizacja pustych obiektów
             volunteer.setPreferences(new Preferences());
@@ -89,10 +89,10 @@ public class VolunteerService {
                     volunteerEntity.getPreferences().getT().add(action.get());
                 }
                 if(decision == Decision.R){
-                    volunteerEntity.getPreferences().getT().add(action.get());
+                    volunteerEntity.getPreferences().getR().add(action.get());
                 }
                 if(decision == Decision.N){
-                    volunteerEntity.getPreferences().getT().add(action.get());
+                    volunteerEntity.getPreferences().getN().add(action.get());
                 }
             }
         }

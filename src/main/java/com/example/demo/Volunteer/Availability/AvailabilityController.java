@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("availability")
+@RequestMapping("availabilities")
 public class AvailabilityController {
     private final AvailabilityRepository availabilityRepository;
     public AvailabilityController(AvailabilityRepository availabilityRepository) {

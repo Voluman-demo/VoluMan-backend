@@ -29,4 +29,11 @@ public class DutyInterval {
     @ManyToOne
     @JoinColumn(name = "duty_id")
     private Duty duty;
+
+    @PrePersist
+    public void prePersist() {
+        if(this.assign == null){
+            this.assign = 0L;
+        }
+    }
 }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +29,9 @@ public class Volunteer {
     @Enumerated(EnumType.STRING)
     private VolunteerRole role;
 
-    private Long limitOfHours; // do przedyskutowania
+    private Long limitOfWeeklyHours;
+
+    private Long currentWeeklyHours;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "volunteer_details_id", referencedColumnName = "volunteerId")
@@ -38,7 +41,7 @@ public class Volunteer {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "preferences_id", referencedColumnName = "preferenceId")
     @JsonIgnore // Ignoruj przy serializacji, aby uniknąć rekurencji
-    private Preferences preferences;
+    private Preferences preferences = new Preferences();
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference // Zarządzany odnośnik dla serializacji
@@ -56,4 +59,26 @@ public class Volunteer {
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference // Ignoruj przy serializacji, aby uniknąć rekurencji
     private Set<Duty> duties = new HashSet<>();
+
+    public long calculateCurrentWeeklyHours(LocalDate startOfWeek, LocalDate endOfWeek) {
+        return duties.stream()
+                .filter(duty -> !duty.getDate().isBefore(startOfWeek) && !duty.getDate().isAfter(endOfWeek))
+                .mapToLong(Duty::getTotalDurationHours)
+                .sum();
+    }
+
+    @PrePersist
+    public void prePersist() {
+        if(this.currentWeeklyHours == null){
+            this.currentWeeklyHours = 0L;
+        }
+
+        if(this.limitOfWeeklyHours == null){
+            this.limitOfWeeklyHours = 0L;
+        }
+
+        if (this.preferences == null) {
+            this.preferences = new Preferences();
+        }
+    }
 }

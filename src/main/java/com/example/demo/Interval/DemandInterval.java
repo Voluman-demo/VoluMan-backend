@@ -28,8 +28,17 @@ public class DemandInterval {
     private Long needMin;
     private Long needMax;
 
+    private Long currentVolunteers;
+
     @ManyToOne
     @JoinColumn(name = "demand_id")
     @JsonBackReference // Odwrotny odnośnik, ignorowany przy serializacji
     private Demand demand;
+
+    @PrePersist
+    public void prePersist() {
+        if(this.currentVolunteers == null){
+            this.currentVolunteers = 0L;
+        }
+    }
 }

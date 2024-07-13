@@ -5,6 +5,7 @@ import com.example.demo.Volunteer.Volunteer;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -31,4 +32,10 @@ public class Duty {
     @OneToMany(mappedBy = "duty", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DutyInterval> dutyIntervals = new HashSet<>();
 
+
+    public long getTotalDurationHours() {
+        return dutyIntervals.stream()
+                .mapToLong(interval -> Duration.between(interval.getStartTime(), interval.getEndTime()).toHours())
+                .sum();
+    }
 }
