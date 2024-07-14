@@ -2,6 +2,7 @@ package com.example.demo.Schedule;
 
 import com.example.demo.Volunteer.VolunteerRepository;
 import com.example.demo.action.ActionRepository;
+import com.example.demo.action.Dto.ActionScheduleDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -72,6 +73,16 @@ public class ScheduleController {
 
         scheduleService.generateSchedule(generateScheduleRequest.date());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/actions/{actionId}")
+    public ResponseEntity<?> getActionSchedule(@PathVariable("actionId") Long actionId) {
+        try {
+            ActionScheduleDto scheduleDto = scheduleService.getActionSchedule(actionId);
+            return ResponseEntity.ok(scheduleDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving action schedule.");
+        }
     }
 
 }

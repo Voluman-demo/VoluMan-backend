@@ -1,4 +1,6 @@
-package com.example.demo.action;
+package com.example.demo.action.Dto;
+
+import com.example.demo.action.ActionStatus;
 
 import java.time.LocalDate;
 

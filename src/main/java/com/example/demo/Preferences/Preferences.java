@@ -18,6 +18,32 @@ public class Preferences {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long preferenceId;
 
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "preferences_action_t",
+            joinColumns = @JoinColumn(name = "preference_id"),
+            inverseJoinColumns = @JoinColumn(name = "action_id")
+    )
+    private Set<Action> T = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "preferences_action_r",
+            joinColumns = @JoinColumn(name = "preference_id"),
+            inverseJoinColumns = @JoinColumn(name = "action_id")
+    )
+    private Set<Action> R = new HashSet<>();
+
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "preferences_action_n",
+            joinColumns = @JoinColumn(name = "preference_id"),
+            inverseJoinColumns = @JoinColumn(name = "action_id")
+    )
+    private Set<Action> N = new HashSet<>();
+
+}
+
  /*   @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Action> T = new ArrayList<>();
 
@@ -26,29 +52,3 @@ public class Preferences {
 
     @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Action> N = new ArrayList<>();*/
-
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "preferences_action",
-            joinColumns = @JoinColumn(name = "preference_id"),
-            inverseJoinColumns = @JoinColumn(name = "action_id")
-    )
-    private Set<Action> T = new HashSet<>();
-
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "preferences_action",
-            joinColumns = @JoinColumn(name = "preference_id"),
-            inverseJoinColumns = @JoinColumn(name = "action_id")
-    )
-    private Set<Action> R = new HashSet<>();
-
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(
-            name = "preferences_action",
-            joinColumns = @JoinColumn(name = "preference_id"),
-            inverseJoinColumns = @JoinColumn(name = "action_id")
-    )
-    private Set<Action> N = new HashSet<>();
-
-}

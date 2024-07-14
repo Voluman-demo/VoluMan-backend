@@ -1,6 +1,7 @@
 package com.example.demo.Interval;
 
 import com.example.demo.Volunteer.Duty.Duty;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,6 +29,7 @@ public class DutyInterval {
 
     @ManyToOne
     @JoinColumn(name = "duty_id")
+    @JsonBackReference
     private Duty duty;
 
     @PrePersist

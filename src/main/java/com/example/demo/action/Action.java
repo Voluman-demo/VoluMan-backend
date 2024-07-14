@@ -47,7 +47,11 @@ public class Action {
     @JsonIgnore // Ignoruj przy serializacji, aby uniknąć rekurencji
     private Set<Volunteer> determined = new HashSet<>(); //T
 
-    //TODO lista wolontariuszy na dany demand
+    //TODO lista wolontariuszy na dany demand ?????
+
+}
+
+/*
 //    @ManyToMany(mappedBy = "T", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 //    private Set<Preferences> preferencesT = new HashSet<>();
 //
@@ -56,4 +60,4 @@ public class Action {
 //
 //    @ManyToMany(mappedBy = "N", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 //    private Set<Preferences> preferencesN = new HashSet<>();
-}
+ */

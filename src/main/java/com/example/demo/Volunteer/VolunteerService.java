@@ -2,6 +2,7 @@ package com.example.demo.Volunteer;
 
 import com.example.demo.Candidate.Candidate;
 import com.example.demo.Preferences.Preferences;
+import com.example.demo.Preferences.PreferencesService;
 import com.example.demo.Schedule.Decision;
 import com.example.demo.action.Action;
 import com.example.demo.action.ActionRepository;
@@ -18,11 +19,13 @@ public class VolunteerService {
     private final VolunteerRepository volunteerRepository;
     private final ActionService actionService;
     private final ActionRepository actionRepository;
+    private final PreferencesService preferencesService;
 
-    public VolunteerService(VolunteerRepository volunteerRepository, ActionService actionService, ActionRepository actionRepository) {
+    public VolunteerService(VolunteerRepository volunteerRepository, ActionService actionService, ActionRepository actionRepository, PreferencesService preferencesService) {
         this.volunteerRepository = volunteerRepository;
         this.actionService = actionService;
         this.actionRepository = actionRepository;
+        this.preferencesService = preferencesService;
     }
 
     public void addVolunteer(Optional<Candidate> candidate) {
@@ -84,17 +87,29 @@ public class VolunteerService {
         if (volunteer.isPresent()) {
             Volunteer volunteerEntity = volunteer.get();
             Optional<Action> action = actionService.getActionById(actionId);
-            if(action.isPresent()){
-                if(decision == Decision.T){
-                    volunteerEntity.getPreferences().getT().add(action.get());
+            if (action.isPresent()) {
+                Action actionEntity = action.get();
+                Preferences preferences = volunteerEntity.getPreferences();
+                if (preferences == null) {
+                    preferences = new Preferences();
+                    volunteerEntity.setPreferences(preferences);
+                    preferencesService.addPreferences(preferences); // Zapisz nowe preferencje
                 }
-                if(decision == Decision.R){
-                    volunteerEntity.getPreferences().getR().add(action.get());
+
+                if (decision == Decision.T) {
+                    preferences.getT().add(actionEntity);
                 }
-                if(decision == Decision.N){
-                    volunteerEntity.getPreferences().getN().add(action.get());
+                if (decision == Decision.R) {
+                    preferences.getR().add(actionEntity);
                 }
+                if (decision == Decision.N) {
+                    preferences.getN().add(actionEntity);
+                }
+
+                preferencesService.addPreferences(preferences);
             }
         }
     }
+
+
 }
