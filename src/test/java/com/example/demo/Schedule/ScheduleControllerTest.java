@@ -79,7 +79,7 @@ public class ScheduleControllerTest {
         return request;
     }
     @Test
-    void testChoosePref_ActionNotFound() {
+    void testChoosePref_ActionNotFound() {//Klaudiusz jeszcze sie bawi tym
         Long actionId = 1L;
         ActionPrefRequest request = new ActionPrefRequest(1L, "preference");
 
@@ -91,7 +91,7 @@ public class ScheduleControllerTest {
     }
 
     @Test
-    void testChoosePref_VolunteerNotFound() {
+    void testChoosePref_VolunteerNotFound() {//Klaudiusz jeszcze sie bawi tym
         Long actionId = 1L;
         ActionPrefRequest request = new ActionPrefRequest(1L, "preference");
 
@@ -104,7 +104,7 @@ public class ScheduleControllerTest {
     }
 
     @Test
-    void testChoosePref_Success() {
+    void testChoosePref_Success() {//Klaudiusz jeszcze sie bawi tym
         Long actionId = 1L;
         ActionPrefRequest request = new ActionPrefRequest(1L, "preference");
 

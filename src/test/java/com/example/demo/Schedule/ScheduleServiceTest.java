@@ -32,7 +32,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
+
 public class ScheduleServiceTest {
 
     @Mock
@@ -120,6 +120,7 @@ public class ScheduleServiceTest {
         Action action = new Action();
         action.setStartDay(LocalDate.of(2024, 7, 1));
         action.setEndDay(LocalDate.of(2024, 7, 31));
+        action.setDemands(new ArrayList<>()); // Initialize demands list
 
         when(volunteerRepository.existsByVolunteerIdAndRole(1L, VolunteerRole.LEADER)).thenReturn(true);
         when(actionRepository.findById(1L)).thenReturn(Optional.of(action));
