@@ -81,7 +81,7 @@ public class ScheduleControllerTest {
     @Test
     void testChoosePref_ActionNotFound() {//Klaudiusz jeszcze sie bawi tym
         Long actionId = 1L;
-        ActionPrefRequest request = new ActionPrefRequest(1L, "preference");
+        ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 
         when(actionRepository.existsById(actionId)).thenReturn(false);
 
@@ -93,7 +93,7 @@ public class ScheduleControllerTest {
     @Test
     void testChoosePref_VolunteerNotFound() {//Klaudiusz jeszcze sie bawi tym
         Long actionId = 1L;
-        ActionPrefRequest request = new ActionPrefRequest(1L, "preference");
+        ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 
         when(actionRepository.existsById(actionId)).thenReturn(true);
         when(volunteerRepository.existsById(request.getVolunteerId())).thenReturn(false);
@@ -106,7 +106,7 @@ public class ScheduleControllerTest {
     @Test
     void testChoosePref_Success() {//Klaudiusz jeszcze sie bawi tym
         Long actionId = 1L;
-        ActionPrefRequest request = new ActionPrefRequest(1L, "preference");
+        ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 
         when(actionRepository.existsById(actionId)).thenReturn(true);
         when(volunteerRepository.existsById(request.getVolunteerId())).thenReturn(true);
@@ -154,7 +154,7 @@ public class ScheduleControllerTest {
     @Test
     void testChoosePref_Exception() {
         Long actionId = 1L;
-        ActionPrefRequest request = new ActionPrefRequest(1L, "preference");
+        ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 
         when(actionRepository.existsById(actionId)).thenReturn(true);
         when(volunteerRepository.existsById(request.getVolunteerId())).thenReturn(true);
