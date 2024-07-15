@@ -2,6 +2,7 @@ package com.example.demo.Volunteer;
 
 import com.example.demo.Candidate.Candidate;
 import com.example.demo.Preferences.Preferences;
+import com.example.demo.Preferences.PreferencesService;
 import com.example.demo.Schedule.Decision;
 import com.example.demo.action.Action;
 import com.example.demo.action.ActionRepository;
@@ -12,8 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -31,17 +30,20 @@ public class VolunteerServiceTest {
     @Mock
     private ActionRepository actionRepository;
 
+    @Mock
+    private PreferencesService preferencesService;
+
     @InjectMocks
     private VolunteerService volunteerService;
 
     @Test
-    public void testAddVolunteer() {
+    public void testAddVolunteerFromCandidate() {
         Candidate candidate = new Candidate();
-        candidate.setName("John");
+        candidate.setFirstname("John");
         candidate.setLastname("Doe");
         Optional<Candidate> candidateOptional = Optional.of(candidate);
 
-        volunteerService.addVolunteer(candidateOptional);
+        volunteerService.addVolunteerFromCandidate(candidateOptional);
 
         verify(volunteerRepository, times(1)).save(any(Volunteer.class));
     }
@@ -83,12 +85,20 @@ public class VolunteerServiceTest {
         volunteer.setPreferences(new Preferences());
         Action action = new Action();
 
+        // Ustawienie mocka dla repository i service
         when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
         when(actionService.getActionById(actionId)).thenReturn(Optional.of(action));
 
+        // Wywołanie testowanej metody
         volunteerService.addPreferences(actionId, volunteerId, decision);
 
+        // Sprawdzenie, czy findById zostało wywołane raz
+        verify(volunteerRepository, times(1)).findById(volunteerId);
+
+        // Sprawdzenie, czy save zostało wywołane raz i z odpowiednim obiektem Volunteer
         verify(volunteerRepository, times(1)).save(volunteer);
+
+        // Dodatkowe asercje, aby upewnić się, że preferencje zostały dodane poprawnie
         assertTrue(volunteer.getPreferences().getT().contains(action));
     }
 }

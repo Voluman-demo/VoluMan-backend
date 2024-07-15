@@ -20,9 +20,10 @@ import java.util.Set;
 public class Duty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "demand_id")
-    private Long demandId;
+    @Column(name = "duty_id")
+    private Long dutyId;
 
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @ManyToOne

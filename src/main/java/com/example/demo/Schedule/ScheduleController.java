@@ -12,13 +12,11 @@ import org.springframework.web.bind.annotation.*;
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
-    private final ScheduleRepository scheduleRepository;
     private final ActionRepository actionRepository;
     private final VolunteerRepository volunteerRepository;
 
-    public ScheduleController(ScheduleService scheduleService, ScheduleRepository scheduleRepository, ActionRepository actionRepository,VolunteerRepository volunteerRepository) {
+    public ScheduleController(ScheduleService scheduleService, ActionRepository actionRepository,VolunteerRepository volunteerRepository) {
         this.scheduleService = scheduleService;
-        this.scheduleRepository = scheduleRepository;
         this.actionRepository = actionRepository;
         this.volunteerRepository = volunteerRepository;
     }
@@ -68,12 +66,12 @@ public class ScheduleController {
     }
 
     @PostMapping("/{year}/{week}/schedule")
-    public ResponseEntity<?> generateSchedule(@PathVariable("year") int year, @PathVariable("week") int week, @RequestBody GenerateScheduleRequest generateScheduleRequest) {
-        //walidacja
+         public ResponseEntity<?> generateSchedule(@PathVariable("year") int year, @PathVariable("week") int week, @RequestBody GenerateScheduleRequest generateScheduleRequest) {
+             //walidacja
 
-        scheduleService.generateSchedule(generateScheduleRequest.date());
-        return ResponseEntity.ok().build();
-    }
+             scheduleService.generateSchedule(generateScheduleRequest.date());
+             return ResponseEntity.ok().build();
+         }
 
     @GetMapping("/actions/{actionId}")
     public ResponseEntity<?> getActionSchedule(@PathVariable("actionId") Long actionId) {

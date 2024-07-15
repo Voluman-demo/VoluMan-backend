@@ -1,6 +1,5 @@
 package com.example.demo.Candidate;
 
-import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerRepository;
 import com.example.demo.Volunteer.VolunteerRole;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,12 +10,11 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.Mockito.*;
 
 class CandidateControllerTest {
@@ -38,9 +36,8 @@ class CandidateControllerTest {
     }
 
 
-
     @Test
-    void testGetCandidates_Forbidden() {
+    void testGetCandidates_ReturnsForbidden_WhenVolunteerIsNotRecruiter() {
         Long recruiterId = 1L;
 
         when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(false);
@@ -51,13 +48,29 @@ class CandidateControllerTest {
         verify(volunteerRepository, times(1)).existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER);
         verify(candidateRepository, never()).findAll();
     }
+    @Test
+    void testGetCandidates_ReturnsNotFound_WhenCandidateIsNotFound() {
+        // Arrange
+        Long recruiterId = 1L;
+        when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(true);
+        when(candidateRepository.findAll()).thenReturn(Collections.emptyList());
+
+        // Act
+        ResponseEntity<List<Candidate>> response = candidateController.getCandidates(recruiterId);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertNull(response.getBody()); // Optional check to verify the body content
+        verify(candidateRepository, times(1)).findAll();
+    }
+
 
     @Test
-    void testGetCandidates_Ok() {
+    void testGetCandidates_ReturnsOk_WhenVolunteerIsRecruiter() {
         Long recruiterId = 1L;
 
-        Candidate candidate1 = new Candidate(1L, "John", "Doe", "john@example.com", "123456789", new Date(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
-        Candidate candidate2 = new Candidate(2L, "Jane", "Doe", "jane@example.com", "987654321", new Date(91, 2, 2), "Street", "City", "1", "2", "12345", "Female");
+        Candidate candidate1 = new Candidate(1L, "John", "Doe", "john@example.com", "123456789", LocalDate.of(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
+        Candidate candidate2 = new Candidate(2L, "Jane", "Doe", "jane@example.com", "987654321", LocalDate.of(91, 2, 2), "Street", "City", "1", "2", "12345", "Female");
         List<Candidate> candidates = Arrays.asList(candidate1, candidate2);
 
         when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(true);
@@ -67,13 +80,13 @@ class CandidateControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(candidates, response.getBody());
-        assertEquals(2, response.getBody().size());
+        assertEquals(2, Objects.requireNonNull(response.getBody()).size());
         verify(volunteerRepository, times(1)).existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER);
         verify(candidateRepository, times(1)).findAll();
     }
 
     @Test
-    void testGetCandidate_Forbidden() {
+    void testGetCandidate_ReturnsForbidden_WhenVolunteerIsNotRecruiter() {
         Long recruiterId = 1L;
         Long candidateId = 1L;
 
@@ -88,7 +101,7 @@ class CandidateControllerTest {
     }
 
     @Test
-    void testGetCandidate_NotFound() {
+    void testGetCandidate_ReturnsNotFound_WhenCandidateNotExists() {
         Long recruiterId = 1L;
         Long candidateId = 1L;
 
@@ -104,11 +117,11 @@ class CandidateControllerTest {
     }
 
     @Test
-    void testGetCandidate_Ok() {
+    void testGetCandidate_ReturnsOk_WhenCandidateFound() {
         Long recruiterId = 1L;
         Long candidateId = 1L;
 
-        Candidate candidate = new Candidate(candidateId, "John", "Doe", "john@example.com", "123456789", new Date(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
+        Candidate candidate = new Candidate(candidateId, "John", "Doe", "john@example.com", "123456789", LocalDate.of(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
 
         when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(true);
         when(candidateRepository.findById(candidateId)).thenReturn(Optional.of(candidate));
@@ -122,8 +135,9 @@ class CandidateControllerTest {
     }
 
     @Test
-    void testAddCandidate() {
-        Candidate candidate = new Candidate(1L, "John", "Doe", "john@example.com", "123456789", new Date(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
+    void testAddCandidate_ReturnsCreated_WhenCandidateIsCreated() {
+        Candidate candidate = new Candidate(1L, "John", "Doe", "john@example.com", "123456789",
+                LocalDate.of(1990, 1, 1), "Street", "City", "1", "2", "12345", "M");
 
         when(candidateRepository.save(candidate)).thenReturn(candidate);
 
@@ -135,7 +149,7 @@ class CandidateControllerTest {
     }
 
     @Test
-    void testAcceptCandidate_Forbidden() {
+    void testAcceptCandidate_ReturnsForbidden_WhenVolunteerIsNotRecruiter() {
         Long recruiterId = 1L;
         Long candidateId = 1L;
 
@@ -151,7 +165,7 @@ class CandidateControllerTest {
     }
 
     @Test
-    void testAcceptCandidate_NotFound() {
+    void testAcceptCandidate_ReturnsNotFound_WhenCandidateNotFound() {
         Long recruiterId = 1L;
         Long candidateId = 1L;
 
@@ -168,11 +182,11 @@ class CandidateControllerTest {
     }
 
     @Test
-    void testAcceptCandidate_Ok() {
+    void testAcceptCandidate_Ok_WhenRecruiterAcceptCandidate() {
         Long recruiterId = 1L;
         Long candidateId = 1L;
 
-        Candidate candidate = new Candidate(candidateId, "John", "Doe", "john@example.com", "123456789", new Date(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
+        Candidate candidate = new Candidate(candidateId, "John", "Doe", "john@example.com", "123456789", LocalDate.of(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
 
         when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(true);
         when(candidateRepository.findById(candidateId)).thenReturn(Optional.of(candidate));
@@ -185,7 +199,7 @@ class CandidateControllerTest {
     }
 
     @Test
-    void testRefuseCandidate_Forbidden() {
+    void testRefuseCandidate_ReturnsForbidden_WhenVolunteerIsNotRecruiter() {
         Long recruiterId = 1L;
         Long candidateId = 1L;
 
@@ -201,7 +215,7 @@ class CandidateControllerTest {
     }
 
     @Test
-    void testRefuseCandidate_NotFound() {
+    void testRefuseCandidate_ReturnsNotFound_WhenCandidateNotFound() {
         Long recruiterId = 1L;
         Long candidateId = 1L;
 
@@ -218,11 +232,11 @@ class CandidateControllerTest {
     }
 
     @Test
-    void testRefuseCandidate_Ok() {
+    void testRefuseCandidate_ReturnsOk_WhenRecruiterRefuseCandidate() {
         Long recruiterId = 1L;
         Long candidateId = 1L;
 
-        Candidate candidate = new Candidate(candidateId, "John", "Doe", "john@example.com", "123456789", new Date(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
+        Candidate candidate = new Candidate(candidateId, "John", "Doe", "john@example.com", "123456789", LocalDate.of(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
 
         when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(true);
         when(candidateRepository.findById(candidateId)).thenReturn(Optional.of(candidate));

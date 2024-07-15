@@ -89,6 +89,7 @@ public class ActionServiceTest {
         assertTrue(result.isEmpty());
     }
 
+    //TODO Poprawić
     @Test
     public void testGetActionHeading() {
         Action action = new Action();
@@ -138,7 +139,7 @@ public class ActionServiceTest {
         details.setLastname("Doe");
         details.setEmail("john.doe@example.com");
         details.setPhone("123456789");
-        details.setDateOfBirth(new Date());
+        details.setDateOfBirth(LocalDate.now());
         details.setCity("City");
         details.setStreet("Street");
         details.setHouseNumber("1A");
@@ -199,7 +200,7 @@ public class ActionServiceTest {
         details.setLastname("Lastname");
         details.setEmail("email@example.com");
         details.setPhone("123456789");
-        details.setDateOfBirth(new Date());
+        details.setDateOfBirth(LocalDate.now());
         details.setCity("City");
         details.setStreet("Street");
         details.setHouseNumber("1A");

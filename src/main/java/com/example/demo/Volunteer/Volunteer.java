@@ -27,20 +27,23 @@ public class Volunteer {
     private Long volunteerId;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
     private VolunteerRole role;
 
+    @Column(name = "limit_of_weekly_hours", nullable = false, length = 3)
     private Long limitOfWeeklyHours;
 
+    @Column(name = "current_weekly_hours", nullable = false, length = 3)
     private Long currentWeeklyHours;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "volunteer_details_id", referencedColumnName = "volunteerId")
-    @JsonIgnore // Ignoruj przy serializacji, aby uniknąć rekurencji
+//    @JsonIgnore // Ignoruj przy serializacji, aby uniknąć rekurencji
     private VolunteerDetails volunteerDetails;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "preferences_id", referencedColumnName = "preferenceId")
-    @JsonIgnore // Ignoruj przy serializacji, aby uniknąć rekurencji
+//    @JsonIgnore // Ignoruj przy serializacji, aby uniknąć rekurencji
     private Preferences preferences = new Preferences();
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -79,6 +82,18 @@ public class Volunteer {
 
         if (this.preferences == null) {
             this.preferences = new Preferences();
+        }
+
+        if(this.actions == null) {
+            this.actions = new HashSet<>();
+        }
+
+        if(this.duties == null) {
+            this.duties = new HashSet<>();
+        }
+
+        if(this.availabilities == null) {
+            this.availabilities = new ArrayList<>();
         }
     }
 }

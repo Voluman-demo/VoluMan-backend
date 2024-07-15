@@ -9,8 +9,6 @@ import com.example.demo.action.ActionRepository;
 import com.example.demo.action.ActionService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Optional;
 
 @Service
@@ -28,19 +26,20 @@ public class VolunteerService {
         this.preferencesService = preferencesService;
     }
 
-    public void addVolunteer(Optional<Candidate> candidate) {
+    public void addVolunteerFromCandidate(Optional<Candidate> candidate) {
         if (candidate.isPresent()) {
             VolunteerDetails volunteerDetails = mapCandidateToVolunteerDetails(candidate.get());
 
             Volunteer volunteer = new Volunteer();
             volunteer.setVolunteerDetails(volunteerDetails);
             volunteer.setRole(VolunteerRole.VOLUNTEER);
-            volunteer.setLimitOfWeeklyHours(null);
+            volunteer.setLimitOfWeeklyHours(0L);
+            volunteer.setCurrentWeeklyHours(0L);
 
-//          Inicjalizacja pustych obiektów
-            volunteer.setPreferences(new Preferences());
-            volunteer.setAvailabilities(new ArrayList<>());
-            volunteer.setActions(new HashSet<>());
+////          Inicjalizacja pustych obiektów
+//            volunteer.setPreferences(new Preferences());
+//            volunteer.setAvailabilities(new ArrayList<>());
+//            volunteer.setActions(new HashSet<>());
 
             volunteerRepository.save(volunteer);
         }
@@ -49,7 +48,7 @@ public class VolunteerService {
 
     private VolunteerDetails mapCandidateToVolunteerDetails(Candidate candidate) {
         VolunteerDetails volunteerDetails = new VolunteerDetails();
-        volunteerDetails.setName(candidate.getName());
+        volunteerDetails.setName(candidate.getFirstname());
         volunteerDetails.setLastname(candidate.getLastname());
         volunteerDetails.setEmail(candidate.getEmail());
         volunteerDetails.setPhone(candidate.getPhone());
@@ -107,9 +106,17 @@ public class VolunteerService {
                 }
 
                 preferencesService.addPreferences(preferences);
+                volunteerRepository.save(volunteerEntity);
             }
         }
     }
 
 
+    public Volunteer addVolunteer(Volunteer volunteer) {
+        return volunteerRepository.save(volunteer);
+    }
+
+    public boolean isLeaderExist(Long leaderId) {
+        return volunteerRepository.existsById(leaderId);
+    }
 }

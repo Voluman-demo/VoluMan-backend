@@ -19,7 +19,7 @@ public class CandidateService {
 
     @Transactional
     public void acceptCandidate(Optional<Candidate> candidate) {
-        volunteerService.addVolunteer(candidate);
+        volunteerService.addVolunteerFromCandidate(candidate);
         candidateRepository.delete(candidate.get());
 
     }
@@ -28,4 +28,5 @@ public class CandidateService {
     public void refuseCandidate(Optional<Candidate> candidate) {
         candidateRepository.delete(candidate.get());
     }
+
 }

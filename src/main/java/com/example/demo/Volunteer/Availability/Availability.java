@@ -23,6 +23,7 @@ public class Availability {
     @Column(name = "availability_id")
     private Long availabilityId;
 
+    @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @ManyToOne

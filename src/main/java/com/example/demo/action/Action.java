@@ -25,11 +25,19 @@ public class Action {
     @Column(name = "action_id")
     private Long actionId;
 
+    @Column(name = "heading", nullable = false, length = 50)
     private String heading;
+
+    @Column(name = "description", length = 1000)
     private String description;
+
+    @Column(name = "status", nullable = false)
     private ActionStatus status;
 
+    @Column(name = "start_day", nullable = false)
     private LocalDate startDay;
+
+    @Column(name = "end_day", nullable = false)
     private LocalDate endDay;
 
     @Embedded
@@ -47,7 +55,6 @@ public class Action {
     @JsonIgnore // Ignoruj przy serializacji, aby uniknąć rekurencji
     private Set<Volunteer> determined = new HashSet<>(); //T
 
-    //TODO lista wolontariuszy na dany demand ?????
 
 }
 

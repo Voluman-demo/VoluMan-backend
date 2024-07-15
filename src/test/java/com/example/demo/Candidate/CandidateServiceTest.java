@@ -31,7 +31,7 @@ public class CandidateServiceTest {
 
         candidateService.acceptCandidate(candidateOptional);
 
-        verify(volunteerService, times(1)).addVolunteer(candidateOptional);
+        verify(volunteerService, times(1)).addVolunteerFromCandidate(candidateOptional);
         verify(candidateRepository, times(1)).delete(candidate);
     }
 

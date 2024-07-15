@@ -3,6 +3,7 @@ package com.example.demo.Volunteer;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -18,7 +19,7 @@ public class VolunteerDetails {
     private String lastname;
     private String email;
     private String phone;
-    private Date dateOfBirth;
+    private LocalDate dateOfBirth;
     private String city;
     private String street;
     private String houseNumber;

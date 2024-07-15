@@ -24,6 +24,17 @@ public class VolunteerController {
         return ResponseEntity.ok(volunteerRepository.findAll());
     }
 
+    @PostMapping("")
+    public ResponseEntity<Volunteer> addVolunteer(@RequestBody Volunteer volunteer) {
+        return ResponseEntity.ok(volunteerService.addVolunteer(volunteer));
+    }
+
+    @DeleteMapping("/{volunteerId}/delete")
+    public ResponseEntity<?> deleteVolunteer(@PathVariable Long volunteerId) {
+        volunteerRepository.deleteById(volunteerId);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     @GetMapping("/{idVolunteer}")
     public ResponseEntity<Volunteer> getVolunteer(@PathVariable Long idVolunteer) { //DONE
         Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);

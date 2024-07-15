@@ -5,6 +5,7 @@ import com.example.demo.action.Dto.AddActionRequest;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +48,7 @@ public class ActionService {
         action.setStartDay(request.startDay());
         action.setEndDay(request.endDay());
         action.setLeader(getLeaderDto(request.leaderId()).get());
+        action.setDemands(new ArrayList<>());
 
         return addAction(action);
     }

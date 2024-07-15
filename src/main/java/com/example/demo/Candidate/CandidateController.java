@@ -26,13 +26,19 @@ public class CandidateController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Candidate>> getCandidates(@RequestParam Long recruiterId) { //DONE
+    public ResponseEntity<List<Candidate>> getCandidates(@RequestParam Long recruiterId) {
         if (!volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        return ResponseEntity.ok(candidateRepository.findAll());
+        List<Candidate> candidates = candidateRepository.findAll();
+        if (candidates.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(candidates);
     }
+
 
     @GetMapping("/{idCandidate}")
     public ResponseEntity<Candidate> getCandidate(@PathVariable long idCandidate,@RequestParam Long recruiterId) { //DONE

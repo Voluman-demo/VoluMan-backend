@@ -23,13 +23,17 @@ public class DemandInterval {
     @Column(name = "interval_id")
     private Long intervalId;
 
+    @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
+    @Column(name = "end_time", nullable = false)
     private LocalTime endTime;
-
+    @Column(name = "need_min", nullable = false, length = 4)
     private Long needMin;
+    @Column(name = "need_max", nullable = false, length = 4)
     private Long needMax;
 
-    private Long currentVolunteers;
+    @Column(name = "current_volunteers_number", nullable = false, length = 4)
+    private Long currentVolunteersNumber;
 
     @ManyToOne
     @JoinColumn(name = "demand_id")
@@ -38,8 +42,8 @@ public class DemandInterval {
 
     @PrePersist
     public void prePersist() {
-        if(this.currentVolunteers == null){
-            this.currentVolunteers = 0L;
+        if(this.currentVolunteersNumber == null){
+            this.currentVolunteersNumber = 0L;
         }
     }
 }

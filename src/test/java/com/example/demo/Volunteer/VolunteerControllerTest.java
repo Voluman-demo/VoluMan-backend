@@ -27,7 +27,7 @@ public class VolunteerControllerTest {
     private VolunteerController volunteerController;
 
     @Test
-    public void testGetVolunteers() {
+    public void testGetVolunteers_ReturnsOk_WhenVolunteersFound() {
         when(volunteerRepository.findAll()).thenReturn(List.of(new Volunteer()));
 
         ResponseEntity<List<Volunteer>> response = volunteerController.getVolunteers();
@@ -38,7 +38,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testGetVolunteer() {
+    public void testGetVolunteer_ReturnsOk_WhenVolunteerFound() {
         Long idVolunteer = 1L;
         Volunteer volunteer = new Volunteer();
         when(volunteerRepository.findById(idVolunteer)).thenReturn(Optional.of(volunteer));
@@ -50,7 +50,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testGetVolunteerNotFound() {
+    public void testGetVolunteer_ReturnsNotFound_WhenVolunteerNotFound() {
         Long idVolunteer = 1L;
         when(volunteerRepository.findById(idVolunteer)).thenReturn(Optional.empty());
 
@@ -60,7 +60,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testGetVolunteerLeaders() {
+    public void testGetVolunteerLeaders_ReturnsOk_WhenLeaderListFound() {
         when(volunteerRepository.findAllByRole(VolunteerRole.LEADER)).thenReturn(List.of(new Volunteer()));
 
         ResponseEntity<List<Volunteer>> response = volunteerController.getVolunteerLeaders();
@@ -70,7 +70,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testGetVolunteerLeadersNotFound() {
+    public void testGetVolunteerLeaders_ReturnsNotFound_WhenLeadersListEmpty() {
         when(volunteerRepository.findAllByRole(VolunteerRole.LEADER)).thenReturn(List.of());
 
         ResponseEntity<List<Volunteer>> response = volunteerController.getVolunteerLeaders();
@@ -79,7 +79,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testGetVolunteerLeader() {
+    public void testGetVolunteerLeader_ReturnsOk_WhenFoundLeader() {
         Long idVolunteer = 1L;
         Volunteer volunteer = new Volunteer();
         when(volunteerRepository.findByVolunteerIdAndRole(idVolunteer, VolunteerRole.LEADER)).thenReturn(Optional.of(volunteer));
@@ -91,7 +91,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testGetVolunteerLeaderNotFound() {
+    public void testGetVolunteerLeader_ReturnsNotFound_WhenLeadersNotExists() {
         Long idVolunteer = 1L;
         when(volunteerRepository.findByVolunteerIdAndRole(idVolunteer, VolunteerRole.LEADER)).thenReturn(Optional.empty());
 
@@ -101,7 +101,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testPromoteToLeaderForbidden() {
+    public void testPromoteToLeader_ReturnsForbidden_WhenVolunteerIsNotAdmin() {
         Long idVolunteer = 1L;
         AdminRequest request = new AdminRequest(1L);
 
@@ -113,7 +113,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testPromoteToLeaderConflict() {
+    public void testPromoteToLeader_ReturnsConflict_WhenVolunteerIsLeader() {
         Long idVolunteer = 1L;
         AdminRequest request = new AdminRequest(1L);
 
@@ -126,7 +126,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testPromoteToLeaderNotFound() {
+    public void testPromoteToLeader_ReturnsNotFound_WhenVolunteerNotExists() {
         Long idVolunteer = 1L;
         AdminRequest request = new AdminRequest(1L);
 
@@ -140,7 +140,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testPromoteToLeader() {
+    public void testPromoteToLeader_ReturnsOk_WhenVolunteerPromoted() {
         Long idVolunteer = 1L;
         AdminRequest request = new AdminRequest(1L);
         Volunteer volunteer = new Volunteer();
@@ -156,7 +156,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testDegradeLeaderForbidden() {
+    public void testDegradeLeader_ReturnsForbidden_WhenVolunteerIsNotAdmin() {
         Long idVolunteer = 1L;
         AdminRequest request = new AdminRequest(1L);
 
@@ -168,7 +168,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testDegradeLeaderConflict() {
+    public void testDegradeLeader_ReturnsConflict_WhenVolunteerIsNotLeader() {
         Long idVolunteer = 1L;
         AdminRequest request = new AdminRequest(1L);
 
@@ -181,7 +181,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testDegradeLeaderNotFound() {
+    public void testDegradeLeader_ReturnsNotFound_WhenLeaderNotExists() {
         Long idVolunteer = 1L;
         AdminRequest request = new AdminRequest(1L);
 
@@ -195,7 +195,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testDegradeLeader() {
+    public void testDegradeLeader_ReturnsOk_WhenVolunteerDegraded() {
         Long idVolunteer = 1L;
         AdminRequest request = new AdminRequest(1L);
         Volunteer volunteer = new Volunteer();
@@ -211,7 +211,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testDeleteVolunteerForbidden() {
+    public void testDeleteVolunteer_ReturnForbidden_WhenVolunteerIsNotAdmin() {
         Long idVolunteer = 1L;
         AdminRequest request = new AdminRequest(1L);
 
@@ -223,7 +223,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testDeleteVolunteerNotFound() {
+    public void testDeleteVolunteer_ReturnsNotFound_WhenVolunteerNotExists() {
         Long idVolunteer = 1L;
         AdminRequest request = new AdminRequest(1L);
 
@@ -236,7 +236,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testDeleteVolunteer() {
+    public void testDeleteVolunteer_ReturnsOk_WhenVolunteerDeleted() {
         Long idVolunteer = 1L;
         AdminRequest request = new AdminRequest(1L);
         Volunteer volunteer = new Volunteer();

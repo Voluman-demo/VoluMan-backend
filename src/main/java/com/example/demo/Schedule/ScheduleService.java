@@ -157,8 +157,8 @@ public class ScheduleService {
             // Create or update availability for the volunteer for this date
             Availability availability = availabilityService.getByVolunteerIdAndDate(volunteerId, requestDate);
 
-            if (availability == null) {
-                availability = new Availability();
+            if (availability.getAvailabilityId() == null) {
+//                availability = new Availability();
                 availability.setVolunteer(volunteer);
                 availability.setDate(requestDate);
                 volunteer.getAvailabilities().add(availability);
@@ -220,7 +220,7 @@ public class ScheduleService {
 
                 if (matchingAvailability.isPresent()) {
                     // Dopóki aktualna liczba przypisanych wolontariuszy jest mniejsza od minimalnego zapotrzebowania
-                    while (demandInterval.getCurrentVolunteers() < demandInterval.getNeedMin()) {
+                    while (demandInterval.getCurrentVolunteersNumber() < demandInterval.getNeedMax()) {
                         // Wybierz pierwszego wolontariusza z listy
                         Volunteer volunteer = matchingAvailability.get().getVolunteer();
 
@@ -233,7 +233,7 @@ public class ScheduleService {
                             updateWeeklyLoad(volunteer);
 
                             // Zaktualizuj liczbę wolontariuszy w interwale zapotrzebowania
-                            demandInterval.setCurrentVolunteers(demandInterval.getCurrentVolunteers() + 1);
+                            demandInterval.setCurrentVolunteersNumber(demandInterval.getCurrentVolunteersNumber() + 1);
                         }
                     }
                 }
@@ -256,7 +256,7 @@ public class ScheduleService {
             for (Volunteer volunteer : allVolunteers) {
                 Preferences preferences = volunteer.getPreferences();
                 if (preferences != null) {
-                    if (preferences.getT().contains(action) || preferences.getR().contains(action) || preferences.getN().contains(action)) {
+                    if (preferences.getT().contains(action) || preferences.getR().contains(action)) {
                         interestedVolunteers.add(volunteer);
                     }
                 }
@@ -326,7 +326,7 @@ public class ScheduleService {
             newInterval.setAssign(1L); // Pierwsze przypisanie
 
             newInterval.setDuty(duty);
-            duty.getDutyIntervals().add(newInterval);
+//            duty.getDutyIntervals().add(newInterval);
             dutyService.addDutyInterval(newInterval, duty); // Zapisz nowy interwał do bazy danych
         }
     }

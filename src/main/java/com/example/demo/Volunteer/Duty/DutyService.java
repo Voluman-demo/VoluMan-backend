@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DutyService {
@@ -34,6 +35,13 @@ public class DutyService {
 
     // Metoda do aktualizacji istniejącego DutyInterval
     public DutyInterval updateDutyInterval(DutyInterval dutyInterval) {
+        Optional<DutyInterval> dutyIntervalExisted = dutyIntervalRepository.findById(dutyInterval.getIntervalId());
+
+        if(dutyIntervalExisted.isPresent()){
+            DutyInterval dutyIntervalPresent =  dutyIntervalExisted.get();
+            dutyIntervalPresent.setAssign(dutyInterval.getAssign());
+            return dutyIntervalRepository.save(dutyIntervalPresent);
+        }
         return dutyIntervalRepository.save(dutyInterval); // Aktualizacja w bazie danych
     }
 }
