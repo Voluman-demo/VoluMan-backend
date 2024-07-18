@@ -5,10 +5,14 @@ import com.example.demo.Interval.DemandInterval;
 import com.example.demo.Interval.DemandIntervalDto;
 import com.example.demo.Interval.DutyInterval;
 import com.example.demo.Preferences.Preferences;
+import com.example.demo.Schedule.Dto.ActionNeedRequest;
+import com.example.demo.Schedule.Dto.ActionPrefRequest;
+import com.example.demo.Schedule.Dto.VolunteerAvailRequest;
 import com.example.demo.Volunteer.*;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Availability.AvailabilityService;
 import com.example.demo.Volunteer.Duty.Duty;
+import com.example.demo.Volunteer.Duty.DutyRepository;
 import com.example.demo.Volunteer.Duty.DutyService;
 import com.example.demo.action.Action;
 import com.example.demo.action.ActionRepository;
@@ -37,8 +41,9 @@ public class ScheduleService {
     private final AvailabilityService availabilityService;
     private final DemandService demandService;
     private final DutyService dutyService;
+    private final DutyRepository dutyRepository;
 
-    public ScheduleService(ActionService actionService, ActionRepository actionRepository, VolunteerService volunteerService, VolunteerRepository volunteerRepository, AvailabilityService availabilityService, DemandService demandService, DutyService dutyService) {
+    public ScheduleService(ActionService actionService, ActionRepository actionRepository, VolunteerService volunteerService, VolunteerRepository volunteerRepository, AvailabilityService availabilityService, DemandService demandService, DutyService dutyService, DutyRepository dutyRepository, DutyRepository dutyRepository1) {
         this.actionService = actionService;
         this.actionRepository = actionRepository;
         this.volunteerService = volunteerService;
@@ -46,25 +51,26 @@ public class ScheduleService {
         this.availabilityService = availabilityService;
         this.demandService = demandService;
         this.dutyService = dutyService;
+        this.dutyRepository = dutyRepository1;
     }
 
 
     public void choosePref(Long actionId, ActionPrefRequest actionPrefRequest) {
-        switch (actionPrefRequest.decision) {
+        switch (actionPrefRequest.decision()) {
             case "T":
-                actionService.addDetermined(actionId, actionPrefRequest.volunteerId);
-                actionService.addVolunteer(actionId, actionPrefRequest.volunteerId);
-                volunteerService.addPreferences(actionId, actionPrefRequest.volunteerId, Decision.T);
+                actionService.addDetermined(actionId, actionPrefRequest.volunteerId());
+                actionService.addVolunteer(actionId, actionPrefRequest.volunteerId());
+                volunteerService.addPreferences(actionId, actionPrefRequest.volunteerId(), Decision.T);
                 break;
             case "R":
-                actionService.addVolunteer(actionId, actionPrefRequest.volunteerId);
-                volunteerService.addPreferences(actionId, actionPrefRequest.volunteerId, Decision.R);
+                actionService.addVolunteer(actionId, actionPrefRequest.volunteerId());
+                volunteerService.addPreferences(actionId, actionPrefRequest.volunteerId(), Decision.R);
                 break;
             case "N":
-                volunteerService.addPreferences(actionId, actionPrefRequest.volunteerId, Decision.N);
+                volunteerService.addPreferences(actionId, actionPrefRequest.volunteerId(), Decision.N);
                 break;
             default:
-                throw new IllegalArgumentException("Invalid decision value: " + actionPrefRequest.getDecision());
+                throw new IllegalArgumentException("Invalid decision value: " + actionPrefRequest.decision());
         }
 
     }
@@ -214,11 +220,28 @@ public class ScheduleService {
             // Dla każdego interwału zapotrzebowania
             for (DemandInterval demandInterval : demand.getDemandIntervals()) {
                 // Znajdź dostępność zgodną z interwałem zapotrzebowania
-                Optional<Availability> matchingAvailability = filteredAvailabilities.stream()
+                List<Availability> matchingAvailability = filteredAvailabilities.stream()
                         .filter(availability -> isAvailabilityMatchingInterval(availability, demandInterval))
-                        .findFirst();
+                        .toList();
 
-                if (matchingAvailability.isPresent()) {
+                for (Availability availabilityIter : matchingAvailability) {
+                    if(demandInterval.getCurrentVolunteersNumber() < demandInterval.getNeedMax()){
+                        Volunteer volunteer = availabilityIter.getVolunteer();
+
+                        // Sprawdź aktualne i maksymalne tygodniowe obciążenie wolontariusza
+                        if (isWithinWeeklyLimit(volunteer)) {
+                            // Utwórz nowy interwał dyżuru dla danego wolontariusza
+                            createDutyInterval(volunteer, demandInterval);
+
+                            // Aktualizuj obciążenie wolontariusza
+                            updateWeeklyLoad(volunteer);
+
+                            // Zaktualizuj liczbę wolontariuszy w interwale zapotrzebowania
+                            demandInterval.setCurrentVolunteersNumber(demandInterval.getCurrentVolunteersNumber() + 1);
+                        }
+                    }
+                }
+                /*if (matchingAvailability.isPresent()) {
                     // Dopóki aktualna liczba przypisanych wolontariuszy jest mniejsza od minimalnego zapotrzebowania
                     while (demandInterval.getCurrentVolunteersNumber() < demandInterval.getNeedMax()) {
                         // Wybierz pierwszego wolontariusza z listy
@@ -236,7 +259,7 @@ public class ScheduleService {
                             demandInterval.setCurrentVolunteersNumber(demandInterval.getCurrentVolunteersNumber() + 1);
                         }
                     }
-                }
+                }*/
             }
         }
 
@@ -276,15 +299,14 @@ public class ScheduleService {
 
     private boolean isSlotMatchingInterval(AvailabilityInterval slot, DemandInterval demandInterval) {
         // Sprawdź czy slot dostępności pokrywa się z interwałem zapotrzebowania
-        return slot.getStartTime().isBefore(demandInterval.getEndTime())
-                && slot.getEndTime().isAfter(demandInterval.getStartTime());
+        return slot.getStartTime().equals(demandInterval.getStartTime()) && slot.getEndTime().equals(demandInterval.getEndTime());
     }
 
     private boolean isWithinWeeklyLimit(Volunteer volunteer) {
         LocalDate startOfWeek = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate endOfWeek = startOfWeek.plusDays(6);
-        long currentWeeklyLoad = volunteer.calculateCurrentWeeklyHours(startOfWeek, endOfWeek);
-        long maxWeeklyLimit = volunteer.getLimitOfWeeklyHours();
+        double currentWeeklyLoad = volunteer.calculateCurrentWeeklyHours(startOfWeek, endOfWeek);
+        double maxWeeklyLimit = volunteer.getLimitOfWeeklyHours();
         return currentWeeklyLoad <= maxWeeklyLimit;
     }
 
@@ -315,7 +337,7 @@ public class ScheduleService {
         if (existingInterval.isPresent()) {
             // Jeśli istnieje, inkrementuj pole assign
             DutyInterval interval = existingInterval.get();
-            interval.setAssign(interval.getAssign() + 1);
+//            interval.setAssign(interval.getAssign() + 1);
             dutyService.updateDutyInterval(interval); // Aktualizuj interwał w bazie danych
         } else {
             // Jeśli nie istnieje, utwórz nowy DutyInterval
@@ -323,7 +345,7 @@ public class ScheduleService {
             newInterval.setStartTime(demandInterval.getStartTime());
             newInterval.setEndTime(demandInterval.getEndTime());
             newInterval.setStatus("ASSIGNED");
-            newInterval.setAssign(1L); // Pierwsze przypisanie
+//            newInterval.setAssign(1L); // Pierwsze przypisanie
 
             newInterval.setDuty(duty);
 //            duty.getDutyIntervals().add(newInterval);
@@ -334,7 +356,7 @@ public class ScheduleService {
     private void updateWeeklyLoad(Volunteer volunteer) {
         LocalDate startOfWeek = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate endOfWeek = startOfWeek.plusDays(6);
-        long currentWeeklyLoad = volunteer.calculateCurrentWeeklyHours(startOfWeek, endOfWeek);
+        double currentWeeklyLoad = volunteer.calculateCurrentWeeklyHours(startOfWeek, endOfWeek);
         volunteer.setCurrentWeeklyHours(currentWeeklyLoad);
         volunteerRepository.save(volunteer);
     }
@@ -344,7 +366,7 @@ public class ScheduleService {
         LocalDate startOfWeek = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate endOfWeek = startOfWeek.plusDays(6);
         for (Volunteer volunteer : volunteers) {
-            long currentWeeklyLoad = volunteer.calculateCurrentWeeklyHours(startOfWeek, endOfWeek);
+            double currentWeeklyLoad = volunteer.calculateCurrentWeeklyHours(startOfWeek, endOfWeek);
             volunteer.setCurrentWeeklyHours(currentWeeklyLoad);
             volunteerRepository.save(volunteer);
         }
@@ -364,24 +386,29 @@ public class ScheduleService {
         List<DemandDto> demandDtos = action.getDemands().stream()
                 .map(demand -> {
                     List<DemandIntervalDto> intervalDtos = demand.getDemandIntervals().stream()
-                            .map(interval -> {
-                                List<VolunteerDto> volunteerDtos = action.getVolunteers().stream()
-                                        .flatMap(volunteer -> volunteer.getDuties().stream()
-                                                .flatMap(duty -> duty.getDutyIntervals().stream()
-                                                        .filter(dutyInterval -> duty.getVolunteer().equals(volunteer))
-                                                        .map(dutyInterval -> new VolunteerDto(
-                                                                volunteer.getVolunteerId(),
-                                                                volunteer.getVolunteerDetails().getName(),
-                                                                volunteer.getVolunteerDetails().getLastname()
-                                                        ))
-                                                ))
+                            .map(demandInterval -> {
+                                // Find matching DutyIntervals
+                                List<VolunteerDto> assignedVolunteers = dutyRepository.findAll().stream()
+                                        .flatMap(duty -> duty.getDutyIntervals().stream())
+                                        .filter(dutyInterval ->
+                                                dutyInterval.getStartTime().equals(demandInterval.getStartTime()) &&
+                                                        dutyInterval.getEndTime().equals(demandInterval.getEndTime())
+                                        )
+                                        .map(dutyInterval -> {
+                                            Volunteer volunteer = dutyInterval.getDuty().getVolunteer();
+                                            return new VolunteerDto(
+                                                    volunteer.getVolunteerId(),
+                                                    volunteer.getVolunteerDetails().getName(),
+                                                    volunteer.getVolunteerDetails().getLastname()
+                                            );
+                                        })
                                         .collect(Collectors.toList());
 
                                 return new DemandIntervalDto(
-                                        interval.getIntervalId(),
-                                        interval.getStartTime(),
-                                        interval.getEndTime(),
-                                        volunteerDtos
+                                        demandInterval.getIntervalId(),
+                                        demandInterval.getStartTime(),
+                                        demandInterval.getEndTime(),
+                                        assignedVolunteers
                                 );
                             })
                             .collect(Collectors.toList());

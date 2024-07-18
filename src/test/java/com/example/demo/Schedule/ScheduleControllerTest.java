@@ -1,5 +1,8 @@
 package com.example.demo.Schedule;
 
+import com.example.demo.Schedule.Dto.ActionNeedRequest;
+import com.example.demo.Schedule.Dto.ActionPrefRequest;
+import com.example.demo.Schedule.Dto.VolunteerAvailRequest;
 import com.example.demo.Volunteer.VolunteerRepository;
 import com.example.demo.action.ActionRepository;
 import org.junit.jupiter.api.BeforeEach;

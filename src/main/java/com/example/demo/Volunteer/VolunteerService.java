@@ -96,12 +96,15 @@ public class VolunteerService {
                 }
 
                 if (decision == Decision.T) {
+                    preferencesService.removeActionFromOtherPreferences(actionEntity, preferences.getPreferenceId(), Decision.T);
                     preferences.getT().add(actionEntity);
                 }
                 if (decision == Decision.R) {
+                    preferencesService.removeActionFromOtherPreferences(actionEntity, preferences.getPreferenceId(), Decision.R);
                     preferences.getR().add(actionEntity);
                 }
                 if (decision == Decision.N) {
+                    preferencesService.removeActionFromOtherPreferences(actionEntity, preferences.getPreferenceId(), Decision.N);
                     preferences.getN().add(actionEntity);
                 }
 

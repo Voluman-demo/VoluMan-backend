@@ -44,11 +44,3 @@ public class Preferences {
 
 }
 
- /*   @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Action> T = new ArrayList<>();
-
-    @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Action> R = new ArrayList<>();
-
-    @OneToMany(mappedBy = "preferences", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Action> N = new ArrayList<>();*/

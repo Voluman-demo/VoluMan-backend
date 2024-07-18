@@ -26,8 +26,8 @@ public class DutyInterval {
     //TODO DutyStatus
     private String status;
 
-    @Column(name = "assign",nullable = false,length = 4)
-    private Long assign;
+//    @Column(name = "assign",nullable = false,length = 4)
+//    private Long assign;
 
 
     @ManyToOne
@@ -35,10 +35,10 @@ public class DutyInterval {
     @JsonBackReference
     private Duty duty;
 
-    @PrePersist
-    public void prePersist() {
-        if(this.assign == null){
-            this.assign = 0L;
-        }
-    }
+//    @PrePersist
+//    public void prePersist() {
+//        if(this.assign == null){
+//            this.assign = 0L;
+//        }
+//    }
 }

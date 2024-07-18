@@ -31,10 +31,10 @@ public class Volunteer {
     private VolunteerRole role;
 
     @Column(name = "limit_of_weekly_hours", nullable = false, length = 3)
-    private Long limitOfWeeklyHours;
+    private double limitOfWeeklyHours;
 
     @Column(name = "current_weekly_hours", nullable = false, length = 3)
-    private Long currentWeeklyHours;
+    private double currentWeeklyHours;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "volunteer_details_id", referencedColumnName = "volunteerId")
@@ -63,23 +63,15 @@ public class Volunteer {
     @JsonManagedReference // Ignoruj przy serializacji, aby uniknąć rekurencji
     private Set<Duty> duties = new HashSet<>();
 
-    public long calculateCurrentWeeklyHours(LocalDate startOfWeek, LocalDate endOfWeek) {
+    public double calculateCurrentWeeklyHours(LocalDate startOfWeek, LocalDate endOfWeek) {
         return duties.stream()
                 .filter(duty -> !duty.getDate().isBefore(startOfWeek) && !duty.getDate().isAfter(endOfWeek))
-                .mapToLong(Duty::getTotalDurationHours)
+                .mapToDouble(Duty::getTotalDurationHours)
                 .sum();
     }
 
     @PrePersist
     public void prePersist() {
-        if(this.currentWeeklyHours == null){
-            this.currentWeeklyHours = 0L;
-        }
-
-        if(this.limitOfWeeklyHours == null){
-            this.limitOfWeeklyHours = 0L;
-        }
-
         if (this.preferences == null) {
             this.preferences = new Preferences();
         }

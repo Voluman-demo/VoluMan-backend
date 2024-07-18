@@ -1,8 +1,7 @@
 package com.example.demo.Schedule;
 
-import com.example.demo.Schedule.ActionNeedRequest;
-import com.example.demo.Schedule.ScheduleService;
-import com.example.demo.Schedule.VolunteerAvailRequest;
+import com.example.demo.Schedule.Dto.ActionNeedRequest;
+import com.example.demo.Schedule.Dto.VolunteerAvailRequest;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Availability.AvailabilityService;
 import com.example.demo.Volunteer.Duty.DutyService;
@@ -17,11 +16,9 @@ import com.example.demo.action.demand.Demand;
 import com.example.demo.action.demand.DemandService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -29,7 +26,6 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 

@@ -36,9 +36,7 @@ public class Duty {
     private Set<DutyInterval> dutyIntervals = new HashSet<>();
 
 
-    public long getTotalDurationHours() {
-        return dutyIntervals.stream()
-                .mapToLong(interval -> Duration.between(interval.getStartTime(), interval.getEndTime()).toHours())
-                .sum();
+    public double getTotalDurationHours() {
+        return dutyIntervals.size() / 2d;
     }
 }

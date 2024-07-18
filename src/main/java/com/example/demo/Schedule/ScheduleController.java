@@ -1,11 +1,15 @@
 package com.example.demo.Schedule;
 
+import com.example.demo.Schedule.Dto.*;
 import com.example.demo.Volunteer.VolunteerRepository;
+import com.example.demo.Volunteer.VolunteerRole;
 import com.example.demo.action.ActionRepository;
 import com.example.demo.action.Dto.ActionScheduleDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Objects;
 
 @RestController
 @RequestMapping("schedules")
@@ -22,20 +26,13 @@ public class ScheduleController {
     }
 
 
-//    @GetMapping("/{year}/{week}/actions/{actionId}")
-//    public ResponseEntity<Schedule> getSchedule(@PathVariable("year") int year, @PathVariable("week") int week, @PathVariable("actionId") int actionId) {
-//        //validacja
-//
-//        return ResponseEntity.ok(scheduleService.showSchedule(year, week, actionId));
-//    }
-
-    @PostMapping("/actions/{actionId}")
+    @PostMapping("/actions/{actionId}/preference")
     public ResponseEntity<?> choosePref(@PathVariable("actionId") Long actionId, @RequestBody ActionPrefRequest actionPrefRequest) {
         try {
             if (!actionRepository.existsById(actionId)) {
                 return ResponseEntity.notFound().build();
             }
-            if (!volunteerRepository.existsById(actionPrefRequest.volunteerId)) {
+            if (!volunteerRepository.existsById(actionPrefRequest.volunteerId())) {
                 return ResponseEntity.notFound().build();
             }
             scheduleService.choosePref(actionId, actionPrefRequest);
@@ -65,17 +62,29 @@ public class ScheduleController {
         }
     }
 
-    @PostMapping("/{year}/{week}/schedule")
-         public ResponseEntity<?> generateSchedule(@PathVariable("year") int year, @PathVariable("week") int week, @RequestBody GenerateScheduleRequest generateScheduleRequest) {
-             //walidacja
+    @PostMapping("/{year}/{week}/schedule/generate")
+    public ResponseEntity<?> generateSchedule(@PathVariable("year") int year, @PathVariable("week") int week, @RequestBody GenerateScheduleRequest generateScheduleRequest) {
+         //walidacja admin = admin? date  = {year}/{week}
 
-             scheduleService.generateSchedule(generateScheduleRequest.date());
-             return ResponseEntity.ok().build();
-         }
+         scheduleService.generateSchedule(generateScheduleRequest.date());
+         return ResponseEntity.ok().build();
+    }
 
-    @GetMapping("/actions/{actionId}")
-    public ResponseEntity<?> getActionSchedule(@PathVariable("actionId") Long actionId) {
+
+
+    @PostMapping("/actions/{actionId}")
+    public ResponseEntity<?> getScheduleByAction(@PathVariable("actionId") Long actionId, @RequestBody ScheduleByActionRequest scheduleByActionRequest) {
         try {
+            if (!actionRepository.existsById(actionId)) {
+                return ResponseEntity.notFound().build();
+            }
+            if (!volunteerRepository.existsByVolunteerIdAndRole(scheduleByActionRequest.leaderId(), VolunteerRole.LEADER) ) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            if(!Objects.equals(actionRepository.findById(actionId).get().getLeader().leaderId(), scheduleByActionRequest.leaderId())){
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
+
             ActionScheduleDto scheduleDto = scheduleService.getActionSchedule(actionId);
             return ResponseEntity.ok(scheduleDto);
         } catch (Exception e) {

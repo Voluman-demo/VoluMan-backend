@@ -182,7 +182,7 @@ class CandidateControllerTest {
     }
 
     @Test
-    void testAcceptCandidate_Ok_WhenRecruiterAcceptCandidate() {
+    void testAcceptCandidate_ReturnsOk_WhenRecruiterAcceptCandidate() {
         Long recruiterId = 1L;
         Long candidateId = 1L;
 
