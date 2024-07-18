@@ -10,4 +10,6 @@ import java.util.List;
 public interface DemandRepository extends JpaRepository<Demand, Long> {
 
     List<Demand> findAllByDate(LocalDate date);
+
+    List<Demand> findAllByAction_ActionId(Long actionId);
 }

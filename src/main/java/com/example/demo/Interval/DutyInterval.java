@@ -23,8 +23,10 @@ public class DutyInterval {
     private LocalTime startTime;
     @Column(name = "end_time",nullable = false)
     private LocalTime endTime;
-    //TODO DutyStatus
-    private String status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private DutyIntervalStatus status;
 
 //    @Column(name = "assign",nullable = false,length = 4)
 //    private Long assign;

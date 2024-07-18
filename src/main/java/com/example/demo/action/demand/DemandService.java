@@ -21,4 +21,8 @@ public class DemandService {
     public List<Demand> getDemandsForDay(LocalDate date) {
         return demandRepository.findAllByDate(date);
     }
+
+    public List<Demand> findAllByActionId(Long actionId) {
+        return demandRepository.findAllByAction_ActionId(actionId);
+    }
 }

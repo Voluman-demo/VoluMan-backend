@@ -1273,3 +1273,10 @@ Database is already closed (to disable automatic closing at VM shutdown, add ";D
 	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659)
 	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63)
 	at java.base/java.lang.Thread.run(Thread.java:1570)
+2024-07-18 17:47:22.209573+02:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Błąd konwersji danych "'ASSIGNED' (DUTY_INTERVAL_COPY_3_0: ""STATUS"" TINYINT)"
+Data conversion error converting "'ASSIGNED' (DUTY_INTERVAL_COPY_3_0: ""STATUS"" TINYINT)"; SQL statement:
+INSERT INTO "PUBLIC"."DUTY_INTERVAL_COPY_3_0"("INTERVAL_ID", "ASSIGN", "END_TIME", "START_TIME", "STATUS", "DUTY_ID") OVERRIDING SYSTEM VALUE SELECT "INTERVAL_ID", "ASSIGN", "END_TIME", "START_TIME", "STATUS", "DUTY_ID" FROM "PUBLIC"."DUTY_INTERVAL" [22018-224]
+2024-07-18 17:48:06.697361+02:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLDataException: Błąd konwersji danych "ASSIGNED"
+Data conversion error converting "ASSIGNED" [22018-224]

@@ -1,12 +1,10 @@
 package com.example.demo.Schedule;
 
-import com.example.demo.Interval.AvailabilityInterval;
-import com.example.demo.Interval.DemandInterval;
-import com.example.demo.Interval.DemandIntervalDto;
-import com.example.demo.Interval.DutyInterval;
+import com.example.demo.Interval.*;
 import com.example.demo.Preferences.Preferences;
 import com.example.demo.Schedule.Dto.ActionNeedRequest;
 import com.example.demo.Schedule.Dto.ActionPrefRequest;
+import com.example.demo.Schedule.Dto.ModifyScheduleRequest;
 import com.example.demo.Schedule.Dto.VolunteerAvailRequest;
 import com.example.demo.Volunteer.*;
 import com.example.demo.Volunteer.Availability.Availability;
@@ -20,10 +18,13 @@ import com.example.demo.action.ActionService;
 import com.example.demo.action.Dto.ActionScheduleDto;
 import com.example.demo.action.demand.Demand;
 import com.example.demo.action.demand.DemandDto;
+import com.example.demo.action.demand.DemandRepository;
 import com.example.demo.action.demand.DemandService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.TemporalAdjusters;
@@ -42,8 +43,9 @@ public class ScheduleService {
     private final DemandService demandService;
     private final DutyService dutyService;
     private final DutyRepository dutyRepository;
+    private final DemandRepository demandRepository;
 
-    public ScheduleService(ActionService actionService, ActionRepository actionRepository, VolunteerService volunteerService, VolunteerRepository volunteerRepository, AvailabilityService availabilityService, DemandService demandService, DutyService dutyService, DutyRepository dutyRepository, DutyRepository dutyRepository1) {
+    public ScheduleService(ActionService actionService, ActionRepository actionRepository, VolunteerService volunteerService, VolunteerRepository volunteerRepository, AvailabilityService availabilityService, DemandService demandService, DutyService dutyService, DutyRepository dutyRepository, DutyRepository dutyRepository1, DemandRepository demandRepository) {
         this.actionService = actionService;
         this.actionRepository = actionRepository;
         this.volunteerService = volunteerService;
@@ -52,6 +54,7 @@ public class ScheduleService {
         this.demandService = demandService;
         this.dutyService = dutyService;
         this.dutyRepository = dutyRepository1;
+        this.demandRepository = demandRepository;
     }
 
 
@@ -344,8 +347,7 @@ public class ScheduleService {
             DutyInterval newInterval = new DutyInterval();
             newInterval.setStartTime(demandInterval.getStartTime());
             newInterval.setEndTime(demandInterval.getEndTime());
-            newInterval.setStatus("ASSIGNED");
-//            newInterval.setAssign(1L); // Pierwsze przypisanie
+            newInterval.setStatus(DutyIntervalStatus.ASSIGNED);
 
             newInterval.setDuty(duty);
 //            duty.getDutyIntervals().add(newInterval);
@@ -429,4 +431,60 @@ public class ScheduleService {
         );
     }
 
+
+    @Transactional
+    public void modifySchedule(Long volunteerId, int year, int week, ModifyScheduleRequest modifyScheduleRequest) {
+        // Pobranie wolontariusza
+        Volunteer volunteer = volunteerRepository.findById(volunteerId)
+                .orElseThrow(() -> new IllegalArgumentException("Volunteer not found"));
+
+        // Określenie początku i końca tygodnia
+        LocalDate startOfWeek = LocalDate.ofYearDay(year, (week - 1) * 7 + 1);
+        LocalDate endOfWeek = startOfWeek.plusDays(6);
+
+        // Pobranie obowiązków wolontariusza z danego tygodnia
+        List<Duty> duties = dutyRepository.findAllByVolunteerAndDateBetween(volunteer, startOfWeek, endOfWeek);
+
+        // Pobranie wszystkich demand związanych z daną akcją
+        List<Demand> demands = demandService.findAllByActionId(modifyScheduleRequest.actionId());
+
+        // Przeliczenie czasu trwania interwałów, które mają być usunięte
+        double totalCanceledHours = 0.0;
+
+        // Iterowanie przez dutyIntervals z requestu
+        for (DutyInterval requestInterval : modifyScheduleRequest.dutyIntervals()) {
+            // Szukanie odpowiadającego interwału w istniejących obowiązkach
+            for (Duty duty : duties) {
+                for (DutyInterval interval : duty.getDutyIntervals()) {
+                    if (interval.getIntervalId().equals(requestInterval.getIntervalId())) {
+                        interval.setStatus(DutyIntervalStatus.CANCELED);
+                        totalCanceledHours += Duration.between(interval.getStartTime(), interval.getEndTime()).toMinutes() / 60.0;
+
+                        // Znalezienie odpowiedniego DemandInterval i zmniejszenie currentVolunteersNumber
+                        for (Demand demand : demands) {
+                            Iterator<DemandInterval> iterator = demand.getDemandIntervals().iterator();
+                            while (iterator.hasNext()) {
+                                DemandInterval demandInterval = iterator.next();
+                                if (demandInterval.getStartTime().equals(interval.getStartTime())
+                                        && demandInterval.getEndTime().equals(interval.getEndTime())) {
+                                    demandInterval.setCurrentVolunteersNumber(demandInterval.getCurrentVolunteersNumber() - 1);
+                                    iterator.remove(); // Usunięcie z aktualnej kolekcji
+                                }
+                            }
+                            demandRepository.save(demand);
+                        }
+                    }
+                }
+            }
+        }
+
+        // Zaktualizowanie currentWeeklyHours wolontariusza
+        volunteer.setCurrentWeeklyHours(volunteer.getCurrentWeeklyHours() - totalCanceledHours);
+
+        // Zapisanie zmian w obowiązkach
+        dutyRepository.saveAll(duties);
+
+        // Zapisanie zmian w wolontariuszu
+        volunteerRepository.save(volunteer);
+    }
 }

@@ -28,7 +28,10 @@ public class ScheduleController {
 
 
     @PostMapping("/actions/{actionId}/preference")
-    public ResponseEntity<?> choosePref(@PathVariable("actionId") Long actionId, @RequestBody ActionPrefRequest actionPrefRequest) {
+    public ResponseEntity<?> choosePref(
+            @PathVariable("actionId") Long actionId,
+            @RequestBody ActionPrefRequest actionPrefRequest
+    ) {
         try {
             if (!actionRepository.existsById(actionId)) {
                 return ResponseEntity.notFound().build();
@@ -44,7 +47,12 @@ public class ScheduleController {
     }
 
     @PostMapping("/{year}/{week}/actions/{actionId}")
-    public ResponseEntity<?> chooseNeed(@PathVariable("year") int year, @PathVariable("week") int week, @PathVariable("actionId") Long actionId, @RequestBody ActionNeedRequest actionNeedRequest) {
+    public ResponseEntity<?> chooseNeed(
+            @PathVariable("year") int year,
+            @PathVariable("week") int week,
+            @PathVariable("actionId") Long actionId,
+            @RequestBody ActionNeedRequest actionNeedRequest
+    ) {
         try {
             if (!actionRepository.existsById(actionId)) {
                 return ResponseEntity.notFound().build();
@@ -63,7 +71,12 @@ public class ScheduleController {
     }
 
     @PostMapping("/{year}/{week}/volunteers/{volunteerId}")
-    public ResponseEntity<?> chooseAvail(@PathVariable("year") int year, @PathVariable("week") int week, @PathVariable("volunteerId") Long volunteerId, @RequestBody VolunteerAvailRequest volunteerAvailRequest) {
+    public ResponseEntity<?> chooseAvail(
+            @PathVariable("year") int year,
+            @PathVariable("week") int week,
+            @PathVariable("volunteerId") Long volunteerId,
+            @RequestBody VolunteerAvailRequest volunteerAvailRequest
+    ) {
         try {
             if(!volunteerRepository.existsById(volunteerId)) {
                 return ResponseEntity.notFound().build();
@@ -76,7 +89,11 @@ public class ScheduleController {
     }
 
     @PostMapping("/{year}/{week}/schedule/generate")
-    public ResponseEntity<?> generateSchedule(@PathVariable("year") int year, @PathVariable("week") int week, @RequestBody GenerateScheduleRequest generateScheduleRequest) {
+    public ResponseEntity<?> generateSchedule(
+            @PathVariable("year") int year,
+            @PathVariable("week") int week,
+            @RequestBody GenerateScheduleRequest generateScheduleRequest
+    ) {
         try {
             // Walidacja: Sprawdzenie, czy użytkownik jest administratorem
             if (!volunteerRepository.existsByVolunteerIdAndRole(generateScheduleRequest.adminId(), VolunteerRole.ADMIN)) {
@@ -102,9 +119,31 @@ public class ScheduleController {
     }
 
 
+    @PostMapping("{year}/{week}/volunteers/{volunteerId}/modify")
+    public ResponseEntity<?> modifySchedule(
+            @PathVariable("year") int year,
+            @PathVariable("week") int week,
+            @PathVariable("volunteerId") Long volunteerId,
+            @RequestBody ModifyScheduleRequest modifyScheduleRequest
+            ){
+        try {
+            if(!volunteerRepository.existsById(volunteerId)) {
+                return ResponseEntity.notFound().build();
+            }
+            scheduleService.modifySchedule(volunteerId, year, week, modifyScheduleRequest);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+
+    }
+
 
     @PostMapping("/actions/{actionId}")
-    public ResponseEntity<?> getScheduleByAction(@PathVariable("actionId") Long actionId, @RequestBody ScheduleByActionRequest scheduleByActionRequest) {
+    public ResponseEntity<?> getScheduleByAction(
+            @PathVariable("actionId") Long actionId,
+            @RequestBody ScheduleByActionRequest scheduleByActionRequest
+    ) {
         try {
             if (!actionRepository.existsById(actionId)) {
                 return ResponseEntity.notFound().build();
@@ -119,7 +158,7 @@ public class ScheduleController {
             ActionScheduleDto scheduleDto = scheduleService.getActionSchedule(actionId);
             return ResponseEntity.ok(scheduleDto);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error retrieving action schedule.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
