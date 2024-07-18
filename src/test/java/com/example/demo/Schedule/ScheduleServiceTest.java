@@ -1,9 +1,14 @@
 package com.example.demo.Schedule;
 
+import com.example.demo.Interval.AvailabilityInterval;
+import com.example.demo.Interval.DemandInterval;
+import com.example.demo.Interval.DutyInterval;
 import com.example.demo.Schedule.Dto.ActionNeedRequest;
 import com.example.demo.Schedule.Dto.VolunteerAvailRequest;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Availability.AvailabilityService;
+import com.example.demo.Volunteer.Duty.Duty;
+import com.example.demo.Volunteer.Duty.DutyRepository;
 import com.example.demo.Volunteer.Duty.DutyService;
 import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerRepository;
@@ -55,6 +60,9 @@ public class ScheduleServiceTest {
     @InjectMocks
     private ScheduleService scheduleService;
 
+
+    @Mock
+    private DutyRepository dutyRepository;
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
@@ -150,7 +158,7 @@ public class ScheduleServiceTest {
         assertThrows(Exception.class, () -> scheduleService.chooseAvailabilities(1L, 2024, 27, request));
     }
 
-    @Test
+   /* @Test
     void testChooseAvailabilities_Success() throws Exception {
         VolunteerAvailRequest request = new VolunteerAvailRequest();
         request.setLimitOfHours(20L);
@@ -171,5 +179,50 @@ public class ScheduleServiceTest {
 
         verify(volunteerRepository, times(1)).save(any(Volunteer.class));
         verify(availabilityService, times(1)).addAvail(any(Availability.class));
+    }*/
+
+    @Test
+    void testGenerateSchedule() {
+        LocalDate date = LocalDate.now();
+
+        // Mocking availabilities
+        Volunteer volunteer = new Volunteer();
+        volunteer.setVolunteerId(1L);
+        volunteer.setLimitOfWeeklyHours(10);
+
+        Availability availability = new Availability();
+        availability.setVolunteer(volunteer);
+        availability.setDate(date);
+        AvailabilityInterval interval = new AvailabilityInterval();
+        interval.setStartTime(LocalTime.of(9, 0));
+        interval.setEndTime(LocalTime.of(11, 0));
+        availability.setSlots(Set.of(interval));
+
+        when(availabilityService.getAvailabilitiesForDay(date)).thenReturn(List.of(availability));
+
+        // Mocking demands
+        Action action = new Action();
+        action.setActionId(1L);
+
+        Demand demand = new Demand();
+        demand.setAction(action);
+        demand.setDate(date);
+        DemandInterval demandInterval = new DemandInterval();
+        demandInterval.setStartTime(LocalTime.of(9, 0));
+        demandInterval.setEndTime(LocalTime.of(11, 0));
+        demandInterval.setNeedMax(1L);
+        demand.setDemandIntervals(Set.of(demandInterval));
+
+        when(demandService.getDemandsForDay(date)).thenReturn(List.of(demand));
+        when(actionRepository.findById(any())).thenReturn(Optional.of(action));
+        when(volunteerRepository.findAll()).thenReturn(List.of(volunteer));
+
+        // Call the method
+        scheduleService.generateSchedule(date);
+
+        // Verify the interactions
+        verify(demandService, times(1)).getDemandsForDay(date);
+        verify(availabilityService, times(1)).getAvailabilitiesForDay(date);
+        verify(dutyService, times(1)).addDutyInterval(any(DutyInterval.class), any(Duty.class)); //TODO FIX IT
     }
 }

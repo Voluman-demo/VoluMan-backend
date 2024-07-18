@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.Objects;
 
 @RestController
@@ -45,6 +46,15 @@ public class ScheduleController {
     @PostMapping("/{year}/{week}/actions/{actionId}")
     public ResponseEntity<?> chooseNeed(@PathVariable("year") int year, @PathVariable("week") int week, @PathVariable("actionId") Long actionId, @RequestBody ActionNeedRequest actionNeedRequest) {
         try {
+            if (!actionRepository.existsById(actionId)) {
+                return ResponseEntity.notFound().build();
+            }
+            if (!volunteerRepository.existsByVolunteerIdAndRole(actionNeedRequest.getLeaderId(), VolunteerRole.LEADER) ) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+            if(!Objects.equals(actionRepository.findById(actionId).get().getLeader().leaderId(), actionNeedRequest.getLeaderId())){
+                return ResponseEntity.status(HttpStatus.CONFLICT).build();
+            }
             scheduleService.scheduleNeedAction(actionId, year, week, actionNeedRequest);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
@@ -55,6 +65,9 @@ public class ScheduleController {
     @PostMapping("/{year}/{week}/volunteers/{volunteerId}")
     public ResponseEntity<?> chooseAvail(@PathVariable("year") int year, @PathVariable("week") int week, @PathVariable("volunteerId") Long volunteerId, @RequestBody VolunteerAvailRequest volunteerAvailRequest) {
         try {
+            if(!volunteerRepository.existsById(volunteerId)) {
+                return ResponseEntity.notFound().build();
+            }
             scheduleService.chooseAvailabilities(volunteerId, year, week, volunteerAvailRequest);
             return ResponseEntity.ok().build();
         } catch (Exception e) {
@@ -64,10 +77,28 @@ public class ScheduleController {
 
     @PostMapping("/{year}/{week}/schedule/generate")
     public ResponseEntity<?> generateSchedule(@PathVariable("year") int year, @PathVariable("week") int week, @RequestBody GenerateScheduleRequest generateScheduleRequest) {
-         //walidacja admin = admin? date  = {year}/{week}
+        try {
+            // Walidacja: Sprawdzenie, czy użytkownik jest administratorem
+            if (!volunteerRepository.existsByVolunteerIdAndRole(generateScheduleRequest.adminId(), VolunteerRole.ADMIN)) {
+                return ResponseEntity.notFound().build();
+            }
 
-         scheduleService.generateSchedule(generateScheduleRequest.date());
-         return ResponseEntity.ok().build();
+            // Obliczanie oczekiwanej daty na podstawie roku i tygodnia
+            LocalDate expectedDate = LocalDate.ofYearDay(year, 1).plusWeeks(week - 1);
+            LocalDate requestDate = generateScheduleRequest.date();
+
+            // Sprawdzenie, czy data w żądaniu zgadza się z oczekiwaną datą
+            if (!expectedDate.equals(requestDate)) {
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
+            }
+
+            // Wywołanie usługi generowania harmonogramu
+            scheduleService.generateSchedule(generateScheduleRequest.date());
+            return ResponseEntity.ok().body("Schedule generated successfully.");
+        } catch (Exception e) {
+            // Obsługa wyjątków i zwrócenie odpowiedzi z kodem błędu 500
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error generating schedule.");
+        }
     }
 
 

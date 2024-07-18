@@ -63,6 +63,9 @@ public class Volunteer {
     @JsonManagedReference // Ignoruj przy serializacji, aby uniknąć rekurencji
     private Set<Duty> duties = new HashSet<>();
 
+
+
+
     public double calculateCurrentWeeklyHours(LocalDate startOfWeek, LocalDate endOfWeek) {
         return duties.stream()
                 .filter(duty -> !duty.getDate().isBefore(startOfWeek) && !duty.getDate().isAfter(endOfWeek))
@@ -88,4 +91,6 @@ public class Volunteer {
             this.availabilities = new ArrayList<>();
         }
     }
+
+
 }
