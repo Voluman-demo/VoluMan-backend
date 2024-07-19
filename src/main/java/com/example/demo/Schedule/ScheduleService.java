@@ -493,26 +493,30 @@ public class ScheduleService {
     private List<DutyIntervalDto> mapDutyIntervalsToDto(List<Duty> duties, List<Demand> demands) {
         return duties.stream()
                 .flatMap(duty -> duty.getDutyIntervals().stream())
-                .map(dutyInterval -> {
-                    DemandInterval correspondingDemandInterval = findCorrespondingDemandInterval(demands, dutyInterval);
-                    Action action = correspondingDemandInterval.getDemand().getAction();
+                .flatMap(dutyInterval -> {
+                    // Znajdź wszystkie odpowiadające demandInterval
+                    List<DemandInterval> correspondingDemandIntervals = findCorrespondingDemandIntervals(demands, dutyInterval);
 
-                    return new DutyIntervalDto(
-                            dutyInterval.getIntervalId(),
-                            dutyInterval.getStartTime(),
-                            dutyInterval.getEndTime(),
-                            new ActionDto(action.getActionId(), action.getHeading())
-                    );
+                    return correspondingDemandIntervals.stream().map(correspondingDemandInterval -> {
+                        Action action = correspondingDemandInterval.getDemand().getAction();
+
+                        return new DutyIntervalDto(
+                                dutyInterval.getIntervalId(),
+                                dutyInterval.getStartTime(),
+                                dutyInterval.getEndTime(),
+                                new ActionDto(action.getActionId(), action.getHeading())
+                        );
+                    });
                 })
                 .collect(Collectors.toList());
     }
 
-    private DemandInterval findCorrespondingDemandInterval(List<Demand> demands, DutyInterval dutyInterval) {
+    private List<DemandInterval> findCorrespondingDemandIntervals(List<Demand> demands, DutyInterval dutyInterval) {
         return demands.stream()
                 .flatMap(demand -> demand.getDemandIntervals().stream())
                 .filter(demandInterval ->
-                        demandInterval.getStartTime().equals(dutyInterval.getStartTime()) &&
-                                demandInterval.getEndTime().equals(dutyInterval.getEndTime()))
-                .findFirst().orElse(null);
+                        demandInterval.getStartTime().equals(dutyInterval.getStartTime())
+                                && demandInterval.getEndTime().equals(dutyInterval.getEndTime()))
+                .collect(Collectors.toList());
     }
 }
