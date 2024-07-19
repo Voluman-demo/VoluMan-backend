@@ -234,6 +234,40 @@ public class ScheduleControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
+    @Test
+    void testChooseAvail_VolunteerNotFound() {
+        int year = 2024;
+        int week = 27;
+        Long volunteerId = 1L;
+        VolunteerAvailRequest request = createVolunteerAvailRequest();
+
+        // Mock the non-existence of the volunteer
+        when(volunteerRepository.existsById(volunteerId)).thenReturn(false);
+
+        ResponseEntity<?> response = scheduleController.chooseAvail(year, week, volunteerId, request);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    void testChooseAvail_Exception() throws Exception {
+        int year = 2024;
+        int week = 27;
+        Long volunteerId = 1L;
+        VolunteerAvailRequest request = createVolunteerAvailRequest();
+
+        // Mock the existence of the volunteer
+        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
+
+        // Mocking an exception from the service
+        doThrow(new RuntimeException("Error")).when(scheduleService).chooseAvailabilities(anyLong(), anyInt(), anyInt(), any(VolunteerAvailRequest.class));
+
+        ResponseEntity<?> response = scheduleController.chooseAvail(year, week, volunteerId, request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Error", response.getBody());
+    }
+
 
     @Test
     void testGenerateSchedule_Success() {
