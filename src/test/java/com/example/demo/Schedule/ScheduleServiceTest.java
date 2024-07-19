@@ -158,28 +158,30 @@ public class ScheduleServiceTest {
         assertThrows(Exception.class, () -> scheduleService.chooseAvailabilities(1L, 2024, 27, request));
     }
 
-   /* @Test
+    @Test
     void testChooseAvailabilities_Success() throws Exception {
         VolunteerAvailRequest request = new VolunteerAvailRequest();
-        request.setLimitOfHours(20L);
+        request.setLimitOfHours(10L);
         VolunteerAvailRequest.DayAvailabilityRequest dayRequest = new VolunteerAvailRequest.DayAvailabilityRequest();
-        dayRequest.setDate(LocalDate.of(2024, 7, 3));
+        dayRequest.setDate(LocalDate.of(2024, 7, 5));
         VolunteerAvailRequest.AvailabilitySlotRequest slotRequest = new VolunteerAvailRequest.AvailabilitySlotRequest();
         slotRequest.setStartTime(LocalTime.of(9, 0));
-        slotRequest.setEndTime(LocalTime.of(9, 30));
+        slotRequest.setEndTime(LocalTime.of(17, 0));
         dayRequest.setSlots(List.of(slotRequest));
         request.setDays(List.of(dayRequest));
 
         Volunteer volunteer = new Volunteer();
+        volunteer.setVolunteerId(1L);
+        volunteer.setAvailabilities(new ArrayList<>());
 
         when(volunteerRepository.findById(1L)).thenReturn(Optional.of(volunteer));
-        when(availabilityService.getByVolunteerIdAndDate(1L, LocalDate.of(2024, 7, 3))).thenReturn(null);
+        when(availabilityService.getByVolunteerIdAndDate(1L, LocalDate.of(2024, 7, 5))).thenReturn(new Availability());
 
         scheduleService.chooseAvailabilities(1L, 2024, 27, request);
 
         verify(volunteerRepository, times(1)).save(any(Volunteer.class));
         verify(availabilityService, times(1)).addAvail(any(Availability.class));
-    }*/
+    }
 
     @Test
     void testGenerateSchedule() {

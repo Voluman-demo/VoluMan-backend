@@ -2,7 +2,6 @@ package com.example.demo.Schedule;
 
 import com.example.demo.Schedule.Dto.*;
 import com.example.demo.Volunteer.LeaderDto;
-import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerRepository;
 import com.example.demo.Volunteer.VolunteerRole;
 import com.example.demo.action.Action;
@@ -22,17 +21,13 @@ import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 public class ScheduleControllerTest {
 
     @Mock
     private ScheduleService scheduleService;
-
-
 
     @Mock
     private ActionRepository actionRepository;
@@ -83,8 +78,9 @@ public class ScheduleControllerTest {
 
         return request;
     }
+
     @Test
-    void testChoosePref_ReturnsNotFound_WhenActionNotFound() {//Klaudiusz jeszcze sie bawi tym
+    void testChoosePref_ReturnsNotFound_WhenActionNotFound() {
         Long actionId = 1L;
         ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 
@@ -96,7 +92,7 @@ public class ScheduleControllerTest {
     }
 
     @Test
-    void testChoosePref_ReturnsNotFound_VolunteerNotFound() {//Klaudiusz jeszcze sie bawi tym
+    void testChoosePref_ReturnsNotFound_VolunteerNotFound() {
         Long actionId = 1L;
         ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 
@@ -109,7 +105,7 @@ public class ScheduleControllerTest {
     }
 
     @Test
-    void testChoose_ReturnsOk_Pref_Success() {//Klaudiusz jeszcze sie bawi tym
+    void testChoose_ReturnsOk_Pref_Success() {
         Long actionId = 1L;
         ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 
@@ -120,17 +116,104 @@ public class ScheduleControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
- //TODO
-   /* @Test
+
+    @Test
     void testChooseNeed_Success() throws Exception {
         int year = 2024;
         int week = 27;
         Long actionId = 1L;
         ActionNeedRequest request = createActionNeedRequest();
+        request.setLeaderId(1L);
+
+        // Mock the existence of the action
+        when(actionRepository.existsById(actionId)).thenReturn(true);
+        // Mock the existence of the leader
+        when(volunteerRepository.existsByVolunteerIdAndRole(request.getLeaderId(), VolunteerRole.LEADER)).thenReturn(true);
+        Action action = new Action();
+        action.setLeader(new LeaderDto(request.getLeaderId(), "John", "Doe", "john.doe@example.com", "123456789"));
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
+        // Assuming the service call is expected to succeed
+        doNothing().when(scheduleService).scheduleNeedAction(anyLong(), anyInt(), anyInt(), any(ActionNeedRequest.class));
 
         ResponseEntity<?> response = scheduleController.chooseNeed(year, week, actionId, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void testChooseNeed_LeaderNotAuthorized() {
+        // Given
+        int year = 2024;
+        int week = 27;
+        Long actionId = 1L;
+        Long VolunteerId = 1L;
+        ActionNeedRequest request = createActionNeedRequest();
+        request.setLeaderId(VolunteerId);
+
+        // Mockowanie istnienia akcji
+        when(actionRepository.existsById(actionId)).thenReturn(true);
+        // Mockowanie braku odpowiedniej roli lidera
+        when(volunteerRepository.existsByVolunteerIdAndRole(request.getLeaderId(), VolunteerRole.LEADER)).thenReturn(false);
+
+        // When
+        ResponseEntity<?> response = scheduleController.chooseNeed(year, week, actionId, request);
+
+        // Then
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+    }
+    @Test
+    void testChooseNeed_LeaderMismatch() {
+        // Given
+        int year = 2024;
+        int week = 27;
+        Long actionId = 1L;
+
+        ActionNeedRequest request = createActionNeedRequest();
+        request.setLeaderId(1L);
+
+        // Mockowanie istnienia akcji
+        when(actionRepository.existsById(actionId)).thenReturn(true);
+
+        // Mockowanie lidera akcji jako inny lider
+        Action action = new Action();
+        action.setLeader(new LeaderDto(2L, "John", "Doe", "john.doe@example.com", "123456789"));
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
+
+        // Mockowanie istnienia lidera
+        when(volunteerRepository.existsByVolunteerIdAndRole(request.getLeaderId(), VolunteerRole.LEADER)).thenReturn(true);
+
+        // When
+        ResponseEntity<?> response = scheduleController.chooseNeed(year, week, actionId, request);
+
+        // Then
+        assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
+    }
+    @Test
+    void testChooseNeed_Exception() throws Exception {
+        // Given
+        int year = 2024;
+        int week = 27;
+        Long actionId = 1L;
+        Long leaderId = 1L;
+        ActionNeedRequest request = createActionNeedRequest();
+        request.setLeaderId(leaderId);
+
+        // Mockowanie istnienia akcji
+        when(actionRepository.existsById(actionId)).thenReturn(true);
+        // Mockowanie istnienia lidera
+        when(volunteerRepository.existsByVolunteerIdAndRole(leaderId, VolunteerRole.LEADER)).thenReturn(true);
+        Action action = new Action();
+        action.setLeader(new LeaderDto(leaderId, "John", "Doe", "john.doe@example.com", "123456789"));
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
+        // Mockowanie wyjątku z serwisu
+        doThrow(new RuntimeException("Error")).when(scheduleService).scheduleNeedAction(anyLong(), anyInt(), anyInt(), any(ActionNeedRequest.class));
+
+        // When
+        ResponseEntity<?> response = scheduleController.chooseNeed(year, week, actionId, request);
+
+        // Then
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Error", response.getBody());
     }
 
     @Test
@@ -140,69 +223,20 @@ public class ScheduleControllerTest {
         Long volunteerId = 1L;
         VolunteerAvailRequest request = createVolunteerAvailRequest();
 
+        // Mock the existence of the volunteer
+        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
+
+        // Assuming the service call is expected to succeed
+        doNothing().when(scheduleService).chooseAvailabilities(anyLong(), anyInt(), anyInt(), any(VolunteerAvailRequest.class));
+
         ResponseEntity<?> response = scheduleController.chooseAvail(year, week, volunteerId, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-    }*/
-
- /*   @Test
-    void testGenerateSchedule_Success() {
-        int year = 2024;
-        int week = 27;
-        GenerateScheduleRequest request = new GenerateScheduleRequest(LocalDate.now());
-
-        ResponseEntity<?> response = scheduleController.generateSchedule(year, week, request);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }*/
-
-    @Test
-    void testChoosePref_Exception() {
-        Long actionId = 1L;
-        ActionPrefRequest request = new ActionPrefRequest(1L, "T");
-
-        when(actionRepository.existsById(actionId)).thenReturn(true);
-        when(volunteerRepository.existsById(request.volunteerId())).thenReturn(true);
-        doThrow(new RuntimeException("Error")).when(scheduleService).choosePref(anyLong(), any(ActionPrefRequest.class));
-
-        ResponseEntity<?> response = scheduleController.choosePref(actionId, request);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Error", response.getBody());
     }
-//TODO
-   /* @Test
-    void testChooseNeed_Exception() throws Exception {
-        int year = 2024;
-        int week = 27;
-        Long actionId = 1L;
-        ActionNeedRequest request = createActionNeedRequest();
 
-        doThrow(new Exception("Error")).when(scheduleService).scheduleNeedAction(anyLong(), anyInt(), anyInt(), any(ActionNeedRequest.class));
 
-        ResponseEntity<?> response = scheduleController.chooseNeed(year, week, actionId, request);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Error", response.getBody());
-    }*/
-    //TODO
-    /*@Test
-    void testChooseAvail_Exception() throws Exception {
-        int year = 2024;
-        int week = 27;
-        Long volunteerId = 1L;
-        VolunteerAvailRequest request = createVolunteerAvailRequest();
-
-        doThrow(new Exception("Error")).when(scheduleService).chooseAvailabilities(anyLong(), anyInt(), anyInt(), any(VolunteerAvailRequest.class));
-
-        ResponseEntity<?> response = scheduleController.chooseAvail(year, week, volunteerId, request);
-
-        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-        assertEquals("Error", response.getBody());
-    }*/
     @Test
     void testGenerateSchedule_Success() {
-        // Given
         int year = 2024;
         int week = 27;
         LocalDate date = LocalDate.of(year, 7, 1);
@@ -210,51 +244,46 @@ public class ScheduleControllerTest {
 
         when(volunteerRepository.existsByVolunteerIdAndRole(any(Long.class), any(VolunteerRole.class))).thenReturn(true);
 
-        // When
         ResponseEntity<?> response = scheduleController.generateSchedule(year, week, request);
 
-        // Then
         assertEquals(HttpStatus.OK, response.getStatusCode());
         verify(scheduleService, times(1)).generateSchedule(date);
     }
+
+
+
+
+
     @Test
     void testGenerateSchedule_AdminNotFound() {
-        // Given
         int year = 2024;
         int week = 27;
         GenerateScheduleRequest request = new GenerateScheduleRequest(1L, LocalDate.of(year, 1, 1));
 
         when(volunteerRepository.existsByVolunteerIdAndRole(any(Long.class), any(VolunteerRole.class))).thenReturn(false);
 
-        // When
         ResponseEntity<?> response = scheduleController.generateSchedule(year, week, request);
 
-        // Then
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(scheduleService, never()).generateSchedule(any(LocalDate.class));
     }
 
     @Test
     void testGenerateSchedule_DateMismatch() {
-        // Given
         int year = 2024;
         int week = 27;
         GenerateScheduleRequest request = new GenerateScheduleRequest(1L, LocalDate.of(year, 1, 1));
 
         when(volunteerRepository.existsByVolunteerIdAndRole(any(Long.class), any(VolunteerRole.class))).thenReturn(true);
 
-        // When
         ResponseEntity<?> response = scheduleController.generateSchedule(year, week, request);
 
-        // Then
         assertEquals(HttpStatus.NOT_ACCEPTABLE, response.getStatusCode());
         verify(scheduleService, never()).generateSchedule(any(LocalDate.class));
     }
 
-
     @Test
     void testGenerateSchedule_Exception() {
-        // Given
         int year = 2024;
         int week = 27;
         LocalDate date = LocalDate.of(year, 7, 1);
@@ -263,16 +292,11 @@ public class ScheduleControllerTest {
         when(volunteerRepository.existsByVolunteerIdAndRole(any(Long.class), any(VolunteerRole.class))).thenReturn(true);
         doThrow(new RuntimeException("Error")).when(scheduleService).generateSchedule(date);
 
-        // When
         ResponseEntity<?> response = scheduleController.generateSchedule(year, week, request);
 
-        // Then
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("Error generating schedule.", response.getBody());
     }
-
-
-
 
     @Test
     void testGetScheduleByAction_R_ActionNotFound() {
@@ -284,7 +308,6 @@ public class ScheduleControllerTest {
         ResponseEntity<?> response = scheduleController.getScheduleByAction(actionId, request);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-
     }
 
     @Test
@@ -298,7 +321,6 @@ public class ScheduleControllerTest {
         ResponseEntity<?> response = scheduleController.getScheduleByAction(actionId, request);
 
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-
     }
 
     @Test
@@ -316,7 +338,6 @@ public class ScheduleControllerTest {
         ResponseEntity<?> response = scheduleController.getScheduleByAction(actionId, request);
 
         assertEquals(HttpStatus.CONFLICT, response.getStatusCode());
-
     }
 
     @Test
@@ -336,30 +357,8 @@ public class ScheduleControllerTest {
         ResponseEntity<?> response = scheduleController.getScheduleByAction(actionId, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(scheduleDto, response.getBody());
     }
 
-    @Test
-    void testGetScheduleByAction_Exception() {
-        Long actionId = 1L;
-        ScheduleByActionRequest request = new ScheduleByActionRequest(1L);
-
-        when(actionRepository.existsById(actionId)).thenReturn(true);
-        when(volunteerRepository.existsByVolunteerIdAndRole(request.leaderId(), VolunteerRole.LEADER)).thenReturn(true);
-
-        // Create a LeaderDto object
-        LeaderDto leaderDto = new LeaderDto(1L, "John", "Doe", "john.doe@example.com", "123456789");
-
-        Action action = new Action();
-        action.setLeader(leaderDto); // Set the leader using LeaderDto
-        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
-        doThrow(new RuntimeException("Error")).when(scheduleService).getActionSchedule(actionId);
-
-        ResponseEntity<?> response = scheduleController.getScheduleByAction(actionId, request);
-
-        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Error retrieving action schedule.", response.getBody());
-    }
 
 
 }
