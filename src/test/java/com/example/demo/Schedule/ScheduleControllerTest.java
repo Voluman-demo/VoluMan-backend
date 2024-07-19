@@ -352,13 +352,58 @@ public class ScheduleControllerTest {
         Action action = new Action();
         action.setLeader(leaderDto);
         when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
-        when(scheduleService.getActionSchedule(actionId)).thenReturn(scheduleDto);
+        when(scheduleService.getScheduleByAction(actionId)).thenReturn(scheduleDto);
 
         ResponseEntity<?> response = scheduleController.getScheduleByAction(actionId, request);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
+    @Test
+    void testModifySchedule_VolunteerNotFound() {
+        int year = 2024;
+        int week = 27;
+        Long volunteerId = 1L;
+        ModifyScheduleRequest request = new ModifyScheduleRequest(1L, Collections.emptyList());
 
+        when(volunteerRepository.existsById(volunteerId)).thenReturn(false);
 
+        ResponseEntity<?> response = scheduleController.modifySchedule(year, week, volunteerId, request);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    void testModifySchedule_Success() throws Exception {
+        int year = 2024;
+        int week = 27;
+        Long volunteerId = 1L;
+        ModifyScheduleRequest request = new ModifyScheduleRequest(1L, Collections.emptyList());
+
+        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
+        doNothing().when(scheduleService).modifySchedule(volunteerId, year, week, request);
+
+        ResponseEntity<?> response = scheduleController.modifySchedule(year, week, volunteerId, request);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    void testModifySchedule_Exception() throws Exception {
+        int year = 2024;
+        int week = 27;
+        Long volunteerId = 1L;
+        ModifyScheduleRequest request = new ModifyScheduleRequest(1L, Collections.emptyList());
+
+        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
+        doThrow(new RuntimeException("Error")).when(scheduleService).modifySchedule(volunteerId, year, week, request);
+
+        ResponseEntity<?> response = scheduleController.modifySchedule(year, week, volunteerId, request);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Error", response.getBody());
+    }
 }
+
+
+

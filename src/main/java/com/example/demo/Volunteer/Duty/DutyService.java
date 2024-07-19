@@ -36,7 +36,6 @@ public class DutyService {
 
         if(dutyIntervalExisted.isPresent()){
             DutyInterval dutyIntervalPresent =  dutyIntervalExisted.get();
-//            dutyIntervalPresent.setAssign(dutyInterval.getAssign());
             dutyIntervalRepository.save(dutyIntervalPresent);
             return;
         }

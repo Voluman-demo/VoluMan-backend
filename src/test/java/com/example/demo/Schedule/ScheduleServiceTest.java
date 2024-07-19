@@ -3,21 +3,21 @@ package com.example.demo.Schedule;
 import com.example.demo.Interval.AvailabilityInterval;
 import com.example.demo.Interval.DemandInterval;
 import com.example.demo.Interval.DutyInterval;
+import com.example.demo.Interval.DutyIntervalRepository;
+import com.example.demo.Preferences.Preferences;
 import com.example.demo.Schedule.Dto.ActionNeedRequest;
 import com.example.demo.Schedule.Dto.VolunteerAvailRequest;
+import com.example.demo.Volunteer.*;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Availability.AvailabilityService;
 import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Duty.DutyRepository;
 import com.example.demo.Volunteer.Duty.DutyService;
-import com.example.demo.Volunteer.Volunteer;
-import com.example.demo.Volunteer.VolunteerRepository;
-import com.example.demo.Volunteer.VolunteerRole;
-import com.example.demo.Volunteer.VolunteerService;
 import com.example.demo.action.Action;
 import com.example.demo.action.ActionRepository;
 import com.example.demo.action.ActionService;
 import com.example.demo.action.demand.Demand;
+import com.example.demo.action.demand.DemandRepository;
 import com.example.demo.action.demand.DemandService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,6 +35,8 @@ import static org.mockito.Mockito.*;
 
 
 public class ScheduleServiceTest {
+    @Mock
+    private DutyIntervalRepository dutyIntervalRepository;
 
     @Mock
     private ActionService actionService;
@@ -57,15 +59,21 @@ public class ScheduleServiceTest {
     @Mock
     private DutyService dutyService;
 
+    @Mock
+    private DemandRepository demandRepository;
+
     @InjectMocks
     private ScheduleService scheduleService;
 
 
     @Mock
     private DutyRepository dutyRepository;
+
+
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+
     }
 
     @Test
@@ -191,11 +199,17 @@ public class ScheduleServiceTest {
         Volunteer volunteer = new Volunteer();
         volunteer.setVolunteerId(1L);
         volunteer.setLimitOfWeeklyHours(10);
+        volunteer.setDuties(new HashSet<>());
+
+
 
         Availability availability = new Availability();
+        availability.setAvailabilityId(1L);
         availability.setVolunteer(volunteer);
         availability.setDate(date);
+
         AvailabilityInterval interval = new AvailabilityInterval();
+        interval.setIntervalId(1L);
         interval.setStartTime(LocalTime.of(9, 0));
         interval.setEndTime(LocalTime.of(11, 0));
         availability.setSlots(Set.of(interval));
@@ -205,19 +219,34 @@ public class ScheduleServiceTest {
         // Mocking demands
         Action action = new Action();
         action.setActionId(1L);
+        action.setStartDay(date.minusDays(3));
+        action.setEndDay(date.plusDays(3));
+//        action.setLeader(new LeaderD);
+
+        Preferences preferences = new Preferences();
+        preferences.setPreferenceId(1L);
+        preferences.getT().add(action);
+
+        volunteer.setPreferences(preferences);
 
         Demand demand = new Demand();
         demand.setAction(action);
         demand.setDate(date);
+
         DemandInterval demandInterval = new DemandInterval();
         demandInterval.setStartTime(LocalTime.of(9, 0));
         demandInterval.setEndTime(LocalTime.of(11, 0));
         demandInterval.setNeedMax(1L);
+        demandInterval.setCurrentVolunteersNumber(0L);
+        demandInterval.setDemand(demand);
         demand.setDemandIntervals(Set.of(demandInterval));
 
         when(demandService.getDemandsForDay(date)).thenReturn(List.of(demand));
         when(actionRepository.findById(any())).thenReturn(Optional.of(action));
         when(volunteerRepository.findAll()).thenReturn(List.of(volunteer));
+
+        doNothing().when(dutyService).addDutyInterval(any(DutyInterval.class), any(Duty.class));
+        doNothing().when(dutyService).updateDutyInterval(any(DutyInterval.class));
 
         // Call the method
         scheduleService.generateSchedule(date);
@@ -225,6 +254,19 @@ public class ScheduleServiceTest {
         // Verify the interactions
         verify(demandService, times(1)).getDemandsForDay(date);
         verify(availabilityService, times(1)).getAvailabilitiesForDay(date);
-        verify(dutyService, times(1)).addDutyInterval(any(DutyInterval.class), any(Duty.class)); //TODO FIX IT
+        // Verify that save was called on the dutyIntervalRepository with any instance of DutyInterval
+        //  verify(dutyIntervalRepository, times(1)).save(new DutyInterval());
+
+        verify(dutyService, times(1)).addDutyInterval(any(DutyInterval.class), any(Duty.class));
+
+
+            // Assert that exactly one of these methods was called, not both
+        verify(dutyService, atMost(1)).addDutyInterval(any(DutyInterval.class), any(Duty.class));
+        verify(dutyService, atMost(1)).updateDutyInterval(any(DutyInterval.class));
+
+        // Additional verifications for other methods if needed
+        verify(volunteerRepository, times(2)).save(volunteer);
     }
-}
+
+    }
+

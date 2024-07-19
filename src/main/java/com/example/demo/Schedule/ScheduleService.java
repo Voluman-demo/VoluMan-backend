@@ -2,10 +2,7 @@ package com.example.demo.Schedule;
 
 import com.example.demo.Interval.*;
 import com.example.demo.Preferences.Preferences;
-import com.example.demo.Schedule.Dto.ActionNeedRequest;
-import com.example.demo.Schedule.Dto.ActionPrefRequest;
-import com.example.demo.Schedule.Dto.ModifyScheduleRequest;
-import com.example.demo.Schedule.Dto.VolunteerAvailRequest;
+import com.example.demo.Schedule.Dto.*;
 import com.example.demo.Volunteer.*;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Availability.AvailabilityService;
@@ -15,6 +12,7 @@ import com.example.demo.Volunteer.Duty.DutyService;
 import com.example.demo.action.Action;
 import com.example.demo.action.ActionRepository;
 import com.example.demo.action.ActionService;
+import com.example.demo.action.Dto.ActionDto;
 import com.example.demo.action.Dto.ActionScheduleDto;
 import com.example.demo.action.demand.Demand;
 import com.example.demo.action.demand.DemandDto;
@@ -241,28 +239,9 @@ public class ScheduleService {
 
                             // Zaktualizuj liczbę wolontariuszy w interwale zapotrzebowania
                             demandInterval.setCurrentVolunteersNumber(demandInterval.getCurrentVolunteersNumber() + 1);
-                        }
+                    }
                     }
                 }
-                /*if (matchingAvailability.isPresent()) {
-                    // Dopóki aktualna liczba przypisanych wolontariuszy jest mniejsza od minimalnego zapotrzebowania
-                    while (demandInterval.getCurrentVolunteersNumber() < demandInterval.getNeedMax()) {
-                        // Wybierz pierwszego wolontariusza z listy
-                        Volunteer volunteer = matchingAvailability.get().getVolunteer();
-
-                        // Sprawdź aktualne i maksymalne tygodniowe obciążenie wolontariusza
-                        if (isWithinWeeklyLimit(volunteer)) {
-                            // Utwórz nowy interwał dyżuru dla danego wolontariusza
-                            createDutyInterval(volunteer, demandInterval);
-
-                            // Aktualizuj obciążenie wolontariusza
-                            updateWeeklyLoad(volunteer);
-
-                            // Zaktualizuj liczbę wolontariuszy w interwale zapotrzebowania
-                            demandInterval.setCurrentVolunteersNumber(demandInterval.getCurrentVolunteersNumber() + 1);
-                        }
-                    }
-                }*/
             }
         }
 
@@ -313,11 +292,6 @@ public class ScheduleService {
         return currentWeeklyLoad <= maxWeeklyLimit;
     }
 
-    private boolean isWithinCurrentWeek(LocalDate dutyDate) {
-        LocalDate startOfWeek = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
-        LocalDate endOfWeek = startOfWeek.plusDays(6);
-        return !dutyDate.isBefore(startOfWeek) && !dutyDate.isAfter(endOfWeek);
-    }
 
     private void createDutyInterval(Volunteer volunteer, DemandInterval demandInterval) {
         Duty duty = volunteer.getDuties().stream()
@@ -331,6 +305,7 @@ public class ScheduleService {
                     return newDuty;
                 });
 
+
         // Sprawdź, czy istnieje już DutyInterval dla danego interwału
         Optional<DutyInterval> existingInterval = duty.getDutyIntervals().stream()
                 .filter(interval -> interval.getStartTime().equals(demandInterval.getStartTime()) &&
@@ -340,7 +315,6 @@ public class ScheduleService {
         if (existingInterval.isPresent()) {
             // Jeśli istnieje, inkrementuj pole assign
             DutyInterval interval = existingInterval.get();
-//            interval.setAssign(interval.getAssign() + 1);
             dutyService.updateDutyInterval(interval); // Aktualizuj interwał w bazie danych
         } else {
             // Jeśli nie istnieje, utwórz nowy DutyInterval
@@ -350,7 +324,6 @@ public class ScheduleService {
             newInterval.setStatus(DutyIntervalStatus.ASSIGNED);
 
             newInterval.setDuty(duty);
-//            duty.getDutyIntervals().add(newInterval);
             dutyService.addDutyInterval(newInterval, duty); // Zapisz nowy interwał do bazy danych
         }
     }
@@ -381,7 +354,7 @@ public class ScheduleService {
         // Implementacja zależna od specyfiki Twojej aplikacji
     }
 
-    public ActionScheduleDto getActionSchedule(Long actionId) {
+    public ActionScheduleDto getScheduleByAction(Long actionId) {
         Action action = actionRepository.findById(actionId)
                 .orElseThrow(() -> new IllegalArgumentException("Action not found"));
 
@@ -456,7 +429,8 @@ public class ScheduleService {
             // Szukanie odpowiadającego interwału w istniejących obowiązkach
             for (Duty duty : duties) {
                 for (DutyInterval interval : duty.getDutyIntervals()) {
-                    if (interval.getIntervalId().equals(requestInterval.getIntervalId())) {
+                    if (interval.getIntervalId().equals(requestInterval.getIntervalId())
+                            && interval.getStatus() == DutyIntervalStatus.ASSIGNED) {
                         interval.setStatus(DutyIntervalStatus.CANCELED);
                         totalCanceledHours += Duration.between(interval.getStartTime(), interval.getEndTime()).toMinutes() / 60.0;
 
@@ -466,7 +440,10 @@ public class ScheduleService {
                             while (iterator.hasNext()) {
                                 DemandInterval demandInterval = iterator.next();
                                 if (demandInterval.getStartTime().equals(interval.getStartTime())
-                                        && demandInterval.getEndTime().equals(interval.getEndTime())) {
+                                        && demandInterval.getEndTime().equals(interval.getEndTime())
+                                        && interval.getDuty().getVolunteer().getActions().stream()
+                                            .anyMatch(action -> action.equals(demandInterval.getDemand().getAction()))
+                                ) {
                                     demandInterval.setCurrentVolunteersNumber(demandInterval.getCurrentVolunteersNumber() - 1);
                                     iterator.remove(); // Usunięcie z aktualnej kolekcji
                                 }
@@ -486,5 +463,56 @@ public class ScheduleService {
 
         // Zapisanie zmian w wolontariuszu
         volunteerRepository.save(volunteer);
+    }
+
+    public VolunteerScheduleDto getScheduleByVolunteer(Long volunteerId, int year, int week) {
+        Volunteer volunteer = volunteerRepository.findById(volunteerId)
+                .orElseThrow(() -> new IllegalArgumentException("Volunteer not found"));
+
+        LocalDate startDate = getStartDateOfWeek(year, week);
+        LocalDate endDate = startDate.plusDays(6);
+
+        List<Duty> duties = dutyRepository.findByVolunteer_VolunteerIdAndDateBetween(volunteerId, startDate, endDate);
+        List<Demand> demands = demandRepository.findByDateBetween(startDate, endDate);
+
+        List<DutyIntervalDto> dutyIntervals = mapDutyIntervalsToDto(duties, demands);
+
+        return new VolunteerScheduleDto(
+                volunteer.getVolunteerId(),
+                volunteer.getVolunteerDetails().getName(),
+                volunteer.getVolunteerDetails().getLastname(),
+                dutyIntervals
+        );
+    }
+
+    private LocalDate getStartDateOfWeek(int year, int week) {
+        return LocalDate.ofYearDay(year, 1).with(WeekFields.of(Locale.getDefault()).weekOfYear(), week);
+    }
+
+
+    private List<DutyIntervalDto> mapDutyIntervalsToDto(List<Duty> duties, List<Demand> demands) {
+        return duties.stream()
+                .flatMap(duty -> duty.getDutyIntervals().stream())
+                .map(dutyInterval -> {
+                    DemandInterval correspondingDemandInterval = findCorrespondingDemandInterval(demands, dutyInterval);
+                    Action action = correspondingDemandInterval.getDemand().getAction();
+
+                    return new DutyIntervalDto(
+                            dutyInterval.getIntervalId(),
+                            dutyInterval.getStartTime(),
+                            dutyInterval.getEndTime(),
+                            new ActionDto(action.getActionId(), action.getHeading())
+                    );
+                })
+                .collect(Collectors.toList());
+    }
+
+    private DemandInterval findCorrespondingDemandInterval(List<Demand> demands, DutyInterval dutyInterval) {
+        return demands.stream()
+                .flatMap(demand -> demand.getDemandIntervals().stream())
+                .filter(demandInterval ->
+                        demandInterval.getStartTime().equals(dutyInterval.getStartTime()) &&
+                                demandInterval.getEndTime().equals(dutyInterval.getEndTime()))
+                .findFirst().orElse(null);
     }
 }

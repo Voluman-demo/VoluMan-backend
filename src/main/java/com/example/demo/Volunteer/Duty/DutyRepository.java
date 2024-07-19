@@ -12,4 +12,6 @@ public interface DutyRepository extends JpaRepository<Duty, Long> {
     List<Duty> findAllByDate(LocalDate date);
 
     List<Duty> findAllByVolunteerAndDateBetween(Volunteer volunteer, LocalDate startOfWeek, LocalDate endOfWeek);
+
+    List<Duty> findByVolunteer_VolunteerIdAndDateBetween(Long volunteerId, LocalDate startDate, LocalDate endDate);
 }

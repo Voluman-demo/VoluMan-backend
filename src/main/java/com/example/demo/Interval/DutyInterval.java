@@ -28,19 +28,10 @@ public class DutyInterval {
     @Column(name = "status", nullable = false)
     private DutyIntervalStatus status;
 
-//    @Column(name = "assign",nullable = false,length = 4)
-//    private Long assign;
-
 
     @ManyToOne
     @JoinColumn(name = "duty_id")
     @JsonBackReference
     private Duty duty;
 
-//    @PrePersist
-//    public void prePersist() {
-//        if(this.assign == null){
-//            this.assign = 0L;
-//        }
-//    }
 }

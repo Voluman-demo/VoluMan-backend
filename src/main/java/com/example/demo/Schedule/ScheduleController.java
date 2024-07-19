@@ -125,7 +125,7 @@ public class ScheduleController {
             @PathVariable("week") int week,
             @PathVariable("volunteerId") Long volunteerId,
             @RequestBody ModifyScheduleRequest modifyScheduleRequest
-            ){
+    ){
         try {
             if(!volunteerRepository.existsById(volunteerId)) {
                 return ResponseEntity.notFound().build();
@@ -137,7 +137,6 @@ public class ScheduleController {
         }
 
     }
-
 
     @PostMapping("/actions/{actionId}")
     public ResponseEntity<?> getScheduleByAction(
@@ -155,13 +154,31 @@ public class ScheduleController {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
             }
 
-            ActionScheduleDto scheduleDto = scheduleService.getActionSchedule(actionId);
+            ActionScheduleDto scheduleDto = scheduleService.getScheduleByAction(actionId);
             return ResponseEntity.ok(scheduleDto);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
 
+
+    @GetMapping("/{year}/{week}/volunteers/{volunteerId}")
+    public ResponseEntity<?> getScheduleByVolunteer(
+            @PathVariable int year,
+            @PathVariable int week,
+            @PathVariable("volunteerId") Long volunteerId
+    ) {
+        try {
+            if (!volunteerRepository.existsById(volunteerId)) {
+                return ResponseEntity.notFound().build();
+            }
+
+            VolunteerScheduleDto scheduleDto = scheduleService.getScheduleByVolunteer(volunteerId, year, week);
+            return ResponseEntity.ok(scheduleDto);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
 }
 
 

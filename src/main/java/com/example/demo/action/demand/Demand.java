@@ -26,6 +26,7 @@ public class Demand {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "demand_id")
     private Long demandId;
+
     @Column(name = "date",nullable = false)
     private LocalDate date;
 
@@ -37,7 +38,6 @@ public class Demand {
 
 
     @OneToMany(mappedBy = "demand", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // Zarządzany odnośnik dla serializacji
     private Set<DemandInterval> demandIntervals = new HashSet<>();
 
 }
