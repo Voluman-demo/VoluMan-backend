@@ -502,6 +502,7 @@ public class ScheduleService {
 
                         return new DutyIntervalDto(
                                 dutyInterval.getIntervalId(),
+                                dutyInterval.getDuty().getDate(),
                                 dutyInterval.getStartTime(),
                                 dutyInterval.getEndTime(),
                                 new ActionDto(action.getActionId(), action.getHeading())
