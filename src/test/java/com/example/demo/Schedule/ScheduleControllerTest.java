@@ -1,11 +1,13 @@
 package com.example.demo.Schedule;
 
+import com.example.demo.Interval.DutyIntervalDto;
 import com.example.demo.Schedule.Dto.*;
 import com.example.demo.Volunteer.LeaderDto;
 import com.example.demo.Volunteer.VolunteerRepository;
 import com.example.demo.Volunteer.VolunteerRole;
 import com.example.demo.action.Action;
 import com.example.demo.action.ActionRepository;
+import com.example.demo.action.Dto.ActionDto;
 import com.example.demo.action.Dto.ActionScheduleDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -435,6 +438,72 @@ public class ScheduleControllerTest {
         ResponseEntity<?> response = scheduleController.modifySchedule(year, week, volunteerId, request);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Error", response.getBody());
+    }
+
+    @Test
+    void testGetScheduleByVolunteer_Success() {
+        int year = 2023;
+        int week = 10;
+        Long volunteerId = 1L;
+
+        VolunteerScheduleDto scheduleDto = new VolunteerScheduleDto(
+                volunteerId,
+                "John",
+                "Doe",
+                Collections.singletonList(new DutyIntervalDto(
+                        1L,
+                        LocalDate.now(),
+                        LocalTime.of(9, 0),
+                        LocalTime.of(11, 0),
+                        new ActionDto(1L, "Sample Action")
+                ))
+        );
+
+        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
+        when(scheduleService.getScheduleByVolunteer(volunteerId, year, week)).thenReturn(scheduleDto);
+
+        ResponseEntity<?> response = scheduleController.getScheduleByVolunteer(year, week, volunteerId);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        VolunteerScheduleDto responseBody = (VolunteerScheduleDto) response.getBody();
+
+        assertEquals(volunteerId, responseBody.volunteerId());
+        assertEquals("John", responseBody.name());
+        assertEquals("Doe", responseBody.lastname());
+        assertEquals(1, responseBody.dutyIntervals().size());
+        assertEquals(1L, responseBody.dutyIntervals().get(0).intervalId());
+        assertEquals(LocalTime.of(9, 0), responseBody.dutyIntervals().get(0).startTime());
+        assertEquals(LocalTime.of(11, 0), responseBody.dutyIntervals().get(0).endTime());
+        assertEquals(1L, responseBody.dutyIntervals().get(0).action().actionId());
+        assertEquals("Sample Action", responseBody.dutyIntervals().get(0).action().heading());
+    }
+
+    @Test
+    void testGetScheduleByVolunteer_NotFound() {
+        int year = 2023;
+        int week = 10;
+        Long volunteerId = 1L;
+
+        when(volunteerRepository.existsById(volunteerId)).thenReturn(false);
+
+        ResponseEntity<?> response = scheduleController.getScheduleByVolunteer(year, week, volunteerId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    void testGetScheduleByVolunteer_Exception() {
+        int year = 2023;
+        int week = 10;
+        Long volunteerId = 1L;
+
+        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
+        when(scheduleService.getScheduleByVolunteer(volunteerId, year, week)).thenThrow(new RuntimeException("Error"));
+
+        ResponseEntity<?> response = scheduleController.getScheduleByVolunteer(year, week, volunteerId);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals("Error", response.getBody());
     }
 }
