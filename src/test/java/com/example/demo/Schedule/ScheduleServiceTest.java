@@ -15,7 +15,9 @@ import com.example.demo.Volunteer.Duty.DutyService;
 import com.example.demo.action.Action;
 import com.example.demo.action.ActionRepository;
 import com.example.demo.action.ActionService;
+import com.example.demo.action.Dto.ActionScheduleDto;
 import com.example.demo.action.demand.Demand;
+import com.example.demo.action.demand.DemandDto;
 import com.example.demo.action.demand.DemandRepository;
 import com.example.demo.action.demand.DemandService;
 import org.junit.jupiter.api.BeforeEach;
@@ -413,6 +415,91 @@ public class ScheduleServiceTest {
         verify(dutyRepository, times(1)).findByVolunteer_VolunteerIdAndDateBetween(volunteerId, startDate, endDate);
         verify(demandRepository, times(1)).findByDateBetween(startDate, endDate);
     }
+
+    @Test
+    void testGetScheduleByAction() {
+        // Create mock data
+        Long actionId = 1L;
+
+        Action action = new Action();
+        action.setActionId(actionId);
+        action.setHeading("Test Action");
+        action.setDescription("Test Description");
+
+        Demand demand = new Demand();
+        demand.setDemandId(1L);
+        demand.setDate(LocalDate.of(2024, 7, 20));
+        DemandInterval demandInterval = new DemandInterval();
+        demandInterval.setIntervalId(1L);
+        demandInterval.setStartTime(LocalTime.of(9, 0));
+        demandInterval.setEndTime(LocalTime.of(12, 0));
+        demand.setDemandIntervals(Set.of(demandInterval));
+
+        action.setDemands(List.of(demand));
+
+        Volunteer volunteer = new Volunteer();
+        volunteer.setVolunteerId(1L);
+        VolunteerDetails details = new VolunteerDetails();
+        details.setName("John");
+        details.setLastname("Doe");
+        volunteer.setVolunteerDetails(details);
+
+        Duty duty = new Duty();
+        duty.setVolunteer(volunteer);
+        duty.setDate(LocalDate.of(2024, 7, 20));
+        DutyInterval dutyInterval = new DutyInterval();
+        dutyInterval.setIntervalId(1L);
+        dutyInterval.setStartTime(LocalTime.of(9, 0));
+        dutyInterval.setEndTime(LocalTime.of(12, 0));
+        dutyInterval.setDuty(duty);
+        duty.setDutyIntervals(Set.of(dutyInterval));
+
+        // Mock the behavior of repositories
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
+        when(dutyRepository.findAll()).thenReturn(List.of(duty));
+
+        // Call the method to be tested
+        ActionScheduleDto result = scheduleService.getScheduleByAction(actionId);
+
+        // Verify the result
+        assertNotNull(result);
+        assertEquals(actionId, result.actionId());
+        assertEquals("Test Action", result.heading());
+        assertEquals("Test Description", result.description());
+
+        List<DemandDto> demandDtos = result.demands();
+        assertNotNull(demandDtos);
+        assertEquals(1, demandDtos.size());
+
+        DemandDto demandDto = demandDtos.get(0);
+        assertEquals(1L, demandDto.demandId());
+        assertEquals(LocalDate.of(2024, 7, 20), demandDto.date());
+
+        List<DemandIntervalDto> intervalDtos = demandDto.demandIntervals();
+        assertNotNull(intervalDtos);
+        assertEquals(1, intervalDtos.size());
+
+        DemandIntervalDto intervalDto = intervalDtos.get(0);
+        assertEquals(1L, intervalDto.intervalId());
+        assertEquals(LocalTime.of(9, 0), intervalDto.startTime());
+        assertEquals(LocalTime.of(12, 0), intervalDto.endTime());
+
+        List<VolunteerDto> assignedVolunteers = intervalDto.assignedVolunteers();
+        assertNotNull(assignedVolunteers);
+        assertEquals(1, assignedVolunteers.size());
+
+        VolunteerDto volunteerDto = assignedVolunteers.get(0);
+        assertEquals(1L, volunteerDto.volunteerId());
+        assertEquals("John", volunteerDto.firstname());
+        assertEquals("Doe", volunteerDto.lastname());
+
+        // Verify the interactions with the repositories
+        verify(actionRepository, times(1)).findById(actionId);
+        verify(dutyRepository, times(1)).findAll();
+    }
+
+
+
 
 
 
