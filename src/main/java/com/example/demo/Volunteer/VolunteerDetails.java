@@ -15,15 +15,37 @@ public class VolunteerDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long volunteerId;
 
+
+    @Column(name = "first_name", nullable = false, length = 50)
     private String name;
+
+    @Column(name = "last_name", nullable = false, length = 50)
     private String lastname;
+
+    @Column(name = "email", nullable = false, length = 50)
     private String email;
+
+    @Column(name = "phone", nullable = false, length = 19)
     private String phone;
+
+    @Column(name = "date_of_birth", nullable = false)
     private LocalDate dateOfBirth;
-    private String city;
+
+    @Column(name = "street", nullable = false, length = 50)
     private String street;
+
+    @Column(name = "city", nullable = false, length = 50)
+    private String city;
+
+    @Column(name = "house_number", nullable = false, length = 10)
     private String houseNumber;
+
+    @Column(name = "apartment_number", length = 50)
     private String apartmentNumber;
+
+    @Column(name = "postal_number", nullable = false, length = 20)
     private String postalNumber;
+
+    @Column(name = "sex", length = 1)
     private String sex;
 }

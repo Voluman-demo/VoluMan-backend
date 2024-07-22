@@ -1,7 +1,7 @@
 package com.example.demo.Volunteer.Availability;
 
 
-import com.example.demo.Interval.AvailabilityInterval;
+import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
 import com.example.demo.Volunteer.Volunteer;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;

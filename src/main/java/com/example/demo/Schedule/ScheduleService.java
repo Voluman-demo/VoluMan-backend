@@ -1,23 +1,30 @@
 package com.example.demo.Schedule;
 
-import com.example.demo.Interval.*;
-import com.example.demo.Preferences.Preferences;
-import com.example.demo.Schedule.Dto.*;
+import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
+import com.example.demo.Action.Demand.DemandInterval.DemandIntervalDto;
+import com.example.demo.Volunteer.Preferences.Preferences;
+import com.example.demo.Schedule.ScheduleDto.*;
 import com.example.demo.Volunteer.*;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Availability.AvailabilityService;
+import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
 import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Duty.DutyRepository;
 import com.example.demo.Volunteer.Duty.DutyService;
-import com.example.demo.action.Action;
-import com.example.demo.action.ActionRepository;
-import com.example.demo.action.ActionService;
-import com.example.demo.action.Dto.ActionDto;
-import com.example.demo.action.Dto.ActionScheduleDto;
-import com.example.demo.action.demand.Demand;
-import com.example.demo.action.demand.DemandDto;
-import com.example.demo.action.demand.DemandRepository;
-import com.example.demo.action.demand.DemandService;
+import com.example.demo.Action.Action;
+import com.example.demo.Action.ActionRepository;
+import com.example.demo.Action.ActionService;
+import com.example.demo.Action.ActionDto.ActionDto;
+import com.example.demo.Action.ActionDto.ActionScheduleDto;
+import com.example.demo.Action.Demand.Demand;
+import com.example.demo.Action.Demand.DemandDto;
+import com.example.demo.Action.Demand.DemandRepository;
+import com.example.demo.Action.Demand.DemandService;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyInterval;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalDto;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalStatus;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerDto;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -367,7 +374,8 @@ public class ScheduleService {
                                         .flatMap(duty -> duty.getDutyIntervals().stream())
                                         .filter(dutyInterval ->
                                                 dutyInterval.getStartTime().equals(demandInterval.getStartTime()) &&
-                                                        dutyInterval.getEndTime().equals(demandInterval.getEndTime())
+                                                        dutyInterval.getEndTime().equals(demandInterval.getEndTime()) &&
+                                                        dutyInterval.getDuty().getDate().equals(demandInterval.getDemand().getDate())
                                         )
                                         .map(dutyInterval -> {
                                             Volunteer volunteer = dutyInterval.getDuty().getVolunteer();
@@ -410,6 +418,9 @@ public class ScheduleService {
         // Pobranie wolontariusza
         Volunteer volunteer = volunteerRepository.findById(volunteerId)
                 .orElseThrow(() -> new IllegalArgumentException("Volunteer not found"));
+
+        year = validYear(year);
+        week = validWeek(week);
 
         // Określenie początku i końca tygodnia
         LocalDate startOfWeek = LocalDate.ofYearDay(year, (week - 1) * 7 + 1);
@@ -469,6 +480,9 @@ public class ScheduleService {
         Volunteer volunteer = volunteerRepository.findById(volunteerId)
                 .orElseThrow(() -> new IllegalArgumentException("Volunteer not found"));
 
+        year = validYear(year);
+        week = validWeek(week);
+
         LocalDate startDate = getStartDateOfWeek(year, week);
         LocalDate endDate = startDate.plusDays(6);
 
@@ -483,10 +497,6 @@ public class ScheduleService {
                 volunteer.getVolunteerDetails().getLastname(),
                 dutyIntervals
         );
-    }
-
-    private LocalDate getStartDateOfWeek(int year, int week) {
-        return LocalDate.ofYearDay(year, 1).with(WeekFields.of(Locale.getDefault()).weekOfYear(), week);
     }
 
 
@@ -516,8 +526,28 @@ public class ScheduleService {
         return demands.stream()
                 .flatMap(demand -> demand.getDemandIntervals().stream())
                 .filter(demandInterval ->
-                        demandInterval.getStartTime().equals(dutyInterval.getStartTime())
-                                && demandInterval.getEndTime().equals(dutyInterval.getEndTime()))
+                            demandInterval.getStartTime().equals(dutyInterval.getStartTime()) &&
+                            demandInterval.getEndTime().equals(dutyInterval.getEndTime()) &&
+                            demandInterval.getDemand().getDate().equals(dutyInterval.getDuty().getDate())
+                )
                 .collect(Collectors.toList());
+    }
+
+    private int validWeek(int week) {
+        if(week == 0) {
+            week = LocalDate.now().get(WeekFields.ISO.weekOfWeekBasedYear());
+        }
+        return week;
+    }
+
+    private int validYear(int year) {
+        if(year == 0) {
+            year = LocalDate.now().getYear();
+        }
+        return year;
+    }
+
+    private LocalDate getStartDateOfWeek(int year, int week) {
+        return LocalDate.ofYearDay(year, 1).with(WeekFields.of(Locale.getDefault()).weekOfYear(), week);
     }
 }

@@ -1,25 +1,33 @@
 package com.example.demo.Schedule;
 
-import com.example.demo.Interval.*;
-import com.example.demo.Preferences.Preferences;
-import com.example.demo.Schedule.Dto.ActionNeedRequest;
-import com.example.demo.Schedule.Dto.ModifyScheduleRequest;
-import com.example.demo.Schedule.Dto.VolunteerAvailRequest;
-import com.example.demo.Schedule.Dto.VolunteerScheduleDto;
-import com.example.demo.Volunteer.*;
+import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
+import com.example.demo.Action.Demand.DemandInterval.DemandIntervalDto;
+import com.example.demo.Volunteer.Preferences.Preferences;
+import com.example.demo.Schedule.ScheduleDto.ActionNeedRequest;
+import com.example.demo.Schedule.ScheduleDto.ModifyScheduleRequest;
+import com.example.demo.Schedule.ScheduleDto.VolunteerAvailRequest;
+import com.example.demo.Schedule.ScheduleDto.VolunteerScheduleDto;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Availability.AvailabilityService;
+import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
 import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Duty.DutyRepository;
 import com.example.demo.Volunteer.Duty.DutyService;
-import com.example.demo.action.Action;
-import com.example.demo.action.ActionRepository;
-import com.example.demo.action.ActionService;
-import com.example.demo.action.Dto.ActionScheduleDto;
-import com.example.demo.action.demand.Demand;
-import com.example.demo.action.demand.DemandDto;
-import com.example.demo.action.demand.DemandRepository;
-import com.example.demo.action.demand.DemandService;
+import com.example.demo.Volunteer.*;
+import com.example.demo.Action.Action;
+import com.example.demo.Action.ActionRepository;
+import com.example.demo.Action.ActionService;
+import com.example.demo.Action.ActionDto.ActionScheduleDto;
+import com.example.demo.Action.Demand.Demand;
+import com.example.demo.Action.Demand.DemandDto;
+import com.example.demo.Action.Demand.DemandRepository;
+import com.example.demo.Action.Demand.DemandService;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyInterval;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalDto;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalRepository;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalStatus;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerDto;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -27,7 +35,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.WeekFields;
 import java.util.*;
@@ -335,8 +342,105 @@ public class ScheduleServiceTest {
         verify(dutyRepository, times(1)).saveAll(anyList());
         verify(volunteerRepository, times(1)).save(any(Volunteer.class));
     }
+
+
     @Test
     public void testGetScheduleByVolunteer_Success() {
+        // Setup test data
+        Long volunteerId = 1L;
+        int year = 2023;
+        int week = 30;
+
+        Volunteer volunteer = new Volunteer();
+        volunteer.setVolunteerId(volunteerId);
+
+        VolunteerDetails details = new VolunteerDetails();
+        details.setName("John");
+        details.setLastname("Doe");
+        volunteer.setVolunteerDetails(details);
+
+        LocalDate startDate = LocalDate.ofYearDay(year, 1).with(WeekFields.of(Locale.getDefault()).weekOfYear(), week);
+        LocalDate endDate = startDate.plusDays(6);
+
+        // Create multiple duties and demands for different days
+        List<Duty> duties = new ArrayList<>();
+        List<Demand> demands = new ArrayList<>();
+
+        for (int i = 0; i < 3; i++) {
+            LocalDate dutyDate = startDate.plusDays(i);
+            LocalDate demandDate = startDate.plusDays(i);
+
+            Duty duty = new Duty();
+            duty.setVolunteer(volunteer);
+            duty.setDate(dutyDate);
+            duty.setDutyIntervals(new HashSet<>());
+
+            DutyInterval dutyInterval = new DutyInterval();
+            dutyInterval.setIntervalId(1L + i);
+            dutyInterval.setStartTime(LocalTime.of(9, 0));
+            dutyInterval.setEndTime(LocalTime.of(12, 0));
+            dutyInterval.setDuty(duty);
+
+            duty.getDutyIntervals().add(dutyInterval);
+            duties.add(duty);
+
+            Action action = new Action();
+            action.setActionId(1L + i);
+            action.setHeading("Help Elderly " + i);
+
+            Demand demand = new Demand();
+            demand.setAction(action);
+            demand.setDate(demandDate);
+            demand.setDemandIntervals(new HashSet<>());
+
+            DemandInterval demandInterval = new DemandInterval();
+            demandInterval.setStartTime(LocalTime.of(9, 0));
+            demandInterval.setEndTime(LocalTime.of(12, 0));
+            demandInterval.setDemand(demand);
+
+            demand.getDemandIntervals().add(demandInterval);
+            demands.add(demand);
+        }
+
+        // Mock repository responses
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
+        when(dutyRepository.findByVolunteer_VolunteerIdAndDateBetween(volunteerId, startDate, endDate))
+                .thenReturn(duties);
+        when(demandRepository.findByDateBetween(startDate, endDate))
+                .thenReturn(demands);
+
+        // Execute the service method
+        VolunteerScheduleDto scheduleDto = scheduleService.getScheduleByVolunteer(volunteerId, year, week);
+
+        // Verify the results
+        assertNotNull(scheduleDto);
+        assertEquals(volunteerId, scheduleDto.volunteerId());
+        assertEquals("John", scheduleDto.name());
+        assertEquals("Doe", scheduleDto.lastname());
+
+        List<DutyIntervalDto> dutyIntervals = scheduleDto.dutyIntervals();
+        assertNotNull(dutyIntervals);
+        assertEquals(3, dutyIntervals.stream().map(DutyIntervalDto::intervalId).distinct().count());
+
+        for (Duty duty : duties) {
+            for (DutyInterval dutyInterval : duty.getDutyIntervals()) {
+                boolean matchFound = dutyIntervals.stream().anyMatch(dutyIntervalDto ->
+                        dutyIntervalDto.intervalId().equals(dutyInterval.getIntervalId()) &&
+                                dutyIntervalDto.startTime().equals(dutyInterval.getStartTime()) &&
+                                dutyIntervalDto.endTime().equals(dutyInterval.getEndTime())
+                );
+                assertTrue(matchFound, "Matching DutyIntervalDto not found for DutyInterval: " + dutyInterval);
+            }
+        }
+
+        // Verify repository calls
+        verify(volunteerRepository, times(1)).findById(volunteerId);
+        verify(dutyRepository, times(1)).findByVolunteer_VolunteerIdAndDateBetween(volunteerId, startDate, endDate);
+        verify(demandRepository, times(1)).findByDateBetween(startDate, endDate);
+    }
+
+    @Test
+    public void testGetScheduleByVolunteer_Success_One() {
         // Setup test data
         Long volunteerId = 1L;
         int year = 2023;
@@ -415,9 +519,8 @@ public class ScheduleServiceTest {
         verify(dutyRepository, times(1)).findByVolunteer_VolunteerIdAndDateBetween(volunteerId, startDate, endDate);
         verify(demandRepository, times(1)).findByDateBetween(startDate, endDate);
     }
-
     @Test
-    void testGetScheduleByAction() {
+    void testGetScheduleByAction_One() {
         // Create mock data
         Long actionId = 1L;
 
@@ -433,6 +536,7 @@ public class ScheduleServiceTest {
         demandInterval.setIntervalId(1L);
         demandInterval.setStartTime(LocalTime.of(9, 0));
         demandInterval.setEndTime(LocalTime.of(12, 0));
+        demandInterval.setDemand(demand);
         demand.setDemandIntervals(Set.of(demandInterval));
 
         action.setDemands(List.of(demand));
@@ -498,11 +602,99 @@ public class ScheduleServiceTest {
         verify(dutyRepository, times(1)).findAll();
     }
 
+    @Test
+    void testGetScheduleByAction_ThreeDutiesThreeDemands() {
+        // Create mock data
+        Long actionId = 1L;
 
+        Action action = new Action();
+        action.setActionId(actionId);
+        action.setHeading("Test Action");
+        action.setDescription("Test Description");
 
+        List<Demand> demands = new ArrayList<>();
+        List<Duty> duties = new ArrayList<>();
 
+        for (int i = 0; i < 3; i++) {
+            LocalDate date = LocalDate.of(2024, 7, 20).plusDays(i);
 
+            Demand demand = new Demand();
+            demand.setDemandId((long) (i + 1));
+            demand.setDate(date);
+            DemandInterval demandInterval = new DemandInterval();
+            demandInterval.setIntervalId((long) (i + 1));
+            demandInterval.setStartTime(LocalTime.of(9, 0));
+            demandInterval.setEndTime(LocalTime.of(12, 0));
+            demandInterval.setDemand(demand);
+            demand.setDemandIntervals(Set.of(demandInterval));
+            demands.add(demand);
 
+            Volunteer volunteer = new Volunteer();
+            volunteer.setVolunteerId((long) (i + 1));
+            VolunteerDetails details = new VolunteerDetails();
+            details.setName("John" + i);
+            details.setLastname("Doe" + i);
+            volunteer.setVolunteerDetails(details);
+
+            Duty duty = new Duty();
+            duty.setVolunteer(volunteer);
+            duty.setDate(date);
+            DutyInterval dutyInterval = new DutyInterval();
+            dutyInterval.setIntervalId((long) (i + 1));
+            dutyInterval.setStartTime(LocalTime.of(9, 0));
+            dutyInterval.setEndTime(LocalTime.of(12, 0));
+            dutyInterval.setDuty(duty);
+            duty.setDutyIntervals(Set.of(dutyInterval));
+            duties.add(duty);
+        }
+
+        action.setDemands(demands);
+
+        // Mock the behavior of repositories
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
+        when(dutyRepository.findAll()).thenReturn(duties);
+
+        // Call the method to be tested
+        ActionScheduleDto result = scheduleService.getScheduleByAction(actionId);
+
+        // Verify the result
+        assertNotNull(result);
+        assertEquals(actionId, result.actionId());
+        assertEquals("Test Action", result.heading());
+        assertEquals("Test Description", result.description());
+
+        List<DemandDto> demandDtos = result.demands();
+        assertNotNull(demandDtos);
+        assertEquals(3, demandDtos.size());
+
+        for (int i = 0; i < 3; i++) {
+            DemandDto demandDto = demandDtos.get(i);
+            assertEquals((long) (i + 1), demandDto.demandId());
+            assertEquals(LocalDate.of(2024, 7, 20).plusDays(i), demandDto.date());
+
+            List<DemandIntervalDto> intervalDtos = demandDto.demandIntervals();
+            assertNotNull(intervalDtos);
+            assertEquals(1, intervalDtos.size());
+
+            DemandIntervalDto intervalDto = intervalDtos.get(0);
+            assertEquals((long) (i + 1), intervalDto.intervalId());
+            assertEquals(LocalTime.of(9, 0), intervalDto.startTime());
+            assertEquals(LocalTime.of(12, 0), intervalDto.endTime());
+
+            List<VolunteerDto> assignedVolunteers = intervalDto.assignedVolunteers();
+            assertNotNull(assignedVolunteers);
+            assertEquals(1, assignedVolunteers.size());
+
+            VolunteerDto volunteerDto = assignedVolunteers.get(0);
+            assertEquals((long) (i + 1), volunteerDto.volunteerId());
+            assertEquals("John" + i, volunteerDto.firstname());
+            assertEquals("Doe" + i, volunteerDto.lastname());
+        }
+
+        // Verify the interactions with the repositories
+        verify(actionRepository, times(1)).findById(actionId);
+        verify(dutyRepository, times(3)).findAll();
+    }
 
 
 }

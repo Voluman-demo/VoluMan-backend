@@ -1,7 +1,11 @@
 package com.example.demo.Candidate;
 
+import com.example.demo.Volunteer.Candidate.Candidate;
+import com.example.demo.Volunteer.Candidate.CandidateController;
+import com.example.demo.Volunteer.Candidate.CandidateRepository;
+import com.example.demo.Volunteer.Candidate.CandidateService;
 import com.example.demo.Volunteer.VolunteerRepository;
-import com.example.demo.Volunteer.VolunteerRole;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

@@ -1,9 +1,10 @@
 package com.example.demo.Volunteer;
 
-import com.example.demo.Preferences.Preferences;
+import com.example.demo.Volunteer.Preferences.Preferences;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Duty.Duty;
-import com.example.demo.action.Action;
+import com.example.demo.Action.Action;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -38,12 +39,10 @@ public class Volunteer {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "volunteer_details_id", referencedColumnName = "volunteerId")
-//    @JsonIgnore // Ignoruj przy serializacji, aby uniknąć rekurencji
     private VolunteerDetails volunteerDetails;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "preferences_id", referencedColumnName = "preferenceId")
-//    @JsonIgnore // Ignoruj przy serializacji, aby uniknąć rekurencji
     private Preferences preferences = new Preferences();
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -91,6 +90,5 @@ public class Volunteer {
             this.availabilities = new ArrayList<>();
         }
     }
-
 
 }

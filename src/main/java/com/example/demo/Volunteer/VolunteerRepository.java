@@ -1,5 +1,6 @@
 package com.example.demo.Volunteer;
 
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

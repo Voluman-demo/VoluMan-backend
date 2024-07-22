@@ -1,0 +1,96 @@
+package com.example.demo.Volunteer.Candidate;
+
+
+import com.example.demo.Volunteer.User.UserRepository;
+import com.example.demo.Volunteer.VolunteerRepository;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+
+@RestController
+@RequestMapping("/candidates")
+public class CandidateController {
+
+    private final UserRepository userRepository;
+    private final CandidateRepository candidateRepository;
+    private final CandidateService candidateService;
+    private final VolunteerRepository volunteerRepository;
+    
+    public CandidateController(CandidateRepository candidateRepository, CandidateService candidateService, VolunteerRepository volunteerRepository, UserRepository userRepository) {
+        this.candidateRepository = candidateRepository;
+        this.candidateService = candidateService;
+        this.volunteerRepository = volunteerRepository;
+        this.userRepository = userRepository;
+    }
+
+    @GetMapping("")
+    public ResponseEntity<List<Candidate>> getCandidates(@RequestParam Long recruiterId) {
+        if (!volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<Candidate> candidates = candidateRepository.findAll();
+        if (candidates.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(candidates);
+    }
+
+
+    @GetMapping("/{idCandidate}")
+    public ResponseEntity<Candidate> getCandidate(@PathVariable long idCandidate,@RequestParam Long recruiterId) { //DONE
+        if (!volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        Optional<Candidate> candidate = candidateRepository.findById(idCandidate);
+        return candidate.map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+
+    @PostMapping("")
+    public ResponseEntity<Candidate> addCandidate(@RequestBody Candidate candidate) { //DONE
+        //TODO
+//        if(logCandidateRepository.existsByEmail(candidate.getEmail())){
+//            return ResponseEntity.status(HttpStatus.CONFLICT).build();
+//        }
+
+//        // Save log entry
+//        OperationLog log = new OperationLog("CREATE", savedCandidate.getCandidateId(), LocalDateTime.now(), "Created candidate");
+//        operationLogRepository.save(log);
+
+        Candidate savedCandidate = candidateRepository.save(candidate);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedCandidate);
+    }
+
+    @PostMapping("{idCandidate}/accept")
+    public ResponseEntity<Candidate> acceptCandidate(@PathVariable long idCandidate, @RequestParam Long recruiterId) { //DONE
+        if (!volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        Optional<Candidate> candidate = candidateRepository.findById(idCandidate);
+        if (candidate.isPresent()) {
+            candidateService.acceptCandidate(candidate);
+            return ResponseEntity.ok(candidate.get());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("{idCandidate}/refuse")
+    public ResponseEntity<Candidate> refuseCandidate(@PathVariable long idCandidate, @RequestParam Long recruiterId) { //DONE
+        if (!volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        Optional<Candidate> candidate = candidateRepository.findById(idCandidate);
+        if (candidate.isPresent()) {
+            candidateService.refuseCandidate(candidate);
+            return ResponseEntity.ok(candidate.get());
+        }
+        return ResponseEntity.notFound().build();
+    }
+}

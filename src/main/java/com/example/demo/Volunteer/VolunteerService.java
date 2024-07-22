@@ -1,12 +1,13 @@
 package com.example.demo.Volunteer;
 
-import com.example.demo.Candidate.Candidate;
-import com.example.demo.Preferences.Preferences;
-import com.example.demo.Preferences.PreferencesService;
+import com.example.demo.Volunteer.Candidate.Candidate;
+import com.example.demo.Volunteer.Preferences.Preferences;
+import com.example.demo.Volunteer.Preferences.PreferencesService;
 import com.example.demo.Schedule.Decision;
-import com.example.demo.action.Action;
-import com.example.demo.action.ActionRepository;
-import com.example.demo.action.ActionService;
+import com.example.demo.Action.Action;
+import com.example.demo.Action.ActionRepository;
+import com.example.demo.Action.ActionService;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -26,7 +27,7 @@ public class VolunteerService {
         this.preferencesService = preferencesService;
     }
 
-    public void addVolunteerFromCandidate(Optional<Candidate> candidate) {
+    public Volunteer addVolunteerFromCandidate(Optional<Candidate> candidate) {
         if (candidate.isPresent()) {
             VolunteerDetails volunteerDetails = mapCandidateToVolunteerDetails(candidate.get());
 
@@ -36,13 +37,11 @@ public class VolunteerService {
             volunteer.setLimitOfWeeklyHours(0L);
             volunteer.setCurrentWeeklyHours(0L);
 
-////          Inicjalizacja pustych obiektów
-//            volunteer.setPreferences(new Preferences());
-//            volunteer.setAvailabilities(new ArrayList<>());
-//            volunteer.setActions(new HashSet<>());
 
             volunteerRepository.save(volunteer);
+            return volunteer;
         }
+        return null;
     }
 
 

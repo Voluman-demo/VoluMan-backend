@@ -1,5 +1,8 @@
 package com.example.demo.Candidate;
 
+import com.example.demo.Volunteer.Candidate.Candidate;
+import com.example.demo.Volunteer.Candidate.CandidateRepository;
+import com.example.demo.Volunteer.Candidate.CandidateService;
 import com.example.demo.Volunteer.VolunteerService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

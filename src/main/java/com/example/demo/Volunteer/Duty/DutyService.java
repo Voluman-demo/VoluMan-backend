@@ -1,7 +1,7 @@
 package com.example.demo.Volunteer.Duty;
 
-import com.example.demo.Interval.DutyInterval;
-import com.example.demo.Interval.DutyIntervalRepository;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyInterval;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

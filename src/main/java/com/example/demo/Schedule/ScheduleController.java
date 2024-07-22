@@ -1,10 +1,10 @@
 package com.example.demo.Schedule;
 
-import com.example.demo.Schedule.Dto.*;
+import com.example.demo.Schedule.ScheduleDto.*;
 import com.example.demo.Volunteer.VolunteerRepository;
-import com.example.demo.Volunteer.VolunteerRole;
-import com.example.demo.action.ActionRepository;
-import com.example.demo.action.Dto.ActionScheduleDto;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
+import com.example.demo.Action.ActionRepository;
+import com.example.demo.Action.ActionDto.ActionScheduleDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,21 +13,21 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("schedules")
+@RequestMapping("")
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
     private final ActionRepository actionRepository;
     private final VolunteerRepository volunteerRepository;
 
-    public ScheduleController(ScheduleService scheduleService, ActionRepository actionRepository,VolunteerRepository volunteerRepository) {
+    public ScheduleController(ScheduleService scheduleService, ActionRepository actionRepository, VolunteerRepository volunteerRepository) {
         this.scheduleService = scheduleService;
         this.actionRepository = actionRepository;
         this.volunteerRepository = volunteerRepository;
     }
 
 
-    @PostMapping("/actions/{actionId}/preference")
+    @PostMapping("/actions/{actionId}/preferences")
     public ResponseEntity<?> choosePref(
             @PathVariable("actionId") Long actionId,
             @RequestBody ActionPrefRequest actionPrefRequest
@@ -46,21 +46,21 @@ public class ScheduleController {
         }
     }
 
-    @PostMapping("/{year}/{week}/actions/{actionId}")
+    @PostMapping("/actions/{actionId}/needs")
     public ResponseEntity<?> chooseNeed(
-            @PathVariable("year") int year,
-            @PathVariable("week") int week,
             @PathVariable("actionId") Long actionId,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int week,
             @RequestBody ActionNeedRequest actionNeedRequest
     ) {
         try {
             if (!actionRepository.existsById(actionId)) {
                 return ResponseEntity.notFound().build();
             }
-            if (!volunteerRepository.existsByVolunteerIdAndRole(actionNeedRequest.getLeaderId(), VolunteerRole.LEADER) ) {
+            if (!volunteerRepository.existsByVolunteerIdAndRole(actionNeedRequest.getLeaderId(), VolunteerRole.LEADER)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
-            if(!Objects.equals(actionRepository.findById(actionId).get().getLeader().leaderId(), actionNeedRequest.getLeaderId())){
+            if (!Objects.equals(actionRepository.findById(actionId).get().getLeader().leaderId(), actionNeedRequest.getLeaderId())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
             }
             scheduleService.scheduleNeedAction(actionId, year, week, actionNeedRequest);
@@ -70,15 +70,15 @@ public class ScheduleController {
         }
     }
 
-    @PostMapping("/{year}/{week}/volunteers/{volunteerId}")
+    @PostMapping("/volunteers/{volunteerId}/availabilities")
     public ResponseEntity<?> chooseAvail(
-            @PathVariable("year") int year,
-            @PathVariable("week") int week,
-            @PathVariable("volunteerId") Long volunteerId,
+            @PathVariable Long volunteerId,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int week,
             @RequestBody VolunteerAvailRequest volunteerAvailRequest
     ) {
         try {
-            if(!volunteerRepository.existsById(volunteerId)) {
+            if (!volunteerRepository.existsById(volunteerId)) {
                 return ResponseEntity.notFound().build();
             }
             scheduleService.chooseAvailabilities(volunteerId, year, week, volunteerAvailRequest);
@@ -88,10 +88,10 @@ public class ScheduleController {
         }
     }
 
-    @PostMapping("/{year}/{week}/schedule/generate")
+    @PostMapping("/schedules/generate")
     public ResponseEntity<?> generateSchedule(
-            @PathVariable("year") int year,
-            @PathVariable("week") int week,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int week,
             @RequestBody GenerateScheduleRequest generateScheduleRequest
     ) {
         try {
@@ -119,15 +119,15 @@ public class ScheduleController {
     }
 
 
-    @PostMapping("{year}/{week}/volunteers/{volunteerId}/modify")
+    @PutMapping("/volunteers/{volunteerId}/schedules/modify")
     public ResponseEntity<?> modifySchedule(
-            @PathVariable("year") int year,
-            @PathVariable("week") int week,
-            @PathVariable("volunteerId") Long volunteerId,
+            @PathVariable Long volunteerId,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int week,
             @RequestBody ModifyScheduleRequest modifyScheduleRequest
-    ){
+    ) {
         try {
-            if(!volunteerRepository.existsById(volunteerId)) {
+            if (!volunteerRepository.existsById(volunteerId)) {
                 return ResponseEntity.notFound().build();
             }
             scheduleService.modifySchedule(volunteerId, year, week, modifyScheduleRequest);
@@ -138,19 +138,20 @@ public class ScheduleController {
 
     }
 
-    @PostMapping("/actions/{actionId}")
+    @GetMapping("/actions/{actionId}/schedules")
     public ResponseEntity<?> getScheduleByAction(
-            @PathVariable("actionId") Long actionId,
-            @RequestBody ScheduleByActionRequest scheduleByActionRequest
+            @PathVariable Long actionId,
+            @RequestParam(defaultValue = "0") Long leaderId
     ) {
+        //TODO w przyszłości rozbicie logiki na get od wolontariusza i od leadera
         try {
             if (!actionRepository.existsById(actionId)) {
                 return ResponseEntity.notFound().build();
             }
-            if (!volunteerRepository.existsByVolunteerIdAndRole(scheduleByActionRequest.leaderId(), VolunteerRole.LEADER) ) {
+            if (!volunteerRepository.existsByVolunteerIdAndRole(leaderId, VolunteerRole.LEADER)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
-            if(!Objects.equals(actionRepository.findById(actionId).get().getLeader().leaderId(), scheduleByActionRequest.leaderId())){
+            if (!Objects.equals(actionRepository.findById(actionId).get().getLeader().leaderId(), leaderId)) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
             }
 
@@ -162,11 +163,11 @@ public class ScheduleController {
     }
 
 
-    @GetMapping("/{year}/{week}/volunteers/{volunteerId}")
+    @GetMapping("/volunteers/{volunteerId}/schedules")
     public ResponseEntity<?> getScheduleByVolunteer(
-            @PathVariable int year,
-            @PathVariable int week,
-            @PathVariable("volunteerId") Long volunteerId
+            @PathVariable Long volunteerId,
+            @RequestParam(defaultValue = "0") int year,
+            @RequestParam(defaultValue = "0") int week
     ) {
         try {
             if (!volunteerRepository.existsById(volunteerId)) {

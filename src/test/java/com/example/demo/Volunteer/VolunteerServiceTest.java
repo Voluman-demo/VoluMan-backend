@@ -1,12 +1,13 @@
 package com.example.demo.Volunteer;
 
-import com.example.demo.Candidate.Candidate;
-import com.example.demo.Preferences.Preferences;
-import com.example.demo.Preferences.PreferencesService;
+import com.example.demo.Volunteer.Candidate.Candidate;
+import com.example.demo.Volunteer.Preferences.Preferences;
+import com.example.demo.Volunteer.Preferences.PreferencesService;
 import com.example.demo.Schedule.Decision;
-import com.example.demo.action.Action;
-import com.example.demo.action.ActionRepository;
-import com.example.demo.action.ActionService;
+import com.example.demo.Action.Action;
+import com.example.demo.Action.ActionRepository;
+import com.example.demo.Action.ActionService;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;

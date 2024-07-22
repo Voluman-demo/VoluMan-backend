@@ -1,9 +1,8 @@
 package com.example.demo.Volunteer.Duty;
 
-import com.example.demo.Interval.DutyInterval;
-import com.example.demo.Interval.DutyIntervalStatus;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyInterval;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalStatus;
 import com.example.demo.Volunteer.Volunteer;
-import com.example.demo.action.Action;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;

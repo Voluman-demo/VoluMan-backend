@@ -1,6 +1,8 @@
 package com.example.demo.Volunteer;
 
 
+import com.example.demo.Volunteer.VolunteerDto.AdminRequest;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
