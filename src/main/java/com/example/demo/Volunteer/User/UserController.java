@@ -3,6 +3,7 @@ package com.example.demo.Volunteer.User;
 import com.example.demo.Auth.AuthDto;
 import com.example.demo.Auth.AuthenticationService;
 import com.example.demo.Auth.ErrorResponse;
+import com.example.demo.Auth.LoginRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,9 +35,9 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> logIn(@RequestBody LogInDto logInDto) {
-        if(authenticationService.authenticate(logInDto.email(), logInDto.password())){
-            Long userId = userRepository.findUserIdByEmailAndPassword(logInDto.email(), logInDto.password());
+    public ResponseEntity<?> logIn(@RequestBody LoginRequest loginRequest) {
+        if(authenticationService.authenticate(loginRequest.email(), loginRequest.password())){
+            Long userId = userRepository.findUserIdByEmailAndPassword(loginRequest.email(), loginRequest.password());
             AuthDto authDto = new AuthDto(
                     userId,
                     authenticationService.createToken(userId)

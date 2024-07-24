@@ -28,18 +28,6 @@ public class UserService {
         this.volunteerService = volunteerService;
     }
 
-//    public ResponseEntity<?> logIn(LogInDto logInDto) {
-//        if(userRepository.existsUserByEmailAndPassword(logInDto.email(), logInDto.password())) {
-//            //TODO TOKEN
-//
-//
-//            return ResponseEntity.ok().body("User logged in");
-//        }
-//        else {
-//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-//        }
-//    }
-
     public void register(Optional<Candidate> candidate) {
         if(candidate.isPresent()) {
             User user = new User();
@@ -54,7 +42,7 @@ public class UserService {
         }
     }
 
-    private String generatePassword(String phone) {
+    protected String generatePassword(String phone) {
         try {
             // Add the salt to the phone number
             String phoneWithSalt = SALT + phone;
