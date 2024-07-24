@@ -91,7 +91,7 @@ public class ActionService {
                     VolunteerDetails details = volunteer.getVolunteerDetails();
                     return new LeaderDto(
                             volunteer.getVolunteerId(),
-                            details.getName(),
+                            details.getFirstname(),
                             details.getLastname(),
                             details.getEmail(),
                             details.getPhone()

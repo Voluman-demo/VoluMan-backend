@@ -355,7 +355,7 @@ public class ScheduleServiceTest {
         volunteer.setVolunteerId(volunteerId);
 
         VolunteerDetails details = new VolunteerDetails();
-        details.setName("John");
+        details.setFirstname("John");
         details.setLastname("Doe");
         volunteer.setVolunteerDetails(details);
 
@@ -450,7 +450,7 @@ public class ScheduleServiceTest {
         volunteer.setVolunteerId(volunteerId);
 
         VolunteerDetails details = new VolunteerDetails();
-        details.setName("John");
+        details.setFirstname("John");
         details.setLastname("Doe");
         volunteer.setVolunteerDetails(details);
 
@@ -544,7 +544,7 @@ public class ScheduleServiceTest {
         Volunteer volunteer = new Volunteer();
         volunteer.setVolunteerId(1L);
         VolunteerDetails details = new VolunteerDetails();
-        details.setName("John");
+        details.setFirstname("John");
         details.setLastname("Doe");
         volunteer.setVolunteerDetails(details);
 
@@ -632,7 +632,7 @@ public class ScheduleServiceTest {
             Volunteer volunteer = new Volunteer();
             volunteer.setVolunteerId((long) (i + 1));
             VolunteerDetails details = new VolunteerDetails();
-            details.setName("John" + i);
+            details.setFirstname("John" + i);
             details.setLastname("Doe" + i);
             volunteer.setVolunteerDetails(details);
 

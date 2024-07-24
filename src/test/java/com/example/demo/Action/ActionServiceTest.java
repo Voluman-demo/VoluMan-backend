@@ -134,7 +134,7 @@ public class ActionServiceTest {
         Volunteer leader = new Volunteer();
         leader.setRole(VolunteerRole.LEADER);
         VolunteerDetails details = new VolunteerDetails();
-        details.setName("John");
+        details.setFirstname("John");
         details.setLastname("Doe");
         details.setEmail("john.doe@example.com");
         details.setPhone("123456789");
@@ -195,7 +195,7 @@ public class ActionServiceTest {
         Volunteer volunteer = new Volunteer();
         volunteer.setRole(VolunteerRole.LEADER);
         VolunteerDetails details = new VolunteerDetails();
-        details.setName("Name");
+        details.setFirstname("Name");
         details.setLastname("Lastname");
         details.setEmail("email@example.com");
         details.setPhone("123456789");
@@ -215,7 +215,7 @@ public class ActionServiceTest {
         assertTrue(result.isPresent());
         LeaderDto dto = result.get();
         assertEquals(volunteer.getVolunteerId(), dto.leaderId());
-        assertEquals(details.getName(), dto.name());
+        assertEquals(details.getFirstname(), dto.name());
         assertEquals(details.getLastname(), dto.lastname());
         assertEquals(details.getEmail(), dto.email());
         assertEquals(details.getPhone(), dto.phone());

@@ -1,10 +1,11 @@
 package com.example.demo.Volunteer.User;
 
+import com.example.demo.Auth.AuthDto;
+import com.example.demo.Config.AppException;
 import com.example.demo.Volunteer.Candidate.Candidate;
 import com.example.demo.Volunteer.VolunteerService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -27,15 +28,17 @@ public class UserService {
         this.volunteerService = volunteerService;
     }
 
-    public ResponseEntity<?> logIn(LogInDto logInDto) {
-        if(userRepository.existsUserByEmailAndPassword(logInDto.email(), logInDto.password())) {
-            //TODO TOKEN
-            return ResponseEntity.ok().body("User logged in");
-        }
-        else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-    }
+//    public ResponseEntity<?> logIn(LogInDto logInDto) {
+//        if(userRepository.existsUserByEmailAndPassword(logInDto.email(), logInDto.password())) {
+//            //TODO TOKEN
+//
+//
+//            return ResponseEntity.ok().body("User logged in");
+//        }
+//        else {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
+//    }
 
     public void register(Optional<Candidate> candidate) {
         if(candidate.isPresent()) {
@@ -71,5 +74,15 @@ public class UserService {
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("Error generating password", e);
         }
+    }
+
+    public boolean authenticateLogin(String email, String password) {
+        return userRepository.existsByEmailAndPassword(email,password);
+    }
+
+    public AuthDto findByUserId(String userId) {
+        User user = userRepository.findById(Long.valueOf(userId))
+                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
+        return new AuthDto(user.getUserId(), null);
     }
 }

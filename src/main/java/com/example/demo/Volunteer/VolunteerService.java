@@ -47,7 +47,7 @@ public class VolunteerService {
 
     private VolunteerDetails mapCandidateToVolunteerDetails(Candidate candidate) {
         VolunteerDetails volunteerDetails = new VolunteerDetails();
-        volunteerDetails.setName(candidate.getFirstname());
+        volunteerDetails.setFirstname(candidate.getFirstname());
         volunteerDetails.setLastname(candidate.getLastname());
         volunteerDetails.setEmail(candidate.getEmail());
         volunteerDetails.setPhone(candidate.getPhone());

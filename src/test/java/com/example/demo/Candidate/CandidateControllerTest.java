@@ -145,7 +145,7 @@ class CandidateControllerTest {
 
         when(candidateRepository.save(candidate)).thenReturn(candidate);
 
-        ResponseEntity<Candidate> response = candidateController.addCandidate(candidate);
+        ResponseEntity<Candidate> response = candidateController.   addCandidate(candidate);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(candidate, response.getBody());

@@ -17,7 +17,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "user")
+@Table(name = "user_")
 public class User {
 
     @Id

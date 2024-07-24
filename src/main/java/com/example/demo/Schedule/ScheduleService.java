@@ -381,7 +381,7 @@ public class ScheduleService {
                                             Volunteer volunteer = dutyInterval.getDuty().getVolunteer();
                                             return new VolunteerDto(
                                                     volunteer.getVolunteerId(),
-                                                    volunteer.getVolunteerDetails().getName(),
+                                                    volunteer.getVolunteerDetails().getFirstname(),
                                                     volunteer.getVolunteerDetails().getLastname()
                                             );
                                         })
@@ -493,7 +493,7 @@ public class ScheduleService {
 
         return new VolunteerScheduleDto(
                 volunteer.getVolunteerId(),
-                volunteer.getVolunteerDetails().getName(),
+                volunteer.getVolunteerDetails().getFirstname(),
                 volunteer.getVolunteerDetails().getLastname(),
                 dutyIntervals
         );
