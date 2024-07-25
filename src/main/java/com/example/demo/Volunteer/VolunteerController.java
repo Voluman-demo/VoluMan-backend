@@ -1,6 +1,9 @@
 package com.example.demo.Volunteer;
 
 
+import com.example.demo.Log.EventType;
+import com.example.demo.Log.LogService;
+import com.example.demo.Log.LogUserDto;
 import com.example.demo.Volunteer.VolunteerDto.AdminRequest;
 import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
 import org.springframework.http.HttpStatus;
@@ -15,10 +18,12 @@ import java.util.Optional;
 public class VolunteerController {
     private final VolunteerRepository volunteerRepository;
     private final VolunteerService volunteerService;
+    private final LogService logService;
 
-    public VolunteerController(VolunteerRepository volunteerRepository, VolunteerService volunteerService) {
+    public VolunteerController(VolunteerRepository volunteerRepository, VolunteerService volunteerService, LogService logService) {
         this.volunteerRepository = volunteerRepository;
         this.volunteerService = volunteerService;
+        this.logService = logService;
     }
 
     @GetMapping("")
@@ -62,7 +67,7 @@ public class VolunteerController {
 
 
     @PutMapping("/{idVolunteer}/promote")
-    public ResponseEntity<Void> promoteToLeader(@PathVariable Long idVolunteer, @RequestBody AdminRequest request) { //DONE
+    public ResponseEntity<Void> promoteToLeader(@PathVariable Long idVolunteer, @RequestBody AdminRequest request) {
         if (!volunteerRepository.existsByVolunteerIdAndRole(request.adminId(), VolunteerRole.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -72,15 +77,19 @@ public class VolunteerController {
         }
         Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
 
+
         if (volunteer.isPresent()) {
             volunteerService.promoteToLeader(idVolunteer);
+
+            logService.logVolunteer(volunteer.get(), EventType.UPDATE, "Promoted by admin with id: " + request.adminId());
+
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{idVolunteer}/degrade")
-    public ResponseEntity<Void> degradeLeader(@PathVariable Long idVolunteer, @RequestBody AdminRequest request) { //DONE
+    public ResponseEntity<Void> degradeLeader(@PathVariable Long idVolunteer, @RequestBody AdminRequest request) {
         if (!volunteerRepository.existsByVolunteerIdAndRole(request.adminId(), VolunteerRole.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -92,21 +101,28 @@ public class VolunteerController {
         Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
         if (volunteer.isPresent()) {
             volunteerService.degradeLeader(idVolunteer);
+            logService.logVolunteer(volunteer.get(),EventType.UPDATE,"Degraded by admin with id: " + request.adminId());
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
     }
 
     @DeleteMapping("/{idVolunteer}")
-    public ResponseEntity<Void> deleteVolunteer(@PathVariable Long idVolunteer, @RequestBody AdminRequest request) { //DONE
+    public ResponseEntity<Void> deleteVolunteer(@PathVariable Long idVolunteer, @RequestBody AdminRequest request) {
         if (!volunteerRepository.existsByVolunteerIdAndRole(request.adminId(), VolunteerRole.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
         if (volunteer.isPresent()) {
             volunteerRepository.deleteById(idVolunteer);
+
+            logService.logVolunteer(volunteer.get(),EventType.DELETE,"Volunteer deleted by admin with id: " + request.adminId());
+
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
     }
+
+
+
 }

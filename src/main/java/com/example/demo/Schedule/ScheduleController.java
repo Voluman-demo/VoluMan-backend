@@ -1,29 +1,36 @@
 package com.example.demo.Schedule;
 
-import com.example.demo.Schedule.ScheduleDto.*;
-import com.example.demo.Volunteer.VolunteerRepository;
-import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
-import com.example.demo.Action.ActionRepository;
 import com.example.demo.Action.ActionDto.ActionScheduleDto;
+import com.example.demo.Action.ActionRepository;
+import com.example.demo.Log.EventType;
+import com.example.demo.Log.LogService;
+import com.example.demo.Log.LogUserDto;
+import com.example.demo.Schedule.ScheduleDto.*;
+import com.example.demo.Volunteer.Volunteer;
+import com.example.demo.Volunteer.VolunteerDetails;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
+import com.example.demo.Volunteer.VolunteerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("")
 public class ScheduleController {
-
+    private final LogService logService;
     private final ScheduleService scheduleService;
     private final ActionRepository actionRepository;
     private final VolunteerRepository volunteerRepository;
 
-    public ScheduleController(ScheduleService scheduleService, ActionRepository actionRepository, VolunteerRepository volunteerRepository) {
+    public ScheduleController(ScheduleService scheduleService, ActionRepository actionRepository, VolunteerRepository volunteerRepository, LogService logService) {
         this.scheduleService = scheduleService;
         this.actionRepository = actionRepository;
         this.volunteerRepository = volunteerRepository;
+        this.logService = logService;
     }
 
 
@@ -40,6 +47,9 @@ public class ScheduleController {
                 return ResponseEntity.notFound().build();
             }
             scheduleService.choosePref(actionId, actionPrefRequest);
+
+            logService.logSchedule(actionPrefRequest.volunteerId(), EventType.UPDATE, "Choose preferences");
+
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -64,6 +74,9 @@ public class ScheduleController {
                 return ResponseEntity.status(HttpStatus.CONFLICT).build();
             }
             scheduleService.scheduleNeedAction(actionId, year, week, actionNeedRequest);
+
+            logService.logSchedule(actionNeedRequest.getLeaderId(), EventType.UPDATE, "Choose action needs with id: " + actionId);
+
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -82,6 +95,8 @@ public class ScheduleController {
                 return ResponseEntity.notFound().build();
             }
             scheduleService.chooseAvailabilities(volunteerId, year, week, volunteerAvailRequest);
+
+            logService.logSchedule(volunteerId, EventType.UPDATE, "Choose availabilities");
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -111,6 +126,8 @@ public class ScheduleController {
 
             // Wywołanie usługi generowania harmonogramu
             scheduleService.generateSchedule(generateScheduleRequest.date());
+
+            logService.logSchedule(generateScheduleRequest.adminId(), EventType.CREATE, "Generate schedule");
             return ResponseEntity.ok().body("Schedule generated successfully.");
         } catch (Exception e) {
             // Obsługa wyjątków i zwrócenie odpowiedzi z kodem błędu 500
@@ -131,6 +148,10 @@ public class ScheduleController {
                 return ResponseEntity.notFound().build();
             }
             scheduleService.modifySchedule(volunteerId, year, week, modifyScheduleRequest);
+
+
+            logService.logSchedule(volunteerId, EventType.UPDATE, "Schedule modified by volunteer with id: " + volunteerId);
+
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
@@ -180,6 +201,8 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
         }
     }
+
+
 }
 
 
