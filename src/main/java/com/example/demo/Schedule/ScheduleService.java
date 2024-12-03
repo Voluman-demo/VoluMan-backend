@@ -1,30 +1,32 @@
 package com.example.demo.Schedule;
 
-import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
-import com.example.demo.Action.Demand.DemandInterval.DemandIntervalDto;
-import com.example.demo.Volunteer.Preferences.Preferences;
-import com.example.demo.Schedule.ScheduleDto.*;
-import com.example.demo.Volunteer.*;
-import com.example.demo.Volunteer.Availability.Availability;
-import com.example.demo.Volunteer.Availability.AvailabilityService;
-import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
-import com.example.demo.Volunteer.Duty.Duty;
-import com.example.demo.Volunteer.Duty.DutyRepository;
-import com.example.demo.Volunteer.Duty.DutyService;
 import com.example.demo.Action.Action;
-import com.example.demo.Action.ActionRepository;
-import com.example.demo.Action.ActionService;
 import com.example.demo.Action.ActionDto.ActionDto;
 import com.example.demo.Action.ActionDto.ActionScheduleDto;
+import com.example.demo.Action.ActionRepository;
+import com.example.demo.Action.ActionService;
 import com.example.demo.Action.Demand.Demand;
 import com.example.demo.Action.Demand.DemandDto;
+import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
+import com.example.demo.Action.Demand.DemandInterval.DemandIntervalDto;
 import com.example.demo.Action.Demand.DemandRepository;
 import com.example.demo.Action.Demand.DemandService;
+import com.example.demo.Schedule.ScheduleDto.*;
+import com.example.demo.Volunteer.Availability.Availability;
+import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
+import com.example.demo.Volunteer.Availability.AvailabilityService;
+import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Duty.DutyInterval.DutyInterval;
 import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalDto;
 import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalStatus;
+import com.example.demo.Volunteer.Duty.DutyRepository;
+import com.example.demo.Volunteer.Duty.DutyService;
+import com.example.demo.Volunteer.Preferences.Preferences;
+import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerDto.VolunteerDto;
-import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
+import com.example.demo.Volunteer.Role.VolunteerRole;
+import com.example.demo.Volunteer.VolunteerRepository;
+import com.example.demo.Volunteer.VolunteerService;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -233,7 +235,7 @@ public class ScheduleService {
                         .toList();
 
                 for (Availability availabilityIter : matchingAvailability) {
-                    if(demandInterval.getCurrentVolunteersNumber() < demandInterval.getNeedMax()){
+                    if (demandInterval.getCurrentVolunteersNumber() < demandInterval.getNeedMax()) {
                         Volunteer volunteer = availabilityIter.getVolunteer();
 
                         // Sprawdź aktualne i maksymalne tygodniowe obciążenie wolontariusza
@@ -246,7 +248,7 @@ public class ScheduleService {
 
                             // Zaktualizuj liczbę wolontariuszy w interwale zapotrzebowania
                             demandInterval.setCurrentVolunteersNumber(demandInterval.getCurrentVolunteersNumber() + 1);
-                    }
+                        }
                     }
                 }
             }
@@ -453,7 +455,7 @@ public class ScheduleService {
                                 if (demandInterval.getStartTime().equals(interval.getStartTime())
                                         && demandInterval.getEndTime().equals(interval.getEndTime())
                                         && interval.getDuty().getVolunteer().getActions().stream()
-                                            .anyMatch(action -> action.equals(demandInterval.getDemand().getAction()))
+                                        .anyMatch(action -> action.equals(demandInterval.getDemand().getAction()))
                                 ) {
                                     demandInterval.setCurrentVolunteersNumber(demandInterval.getCurrentVolunteersNumber() - 1);
                                     iterator.remove(); // Usunięcie z aktualnej kolekcji
@@ -526,22 +528,22 @@ public class ScheduleService {
         return demands.stream()
                 .flatMap(demand -> demand.getDemandIntervals().stream())
                 .filter(demandInterval ->
-                            demandInterval.getStartTime().equals(dutyInterval.getStartTime()) &&
-                            demandInterval.getEndTime().equals(dutyInterval.getEndTime()) &&
-                            demandInterval.getDemand().getDate().equals(dutyInterval.getDuty().getDate())
+                        demandInterval.getStartTime().equals(dutyInterval.getStartTime()) &&
+                                demandInterval.getEndTime().equals(dutyInterval.getEndTime()) &&
+                                demandInterval.getDemand().getDate().equals(dutyInterval.getDuty().getDate())
                 )
                 .collect(Collectors.toList());
     }
 
     private int validWeek(int week) {
-        if(week == 0) {
+        if (week == 0) {
             week = LocalDate.now().get(WeekFields.ISO.weekOfWeekBasedYear());
         }
         return week;
     }
 
     private int validYear(int year) {
-        if(year == 0) {
+        if (year == 0) {
             year = LocalDate.now().getYear();
         }
         return year;

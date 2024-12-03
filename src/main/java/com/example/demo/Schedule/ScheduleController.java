@@ -4,11 +4,8 @@ import com.example.demo.Action.ActionDto.ActionScheduleDto;
 import com.example.demo.Action.ActionRepository;
 import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
-import com.example.demo.Log.LogUserDto;
 import com.example.demo.Schedule.ScheduleDto.*;
-import com.example.demo.Volunteer.Volunteer;
-import com.example.demo.Volunteer.VolunteerDetails;
-import com.example.demo.Volunteer.VolunteerDto.VolunteerRole;
+import com.example.demo.Volunteer.Role.VolunteerRole;
 import com.example.demo.Volunteer.VolunteerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("")

@@ -7,6 +7,7 @@ import com.example.demo.Volunteer.VolunteerRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -55,16 +56,15 @@ public class LogService {
 
     public void logVolunteer(Volunteer volunteer, EventType eventType, String eventDesc) {
         try{
-            VolunteerDetails volunteerDetails = volunteer.getVolunteerDetails();
-            String error = log(
+            String error = Objects.requireNonNull(log(
                     new LogUserDto(
-                            volunteerDetails.getFirstname(),
-                            volunteerDetails.getLastname(),
-                            volunteerDetails.getEmail()
+                            volunteer.getVolunteerDetails().getFirstname(),
+                            volunteer.getVolunteerDetails().getLastname(),
+                            volunteer.getVolunteerDetails().getEmail()
                     ),
                     eventType,
                     eventDesc
-            ).getMessage();
+            )).getMessage();
 
             if (error != null) {
                 throw new RuntimeException(error);
