@@ -52,8 +52,8 @@ public class ScheduleController {
         }
     }
 
-    @PostMapping("/actions/{actionId}/needs")
-    public ResponseEntity<?> chooseNeed(
+    @PostMapping("/actions/{actionId}/demands")
+    public ResponseEntity<?> chooseDemands(
             @PathVariable("actionId") Long actionId,
             @RequestParam(defaultValue = "0") int year,
             @RequestParam(defaultValue = "0") int week,
