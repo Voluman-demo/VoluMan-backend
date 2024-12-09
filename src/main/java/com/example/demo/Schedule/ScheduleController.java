@@ -64,6 +64,7 @@ public class ScheduleController {
                 return ResponseEntity.notFound().build();
             }
             if (!volunteerRepository.existsByVolunteerIdAndRole(actionNeedRequest.getLeaderId(), VolunteerRole.LEADER)) {
+
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
             if (!Objects.equals(actionRepository.findById(actionId).get().getLeader().leaderId(), actionNeedRequest.getLeaderId())) {
@@ -117,7 +118,7 @@ public class ScheduleController {
 
             // Sprawdzenie, czy data w żądaniu zgadza się z oczekiwaną datą
             if (!expectedDate.equals(requestDate)) {
-                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).build();
+                return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(expectedDate);
             }
 
             // Wywołanie usługi generowania harmonogramu
