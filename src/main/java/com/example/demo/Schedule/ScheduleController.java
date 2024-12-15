@@ -7,6 +7,11 @@ import com.example.demo.Log.LogService;
 import com.example.demo.Schedule.ScheduleDto.*;
 import com.example.demo.Volunteer.Role.VolunteerRole;
 import com.example.demo.Volunteer.VolunteerRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +21,7 @@ import java.util.Objects;
 
 @RestController
 @RequestMapping("")
+@Tag(name = "Schedule Management", description = "Endpoints for managing schedules")
 public class ScheduleController {
     private final LogService logService;
     private final ScheduleService scheduleService;
@@ -29,10 +35,15 @@ public class ScheduleController {
         this.logService = logService;
     }
 
-
     @PostMapping("/actions/{actionId}/preferences")
+    @Operation(summary = "Choose preferences for an action", description = "Allows a volunteer to choose preferences for a specific action.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Preferences chosen successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "404", description = "Action or volunteer not found")
+    })
     public ResponseEntity<?> choosePref(
-            @PathVariable("actionId") Long actionId,
+            @Parameter(description = "ID of the action") @PathVariable("actionId") Long actionId,
             @RequestBody ActionPrefRequest actionPrefRequest
     ) {
         try {
@@ -53,8 +64,16 @@ public class ScheduleController {
     }
 
     @PostMapping("/actions/{actionId}/demands")
+    @Operation(summary = "Choose demands for an action", description = "Allows a leader to choose demands for a specific action.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Demands chosen successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request"),
+            @ApiResponse(responseCode = "403", description = "Forbidden: User is not a leader"),
+            @ApiResponse(responseCode = "404", description = "Action not found"),
+            @ApiResponse(responseCode = "409", description = "Conflict: Leader mismatch")
+    })
     public ResponseEntity<?> chooseDemands(
-            @PathVariable("actionId") Long actionId,
+            @Parameter(description = "ID of the action") @PathVariable("actionId") Long actionId,
             @RequestParam(defaultValue = "0") int year,
             @RequestParam(defaultValue = "0") int week,
             @RequestBody ActionNeedRequest actionNeedRequest
@@ -81,8 +100,14 @@ public class ScheduleController {
     }
 
     @PostMapping("/volunteers/{volunteerId}/availabilities")
+    @Operation(summary = "Choose availabilities for a volunteer", description = "Allows volunteers to set their availabilities for a specific year and week.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Availabilities set successfully"),
+            @ApiResponse(responseCode = "404", description = "Volunteer not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid request")
+    })
     public ResponseEntity<?> chooseAvail(
-            @PathVariable Long volunteerId,
+            @Parameter(description = "ID of the volunteer") @PathVariable Long volunteerId,
             @RequestParam(defaultValue = "0") int year,
             @RequestParam(defaultValue = "0") int week,
             @RequestBody VolunteerAvailRequest volunteerAvailRequest
@@ -101,6 +126,12 @@ public class ScheduleController {
     }
 
     @PostMapping("/schedules/generate")
+    @Operation(summary = "Generate schedule", description = "Generates a schedule for a given year and week.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Schedule generated successfully"),
+            @ApiResponse(responseCode = "406", description = "Not acceptable: Date mismatch"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<?> generateSchedule(
             @RequestParam(defaultValue = "0") int year,
             @RequestParam(defaultValue = "0") int week,
@@ -134,8 +165,17 @@ public class ScheduleController {
 
 
     @PutMapping("/volunteers/{volunteerId}/schedules/modify")
+    @Operation(
+            summary = "Modify schedule for a volunteer",
+            description = "Allows a volunteer to modify their schedule for a specific year and week."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Schedule modified successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request or bad data"),
+            @ApiResponse(responseCode = "404", description = "Volunteer not found")
+    })
     public ResponseEntity<?> modifySchedule(
-            @PathVariable Long volunteerId,
+            @Parameter(description = "ID of the volunteer", required = true) @PathVariable Long volunteerId,
             @RequestParam(defaultValue = "0") int year,
             @RequestParam(defaultValue = "0") int week,
             @RequestBody ModifyScheduleRequest modifyScheduleRequest
@@ -157,8 +197,15 @@ public class ScheduleController {
     }
 
     @GetMapping("/actions/{actionId}/schedules")
+    @Operation(summary = "Get schedule for an action", description = "Retrieves the schedule associated with a specific action.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Schedule retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Action not found"),
+            @ApiResponse(responseCode = "403", description = "Access forbidden for non-leaders"),
+            @ApiResponse(responseCode = "409", description = "Leader mismatch")
+    })
     public ResponseEntity<?> getScheduleByAction(
-            @PathVariable Long actionId,
+            @Parameter(description = "ID of the action") @PathVariable Long actionId,
             @RequestParam(defaultValue = "0") Long leaderId
     ) {
         //TODO w przyszłości rozbicie logiki na get od wolontariusza i od leadera
@@ -182,8 +229,16 @@ public class ScheduleController {
 
 
     @GetMapping("/volunteers/{volunteerId}/schedules")
+    @Operation(
+            summary = "Get schedule for a volunteer", description = "Retrieves the schedule for a specific volunteer based on the given year and week."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Schedule retrieved successfully"),
+            @ApiResponse(responseCode = "404", description = "Volunteer not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
     public ResponseEntity<?> getScheduleByVolunteer(
-            @PathVariable Long volunteerId,
+            @Parameter(description = "ID of the volunteer", required = true) @PathVariable Long volunteerId,
             @RequestParam(defaultValue = "0") int year,
             @RequestParam(defaultValue = "0") int week
     ) {

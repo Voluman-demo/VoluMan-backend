@@ -30,6 +30,11 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)) // This allows H2 console to be displayed properly in a frame
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-ui.html"
+                        ).permitAll()
 //                        .requestMatchers(HttpMethod.POST, "/users/login").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                         .requestMatchers("/candidates/**").permitAll()
