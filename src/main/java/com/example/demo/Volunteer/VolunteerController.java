@@ -51,21 +51,21 @@ public class VolunteerController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/leaders")
-    public ResponseEntity<List<Volunteer>> getVolunteerLeaders() { //DONE
-        List<Volunteer> leaders = volunteerRepository.findAllByRole(VolunteerRole.LEADER);
-        if (leaders.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-        }
-        return ResponseEntity.ok(leaders);
-    }
-
-    @GetMapping("/leaders/{idVolunteer}")
-    public ResponseEntity<Volunteer> getVolunteerLeader(@PathVariable Long idVolunteer) { //DONE
-        Optional<Volunteer> leader = volunteerRepository.findByVolunteerIdAndRole(idVolunteer, VolunteerRole.LEADER);
-        return leader.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
+//    @GetMapping("/leaders")
+//    public ResponseEntity<List<Volunteer>> getVolunteerLeaders() { //DONE
+//        List<Volunteer> leaders = volunteerRepository.findAllByRole(VolunteerRole.LEADER);
+//        if (leaders.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+//        }
+//        return ResponseEntity.ok(leaders);
+//    }
+//
+//    @GetMapping("/leaders/{idVolunteer}")
+//    public ResponseEntity<Volunteer> getVolunteerLeader(@PathVariable Long idVolunteer) { //DONE
+//        Optional<Volunteer> leader = volunteerRepository.findByVolunteerIdAndRole(idVolunteer, VolunteerRole.LEADER);
+//        return leader.map(ResponseEntity::ok)
+//                .orElseGet(() -> ResponseEntity.notFound().build());
+//    }
 
     @PutMapping("/{idVolunteer}/roles")
     public ResponseEntity<Void> changeRole(@PathVariable Long idVolunteer, @RequestBody AdminRequest request, @RequestParam String role) {

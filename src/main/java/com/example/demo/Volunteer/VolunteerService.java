@@ -35,7 +35,6 @@ public class VolunteerService {
             volunteer.setVolunteerDetails(volunteerDetails);
             volunteer.setRole(VolunteerRole.CANDIDATE);
             roleService.assignRole(volunteer, VolunteerRole.VOLUNTEER);
-//            volunteer.setRole(VolunteerRole.VOLUNTEER);
             volunteer.setLimitOfWeeklyHours(0L);
             volunteer.setCurrentWeeklyHours(0L);
 
@@ -62,24 +61,6 @@ public class VolunteerService {
         volunteerDetails.setSex(candidate.getSex());
         return volunteerDetails;
     }
-
-//    public void promoteToLeader(Long idVolunteer) {
-//        Optional<Volunteer> volunteer = volunteerRepository.findByVolunteerIdAndRole(idVolunteer, VolunteerRole.VOLUNTEER);
-//        if (volunteer.isPresent()) {
-//            Volunteer volunteerEntity = volunteer.get();
-//            volunteerEntity.setRole(VolunteerRole.LEADER);
-//            volunteerRepository.save(volunteerEntity);
-//        }
-//
-//    }
-//    public void degradeLeader(Long idVolunteer) {
-//        Optional<Volunteer> volunteer = volunteerRepository.findByVolunteerIdAndRole(idVolunteer, VolunteerRole.LEADER);
-//        if (volunteer.isPresent()) {
-//            Volunteer volunteerEntity = volunteer.get();
-//            volunteerEntity.setRole(VolunteerRole.VOLUNTEER);
-//            volunteerRepository.save(volunteerEntity);
-//        }
-//    }
 
     public void addPreferences(Long actionId, Long volunteerId, Decision decision) {
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);

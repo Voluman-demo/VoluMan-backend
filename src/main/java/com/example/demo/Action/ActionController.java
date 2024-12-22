@@ -72,7 +72,6 @@ public class ActionController {
         }
     }
 
-    //Tmp metoda
     @DeleteMapping("/{actionId}")
     public ResponseEntity<?> deleteAction(@PathVariable Long actionId) {
         actionRepository.deleteById(actionId);
