@@ -4,7 +4,10 @@ package com.example.demo.Volunteer.User;
 import com.example.demo.Volunteer.Volunteer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
@@ -13,7 +16,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Getter
 @Setter
-@EqualsAndHashCode
 @Table(name = "user_")
 public class User {
 
