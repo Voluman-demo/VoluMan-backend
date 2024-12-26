@@ -2,14 +2,11 @@ package com.example.demo.Schedule;
 
 import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
 import com.example.demo.Action.Demand.DemandInterval.DemandIntervalDto;
-import com.example.demo.Volunteer.Preferences.Preferences;
 import com.example.demo.Schedule.ScheduleDto.ActionNeedRequest;
 import com.example.demo.Schedule.ScheduleDto.ModifyScheduleRequest;
-import com.example.demo.Schedule.ScheduleDto.VolunteerAvailRequest;
-import com.example.demo.Schedule.ScheduleDto.VolunteerScheduleDto;
+import com.example.demo.Volunteer.Availability.AvailabilityDTO.VolunteerAvailRequest;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Availability.AvailabilityService;
-import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
 import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Duty.DutyRepository;
 import com.example.demo.Volunteer.Duty.DutyService;
@@ -23,7 +20,6 @@ import com.example.demo.Action.Demand.DemandDto;
 import com.example.demo.Action.Demand.DemandRepository;
 import com.example.demo.Action.Demand.DemandService;
 import com.example.demo.Volunteer.Duty.DutyInterval.DutyInterval;
-import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalDto;
 import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalRepository;
 import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalStatus;
 import com.example.demo.Volunteer.VolunteerDto.VolunteerDto;
@@ -36,7 +32,6 @@ import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.temporal.WeekFields;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;

@@ -13,6 +13,7 @@ import com.example.demo.Action.Demand.DemandRepository;
 import com.example.demo.Action.Demand.DemandService;
 import com.example.demo.Schedule.ScheduleDto.*;
 import com.example.demo.Volunteer.Availability.Availability;
+import com.example.demo.Volunteer.Availability.AvailabilityDTO.VolunteerAvailRequest;
 import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
 import com.example.demo.Volunteer.Availability.AvailabilityService;
 import com.example.demo.Volunteer.Duty.Duty;
@@ -238,8 +239,7 @@ public class ScheduleService {
         }
 
         // Update volunteer's limit of hours
-        volunteer.setLimitOfWeeklyHours(availRequest.getLimitOfHours());
-        volunteerRepository.save(volunteer);
+
     }
 
 

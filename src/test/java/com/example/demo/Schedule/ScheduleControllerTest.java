@@ -1,5 +1,6 @@
 package com.example.demo.Schedule;
 
+import com.example.demo.Volunteer.Availability.AvailabilityDTO.VolunteerAvailRequest;
 import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalDto;
 import com.example.demo.Schedule.ScheduleDto.*;
 import com.example.demo.Volunteer.VolunteerDto.LeaderDto;
@@ -236,8 +237,8 @@ public class ScheduleControllerTest {
 //        assertEquals(HttpStatus.OK, response.getStatusCode());
 //    }
 
-    @Test
-    void testChooseAvail_ReturnsNotFound_WhenVolunteerNotFound() {
+    /*@Test
+   *//* void testChooseAvail_ReturnsNotFound_WhenVolunteerNotFound() {
         int year = 2024;
         int week = 27;
         Long volunteerId = 1L;
@@ -249,7 +250,7 @@ public class ScheduleControllerTest {
         ResponseEntity<?> response = scheduleController.chooseAvail(volunteerId, year, week, request);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
+    }*//*
 
     @Test
     void testChooseAvail_Exception() throws Exception {
@@ -269,7 +270,7 @@ public class ScheduleControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Error", response.getBody());
     }
-
+*/
 
 //    @Test
 //    void testGenerateSchedule_ReturnsOk_Success() {

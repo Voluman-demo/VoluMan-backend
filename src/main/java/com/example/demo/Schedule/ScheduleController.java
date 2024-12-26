@@ -80,25 +80,7 @@ public class ScheduleController {
         }
     }
 
-    @PostMapping("/volunteers/{volunteerId}/availabilities")
-    public ResponseEntity<?> chooseAvail(
-            @PathVariable Long volunteerId,
-            @RequestParam(defaultValue = "0") int year,
-            @RequestParam(defaultValue = "0") int week,
-            @RequestBody VolunteerAvailRequest volunteerAvailRequest
-    ) {
-        try {
-            if (!volunteerRepository.existsById(volunteerId)) {
-                return ResponseEntity.notFound().build();
-            }
-            scheduleService.chooseAvailabilities(volunteerId, year, week, volunteerAvailRequest);
 
-            logService.logSchedule(volunteerId, EventType.UPDATE, "Choose availabilities");
-            return ResponseEntity.ok().build();
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        }
-    }
 
     @PostMapping("/schedules/generate")
     public ResponseEntity<?> generateSchedule(

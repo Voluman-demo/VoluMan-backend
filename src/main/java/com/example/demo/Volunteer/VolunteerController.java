@@ -68,7 +68,7 @@ public class VolunteerController {
 //    }
 
     @PutMapping("/{idVolunteer}/roles")
-    public ResponseEntity<Void> changeRole(@PathVariable Long idVolunteer, @RequestBody AdminRequest request, @RequestParam String role) {
+        public ResponseEntity<Void> changeRole(@PathVariable Long idVolunteer, @RequestBody AdminRequest request, @RequestParam String role) {
         if (!volunteerRepository.existsByVolunteerIdAndRole(request.adminId(), VolunteerRole.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
