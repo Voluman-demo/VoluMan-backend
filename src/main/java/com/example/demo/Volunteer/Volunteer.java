@@ -1,6 +1,7 @@
 package com.example.demo.Volunteer;
 
 import com.example.demo.Action.Action;
+import com.example.demo.Action.SingleAction;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Preferences.Preferences;
@@ -56,10 +57,10 @@ public class Volunteer {
     @JoinTable(
             name = "volunteer_action",
             joinColumns = @JoinColumn(name = "volunteer_id"),
-            inverseJoinColumns = @JoinColumn(name = "action_id")
+            inverseJoinColumns = @JoinColumn(name = "single_action_id")
     )
     @JsonIgnore
-    private Set<Action> actions = new HashSet<>();
+    private Set<SingleAction> actions = new HashSet<>();
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference

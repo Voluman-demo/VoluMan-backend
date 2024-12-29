@@ -5,14 +5,12 @@ import com.example.demo.Log.LogService;
 
 
 import com.example.demo.Volunteer.Availability.AvailabilityDTO.*;
-import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping()
@@ -78,7 +76,7 @@ public class AvailabilityController {
     }*/
     @PutMapping("/volunteers/{idVolunteer}/limit-weekly-hours")
     public ResponseEntity<Void> setWeekHourLim(@PathVariable Long idVolunteer, @RequestBody limitOfHoursRequest limitOfHoursRequest){
-        if(!volunteerRepository.existsByVolunteerId(idVolunteer)){
+        if(volunteerRepository.existsByVolunteerId(idVolunteer)){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 

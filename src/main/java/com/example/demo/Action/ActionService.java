@@ -1,120 +1,134 @@
 package com.example.demo.Action;
 
+import com.example.demo.Model.Errors;
+import com.example.demo.Model.ID;
+import com.example.demo.Model.Language.LangISO;
 import com.example.demo.Volunteer.*;
-import com.example.demo.Action.ActionDto.AddActionRequest;
-import com.example.demo.Volunteer.Role.VolunteerRole;
-import com.example.demo.Volunteer.VolunteerDto.LeaderDto;
-import jakarta.transaction.Transactional;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
 @Service
-public class ActionService {
+public class ActionService implements Actions {
+
     private final ActionRepository actionRepository;
-    private final VolunteerRepository volunteerRepository;
+    private final VolunteerService volunteerService;
 
-
-    public ActionService(ActionRepository actionRepository, VolunteerRepository volunteerRepository) {
+    public ActionService(ActionRepository actionRepository, VolunteerService volunteerService) {
         this.actionRepository = actionRepository;
-        this.volunteerRepository = volunteerRepository;
+        this.volunteerService = volunteerService;
     }
 
-    public List<Action> getAllActions() {
-        return actionRepository.findAll();
-    }
+    @Override
+    public Errors addAction(SingleAction action) {
+        try {
+            SingleAction newAction = new SingleAction();
+            newAction.setShortName(action.getShortName());
+            newAction.setFullName(action.getFullName());
+            newAction.setPlace(action.getPlace());
+            newAction.setDescription(action.getDescription());
+            newAction.setActionEnd(action.getActionBeg());
+            newAction.setActionEnd(action.getActionEnd());
+            newAction.setRoles(action.getRoles());
+            newAction.setLanguages(action.getLanguages());
 
-    public Optional<Action> getActionById(Long idAction) {
-        return actionRepository.findById(idAction);
-    }
-
-    public Optional<String> getActionDescription(Long idAction) {
-        return actionRepository.findById(idAction).map(Action::getDescription);
-    }
-
-    public Optional<String> getActionHeading(Long idAction) {
-        return actionRepository.findById(idAction).map(Action::getHeading);
-    }
-
-    public Action addAction(Action action) {
-        return actionRepository.save(action);
-    }
-
-    public Action createAndAddAction(AddActionRequest request) {
-        Action action = new Action();
-        action.setHeading(request.heading());
-        action.setDescription(request.description());
-        action.setStatus(request.status());
-        action.setStartDay(request.startDay());
-        action.setEndDay(request.endDay());
-        action.setLeader(getLeaderDto(request.leaderId()).get());
-        action.setDemands(new ArrayList<>());
-
-        return addAction(action);
+            actionRepository.save(newAction);
+            return Errors.SUCCESS;
+        } catch (Exception e) {
+            return Errors.FAILURE;
+        }
     }
 
 
-    @Transactional
-    public void closeAction(Long idAction, Long adminId) {
-        Optional<Action> optionalAction = getActionById(idAction);
+    @Override
+    public Errors setMy(Volunteer v, ID d) {
+        return null;
+    }
 
+    @Override
+    public Errors setRejected(Volunteer v, ID d) {
+        return null;
+    }
+
+    @Override
+    public Errors setUndecided(Volunteer v, ID d) {
+        return null;
+    }
+
+    @Override
+    public Errors setLanguage(LangISO lang, ID d) {
+        return null;
+    }
+
+    @Override
+    public Errors remAction(ID id) {
+        if (actionRepository.existsById((long) id.getId())) {
+            actionRepository.deleteById((long) id.getId());
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
+    }
+
+    @Override
+    public Errors updAction(ID id, SingleAction action) {
+        Optional<SingleAction> optionalAction = actionRepository.findById((long) id.getId());
         if (optionalAction.isPresent()) {
-            Action action = optionalAction.get();
-            action.setStatus(ActionStatus.CLOSED);
-            actionRepository.save(action);
+            SingleAction existingAction = optionalAction.get();
+            existingAction.setShortName(action.getShortName());
+            existingAction.setFullName(action.getFullName());
+            existingAction.setPlace(action.getPlace());
+            existingAction.setDescription(action.getDescription());
+            existingAction.setActionBeg(action.getActionBeg());
+            existingAction.setActionEnd(action.getActionEnd());
+            existingAction.setRoles(action.getRoles());
+            existingAction.setLanguages(action.getLanguages());
+            actionRepository.save(existingAction);
+            return Errors.SUCCESS;
         }
-        }
-
-    @Transactional
-    public void changeDescription(Long idAction, String description) { //DONE
-
-        Optional<Action> optionalAction = getActionById(idAction);
-
-        if (optionalAction.isPresent()) {
-            Action action = optionalAction.get();
-            action.setDescription(description);
-            actionRepository.save(action);
-        }
-
+        return Errors.NOT_FOUND;
     }
 
-    public Optional<Volunteer> getLeader(Long leaderId) {
-        return volunteerRepository.findById(leaderId);
+    @Override
+    public ArrayList<SingleAction> getAllActions(LangISO lang) {
+        List<SingleAction> actions = actionRepository.findAll().stream()
+                .filter(action -> action.getLanguages().contains(lang))
+                .toList();
+
+        return new ArrayList<>(actions);
     }
 
-    public Optional<LeaderDto> getLeaderDto(Long leaderId) {
-        return volunteerRepository.findById(leaderId)
-                .filter(volunteer -> volunteer.getRole() == VolunteerRole.LEADER)
-                .map(volunteer -> {
-                    VolunteerDetails details = volunteer.getVolunteerDetails();
-                    return new LeaderDto(
-                            volunteer.getVolunteerId(),
-                            details.getFirstname(),
-                            details.getLastname(),
-                            details.getEmail(),
-                            details.getPhone()
-                    );
-                });
+//    @Override
+//    public ArrayList<SingleAction> getMyActions(Long volunteerId) {
+//        return getFilteredActions(volunteerId, Action::getVolunteers);
+//    }
+
+//    @Override
+//    public ArrayList<SingleAction> getRejectedActions(Long volunteerId) {
+//        return getFilteredActions(volunteerService.findVolunteerById(volunteerId), Action::getDetermined);
+//    }
+//
+//    @Override
+//    public ArrayList<SingleAction> getUndecidedActions(Long volunteerId) {
+//        return new ArrayList<>(actionRepository.findAll().stream()
+//                .filter(singleAction -> !singleAction.get().stream()
+//                        .anyMatch(v -> v.getVolunteerId().equals(volunteer.getVolunteerId())))
+//                .toList());
+//    }
+
+    @Override
+    public <T> ResponseEntity<?> isError(Errors error, T body) {
+        return Actions.super.isError(error, body);
     }
 
-    public void addDetermined(Long actionId, Long volunteerId) {
-        Optional<Action> actionOptional = actionRepository.findById(actionId);
-        if (actionOptional.isPresent()) {
-            Optional<Volunteer> volunteerOptional = volunteerRepository.findById(volunteerId);
-
-            volunteerOptional.ifPresent(volunteer -> actionOptional.get().getDetermined().add(volunteer));
-        }
-    }
-
-    public void addVolunteer(Long actionId, Long volunteerId) {
-        Optional<Action> actionOptional = actionRepository.findById(actionId);
-        if (actionOptional.isPresent()) {
-            Optional<Volunteer> volunteerOptional = volunteerRepository.findById(volunteerId);
-
-            volunteerOptional.ifPresent(volunteer -> actionOptional.get().getVolunteers().add(volunteer));
-        }
+    private ArrayList<Object> getFilteredActions(Volunteer volunteer, Function<SingleAction, Set<Volunteer>> selector) {
+        return new ArrayList<>(actionRepository.findAll().stream()
+                .filter(action -> selector.apply(action).stream()
+                        .anyMatch(v -> v.getVolunteerId().equals(volunteer.getVolunteerId())))
+                .toList());
     }
 }
-

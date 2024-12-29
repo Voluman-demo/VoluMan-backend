@@ -34,5 +34,9 @@ public class User {
     @JoinColumn(name = "volunteer_id", referencedColumnName = "volunteerId")
     @JsonIgnore
     private Volunteer volunteer = new Volunteer();
+
+    public User(Long userId) {
+        this.userId = userId;
+    }
 }
 

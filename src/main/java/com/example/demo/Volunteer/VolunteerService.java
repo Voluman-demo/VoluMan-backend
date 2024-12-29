@@ -1,5 +1,6 @@
 package com.example.demo.Volunteer;
 
+import com.example.demo.Action.SingleAction;
 import com.example.demo.Volunteer.Candidate.Candidate;
 import com.example.demo.Volunteer.Preferences.Preferences;
 import com.example.demo.Volunteer.Preferences.PreferencesService;
@@ -10,6 +11,7 @@ import com.example.demo.Volunteer.Role.VolunteerRole;
 import com.example.demo.Volunteer.Role.RoleService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Service
@@ -67,31 +69,33 @@ public class VolunteerService {
 
         if (volunteer.isPresent()) {
             Volunteer volunteerEntity = volunteer.get();
-            Optional<Action> action = actionService.getActionById(actionId);
-            if (action.isPresent()) {
-                Action actionEntity = action.get();
-                Preferences preferences = volunteerEntity.getPreferences();
-                if (preferences == null) {
-                    preferences = new Preferences();
-                    volunteerEntity.setPreferences(preferences);
-                    preferencesService.addPreferences(preferences); // Zapisz nowe preferencje
-                }
+//            ArrayList<SingleAction> actions = actionService.getMyActions(volunteerId);
+            ArrayList<SingleAction> actions = new ArrayList<>();
+            if (!actions.isEmpty()) {
+                actions.forEach(action -> {
+                    Preferences preferences = volunteerEntity.getPreferences();
+                    if (preferences == null) {
+                        preferences = new Preferences();
+                        volunteerEntity.setPreferences(preferences);
+                        preferencesService.addPreferences(preferences); // Zapisz nowe preferencje
+                    }
 
-                if (decision == Decision.T) {
-                    preferencesService.removeActionFromOtherPreferences(actionEntity, preferences.getPreferenceId(), Decision.T);
-                    preferences.getT().add(actionEntity);
-                }
-                if (decision == Decision.R) {
-                    preferencesService.removeActionFromOtherPreferences(actionEntity, preferences.getPreferenceId(), Decision.R);
-                    preferences.getR().add(actionEntity);
-                }
-                if (decision == Decision.N) {
-                    preferencesService.removeActionFromOtherPreferences(actionEntity, preferences.getPreferenceId(), Decision.N);
-                    preferences.getN().add(actionEntity);
-                }
+//                    if (decision == Decision.T) {
+//                        preferencesService.removeActionFromOtherPreferences(action, preferences.getPreferenceId(), Decision.T);
+//                        preferences.getT().add(action);
+//                    }
+//                    if (decision == Decision.R) {
+//                        preferencesService.removeActionFromOtherPreferences(action, preferences.getPreferenceId(), Decision.R);
+//                        preferences.getR().add(action);
+//                    }
+//                    if (decision == Decision.N) {
+//                        preferencesService.removeActionFromOtherPreferences(action, preferences.getPreferenceId(), Decision.N);
+//                        preferences.getN().add(action);
+//                    }
 
-                preferencesService.addPreferences(preferences);
-                volunteerRepository.save(volunteerEntity);
+                    preferencesService.addPreferences(preferences);
+                    volunteerRepository.save(volunteerEntity);
+                });
             }
         }
     }

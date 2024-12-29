@@ -1,5 +1,6 @@
 package com.example.demo.Volunteer.Preferences;
 
+import com.example.demo.Action.SingleAction;
 import com.example.demo.Schedule.Decision;
 import com.example.demo.Action.Action;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class PreferencesService {
     }
 
 
-    public void removeActionFromOtherPreferences(Action action, Long preferencesId, Decision decision) {
+    public void removeActionFromOtherPreferences(SingleAction action, Long preferencesId, Decision decision) {
         Preferences pref = preferencesRepository.findById(preferencesId).orElse(null);
 
         if (pref != null) {

@@ -1,8 +1,8 @@
-package com.example.demo.Action;
+package com.example.demo.Model.Language;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ActionRepository extends JpaRepository<SingleAction, Long> {
+public interface LanguageRepository extends JpaRepository<Language, Long> {
 }

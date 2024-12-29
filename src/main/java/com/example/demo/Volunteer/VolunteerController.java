@@ -72,7 +72,7 @@ public class VolunteerController {
         if (!volunteerRepository.existsByVolunteerIdAndRole(request.adminId(), VolunteerRole.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        if(!volunteerRepository.existsByVolunteerId(idVolunteer)){
+        if(volunteerRepository.existsByVolunteerId(idVolunteer)){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
