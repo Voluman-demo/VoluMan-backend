@@ -1,4 +1,4 @@
-package com.example.demo.Schedule.ScheduleDto;
+package com.example.demo.Volunteer.Availability.AvailabilityDTO;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -10,7 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 public class VolunteerAvailRequest {
-    private Long limitOfHours;
+
     private List<DayAvailabilityRequest> days;
 
     @Getter
