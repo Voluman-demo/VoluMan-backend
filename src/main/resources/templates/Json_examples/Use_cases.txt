@@ -153,8 +153,8 @@ RESPONSE:
         "volunteerId": 1,
         "role": "ADMIN",
         "limitOfWeeklyHours": 40.0,
-        "currentWeeklyHours": 0.0,
-        "volunteerDetails": null,
+        "actualWeeklyHours": 0.0,
+        "personalData": null,
         "preferences": null,
         "availabilities": [],
         "duties": []
@@ -163,8 +163,8 @@ RESPONSE:
         "volunteerId": 2,
         "role": "RECRUITER",
         "limitOfWeeklyHours": 40.0,
-        "currentWeeklyHours": 0.0,
-        "volunteerDetails": null,
+        "actualWeeklyHours": 0.0,
+        "personalData": null,
         "preferences": null,
         "availabilities": [],
         "duties": []
@@ -173,8 +173,8 @@ RESPONSE:
         "volunteerId": 3,
         "role": "LEADER",
         "limitOfWeeklyHours": 40.0,
-        "currentWeeklyHours": 0.0,
-        "volunteerDetails": null,
+        "actualWeeklyHours": 0.0,
+        "personalData": null,
         "preferences": null,
         "availabilities": [],
         "duties": []
@@ -183,8 +183,8 @@ RESPONSE:
         "volunteerId": 4,
         "role": "VOLUNTEER",
         "limitOfWeeklyHours": 0.0,
-        "currentWeeklyHours": 0.0,
-        "volunteerDetails": {
+        "actualWeeklyHours": 0.0,
+        "personalData": {
             "volunteerId": 2,
             "firstname": "Jan",
             "lastname": "W",
@@ -224,8 +224,8 @@ RESPONSE:
     "volunteerId": 4,
     "role": "VOLUNTEER",
     "limitOfWeeklyHours": 0.0,
-    "currentWeeklyHours": 0.0,
-    "volunteerDetails": {
+    "actualWeeklyHours": 0.0,
+    "personalData": {
         "volunteerId": 2,
         "firstname": "Jan",
         "lastname": "W",

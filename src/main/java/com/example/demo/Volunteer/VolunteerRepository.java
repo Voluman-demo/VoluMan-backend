@@ -1,22 +1,18 @@
 package com.example.demo.Volunteer;
 
-import com.example.demo.Volunteer.Role.VolunteerRole;
+import com.example.demo.Model.ID;
+import com.example.demo.Volunteer.Position.Position;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Repository
-public interface VolunteerRepository extends JpaRepository<Volunteer, Long> {
+public interface VolunteerRepository extends JpaRepository<Volunteer, ID> {
 
-    List<Volunteer> findAllByRole(VolunteerRole role);
+    List<Volunteer> findAllByPosition(Position position);
 
-    Optional<Volunteer> findByVolunteerIdAndRole(Long volunteerId, VolunteerRole role);
+    boolean existsByIdAndPosition(ID volunteerId, Position position);
 
-    boolean existsByVolunteerIdAndRole(Long volunteerId, VolunteerRole role);
-
-    boolean existsByVolunteerDetailsEmail(String email);
-
-    boolean existsByVolunteerId(Long idVolunteer);
+    boolean existsByEmail(String email);
 }

@@ -1,5 +1,6 @@
 package com.example.demo.Volunteer.Availability;
 
+import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.AvailabilityDTO.AvailIntervalResponse;
 import com.example.demo.Volunteer.Availability.AvailabilityDTO.AvailResponse;
 import com.example.demo.Volunteer.Availability.AvailabilityDTO.limitOfHoursRequest;
@@ -73,7 +74,7 @@ public class AvailabilityService {
     public List<Availability> getAvailabilitiesForDay(LocalDate date) {
         return availabilityRepository.findAllByDate(date);
     }
-    public void chooseAvailabilities(Long volunteerId, int year, int week, VolunteerAvailRequest availRequest) throws Exception {
+    public void chooseAvailabilities(ID volunteerId, int year, int week, VolunteerAvailRequest availRequest) throws Exception {
         // Validate volunteer
         Volunteer volunteer = volunteerRepository.findById(volunteerId)
                 .orElseThrow(() -> new Exception("Volunteer not found"));

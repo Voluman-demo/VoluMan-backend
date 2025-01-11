@@ -128,7 +128,7 @@ public class ActionService implements Actions {
     private ArrayList<Object> getFilteredActions(Volunteer volunteer, Function<SingleAction, Set<Volunteer>> selector) {
         return new ArrayList<>(actionRepository.findAll().stream()
                 .filter(action -> selector.apply(action).stream()
-                        .anyMatch(v -> v.getVolunteerId().equals(volunteer.getVolunteerId())))
+                        .anyMatch(v -> v.getId().equals(volunteer.getId())))
                 .toList());
     }
 }

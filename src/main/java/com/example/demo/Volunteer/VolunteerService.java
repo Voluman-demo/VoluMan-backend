@@ -1,120 +1,178 @@
 package com.example.demo.Volunteer;
 
+import com.example.demo.Action.ActionRepository;
 import com.example.demo.Action.SingleAction;
-import com.example.demo.Volunteer.Candidate.Candidate;
+import com.example.demo.Model.Errors;
+import com.example.demo.Model.ID;
+import com.example.demo.Model.PreferenceType;
+import com.example.demo.Volunteer.Availability.Availability;
+import com.example.demo.Volunteer.Duty.Duty;
+import com.example.demo.Volunteer.Position.Position;
+import com.example.demo.Volunteer.Position.PositionService;
 import com.example.demo.Volunteer.Preferences.Preferences;
-import com.example.demo.Volunteer.Preferences.PreferencesService;
-import com.example.demo.Schedule.Decision;
-import com.example.demo.Action.Action;
-import com.example.demo.Action.ActionService;
-import com.example.demo.Volunteer.Role.VolunteerRole;
-import com.example.demo.Volunteer.Role.RoleService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
-public class VolunteerService {
+public class VolunteerService implements Volunteers {
 
     private final VolunteerRepository volunteerRepository;
-    private final ActionService actionService;
-    private final PreferencesService preferencesService;
-    private final RoleService roleService;
+    private final ActionRepository actionRepository;
+    private final PositionService PositionService;
 
-    public VolunteerService(VolunteerRepository volunteerRepository, ActionService actionService, PreferencesService preferencesService, RoleService roleService) {
+    public VolunteerService(VolunteerRepository volunteerRepository, ActionRepository actionRepository, PositionService PositionService) {
         this.volunteerRepository = volunteerRepository;
-        this.actionService = actionService;
-        this.preferencesService = preferencesService;
-        this.roleService = roleService;
+        this.actionRepository = actionRepository;
+        this.PositionService = PositionService;
     }
 
-    public Volunteer addVolunteerFromCandidate(Optional<Candidate> candidate) {
-        if (candidate.isPresent()) {
-            VolunteerDetails volunteerDetails = mapCandidateToVolunteerDetails(candidate.get());
+    @Override
+    public ID createVolunteer() {
+        Volunteer volunteer = new Volunteer();
+        volunteer.setPreferences(new Preferences());
+        volunteerRepository.save(volunteer);
+        return volunteer.getId();
+    }
 
-            Volunteer volunteer = new Volunteer();
-            volunteer.setVolunteerDetails(volunteerDetails);
-            volunteer.setRole(VolunteerRole.CANDIDATE);
-            roleService.assignRole(volunteer, VolunteerRole.VOLUNTEER);
-            volunteer.setLimitOfWeeklyHours(0L);
-            volunteer.setCurrentWeeklyHours(0L);
+    @Override
+    public Errors editVolunteer(ID volunteerId, PersonalData details) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+        if (volunteer.isPresent()) {
+            Volunteer vol = volunteer.get();
 
+            vol.setFirstName(details.getFirstName());
+            vol.setLastName(details.getLastName());
+            vol.setEmail(details.getEmail());
+            vol.setPhone(details.getPhone());
+            vol.setDateOfBirth(details.getDateOfBirth());
+            vol.setAddress(details.getAddress());
+            vol.setSex(details.getSex());
 
-            volunteerRepository.save(volunteer);
-            return volunteer;
+            volunteerRepository.save(vol);
+            return Errors.SUCCESS;
         }
+        return Errors.NOT_FOUND;
+    }
+
+    @Override
+    public Errors deleteVolunteer(ID volunteerId) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+        if (volunteer.isPresent()) {
+            Volunteer vol = volunteer.get();
+            vol.setValid(false);
+            volunteerRepository.save(vol);
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
+    }
+
+    @Override
+    public Volunteer getVolunteerById(ID volunteerId) {
+        return volunteerRepository.findById(volunteerId).orElse(null);
+    }
+
+
+    @Override
+    public Errors assignRole(ID volunteerId, Position newRole) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+        if (volunteer.isPresent()) {
+            Volunteer vol = volunteer.get();
+            PositionService.assignRole(vol, newRole);
+            volunteerRepository.save(vol);
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
+    }
+
+    @Override
+    public Position getPosition(ID volunteerId) {
+        return volunteerRepository.findById(volunteerId)
+                .map(Volunteer::getPosition)
+                .orElse(null);
+    }
+
+    @Override
+    public Errors initializePreferences(ID volunteerId) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+        if (volunteer.isPresent()) {
+            Volunteer vol = volunteer.get();
+            Preferences preferences = new Preferences();
+
+            // Przenieś wszystkie akcje do "Undecided" TODO: zmienić potem na action
+            List<SingleAction> allActions = actionRepository.findAll();
+            preferences.getU().addAll(allActions);
+
+            vol.setPreferences(preferences);
+            volunteerRepository.save(vol);
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
+    }
+
+    @Override
+    public Errors updatePreferences(ID volunteerId, ID actionId, PreferenceType type) {
         return null;
     }
 
 
-    private VolunteerDetails mapCandidateToVolunteerDetails(Candidate candidate) {
-        VolunteerDetails volunteerDetails = new VolunteerDetails();
-        volunteerDetails.setFirstname(candidate.getFirstname());
-        volunteerDetails.setLastname(candidate.getLastname());
-        volunteerDetails.setEmail(candidate.getEmail());
-        volunteerDetails.setPhone(candidate.getPhone());
-        volunteerDetails.setDateOfBirth(candidate.getDateOfBirth());
-        volunteerDetails.setCity(candidate.getCity());
-        volunteerDetails.setStreet(candidate.getStreet());
-        volunteerDetails.setHouseNumber(candidate.getHouseNumber());
-        volunteerDetails.setApartmentNumber(candidate.getApartmentNumber());
-        volunteerDetails.setPostalNumber(candidate.getPostalNumber());
-        volunteerDetails.setSex(candidate.getSex());
-        return volunteerDetails;
+    @Override
+    public Errors applyPreferencesToSchedule(ID volunteerId) {
+        // Implementacja modyfikacji harmonogramu zgodnie z preferencjami
+        return Errors.SUCCESS;
     }
 
-    public void addPreferences(Long actionId, Long volunteerId, Decision decision) {
+    @Override
+    public Errors setAvailabilities(ID volunteerId, List<Availability> availabilities) {
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
-
         if (volunteer.isPresent()) {
-            Volunteer volunteerEntity = volunteer.get();
-//            ArrayList<SingleAction> actions = actionService.getMyActions(volunteerId);
-            ArrayList<SingleAction> actions = new ArrayList<>();
-            if (!actions.isEmpty()) {
-                actions.forEach(action -> {
-                    Preferences preferences = volunteerEntity.getPreferences();
-                    if (preferences == null) {
-                        preferences = new Preferences();
-                        volunteerEntity.setPreferences(preferences);
-                        preferencesService.addPreferences(preferences); // Zapisz nowe preferencje
-                    }
-
-//                    if (decision == Decision.T) {
-//                        preferencesService.removeActionFromOtherPreferences(action, preferences.getPreferenceId(), Decision.T);
-//                        preferences.getT().add(action);
-//                    }
-//                    if (decision == Decision.R) {
-//                        preferencesService.removeActionFromOtherPreferences(action, preferences.getPreferenceId(), Decision.R);
-//                        preferences.getR().add(action);
-//                    }
-//                    if (decision == Decision.N) {
-//                        preferencesService.removeActionFromOtherPreferences(action, preferences.getPreferenceId(), Decision.N);
-//                        preferences.getN().add(action);
-//                    }
-
-                    preferencesService.addPreferences(preferences);
-                    volunteerRepository.save(volunteerEntity);
-                });
-            }
+            Volunteer vol = volunteer.get();
+            vol.getAvailabilities().clear();
+            vol.getAvailabilities().addAll(availabilities);
+            volunteerRepository.save(vol);
+            return Errors.SUCCESS;
         }
+        return Errors.NOT_FOUND;
     }
 
-
-    public Volunteer addVolunteer(Volunteer volunteer) {
-        roleService.assignRole(volunteer, VolunteerRole.VOLUNTEER);
-        return volunteerRepository.save(volunteer);
+    @Override
+    public ArrayList<Availability> getAvailabilities(ID volunteerId) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+        return volunteer.map(Volunteer::getAvailabilities).orElse(null);
     }
 
-    public boolean isLeaderExist(Long leaderId) {
-        return volunteerRepository.existsById(leaderId);
+    @Override
+    public Errors assignDuty(ID volunteerId, Duty duty) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+        if (volunteer.isPresent()) {
+            Volunteer vol = volunteer.get();
+            vol.getDuties().add(duty);
+            volunteerRepository.save(vol);
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
     }
 
-    public Volunteer findVolunteerById(Long volunteerId) {
-        return volunteerRepository.findById(volunteerId).get();
+    @Override
+    public ArrayList<Duty> getDuties(ID volunteerId) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+        return volunteer.map(vol -> new ArrayList<>(vol.getDuties())).orElse(null);
+    }
+
+    public ID createAndEditVolunteer(PersonalData details) {
+        ID newVolunteerId = createVolunteer();
+
+        Errors result = editVolunteer(newVolunteerId, details);
+        if (result == Errors.SUCCESS) {
+            return newVolunteerId;
+        }
+        return null;
     }
 
     public boolean existsVolunteerByEmail(String email) {
-        return volunteerRepository.existsByVolunteerDetailsEmail(email);
+        return volunteerRepository.existsByEmail(email);
     }
+
 }

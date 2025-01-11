@@ -2,8 +2,9 @@ package com.example.demo.Volunteer.Candidate;
 
 import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
+import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.User.UserService;
-import com.example.demo.Volunteer.Role.VolunteerRole;
+import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.VolunteerRepository;
 import com.example.demo.Volunteer.VolunteerService;
 import jakarta.transaction.Transactional;
@@ -29,7 +30,7 @@ public class CandidateService {
         this.volunteerService = volunteerService;
     }
 
-    public List<Candidate> getCandidates(Long recruiterId) {
+    public List<Candidate> getCandidates(ID recruiterId) {
         validateRecruiter(recruiterId, volunteerRepository);
         List<Candidate> candidates = candidateRepository.findAll();
         if (candidates.isEmpty()) {
@@ -38,7 +39,7 @@ public class CandidateService {
         return candidates;
     }
 
-    public Candidate getCandidate(Long idCandidate, Long recruiterId) {
+    public Candidate getCandidate(Long idCandidate, ID recruiterId) {
         validateRecruiter(recruiterId, volunteerRepository);
         return candidateRepository.findById(idCandidate)
                 .orElseThrow(() -> new IllegalArgumentException("Candidate not found"));
@@ -46,7 +47,7 @@ public class CandidateService {
 
 
     @Transactional
-    public Candidate acceptCandidate(Long idCandidate, Long recruiterId) {
+    public void acceptCandidate(Long idCandidate, ID recruiterId) {
         validateRecruiter(recruiterId, volunteerRepository);
         Candidate candidate = candidateRepository.findById(idCandidate)
                 .orElseThrow(() -> new IllegalArgumentException("Candidate not found"));
@@ -55,17 +56,15 @@ public class CandidateService {
         candidateRepository.delete(candidate);
 
         logService.logCandidate(candidate, EventType.ACCEPT, "Candidate accepted by recruiter " + recruiterId);
-        return candidate;
     }
 
     @Transactional
-    public Candidate  refuseCandidate(Long idCandidate, Long recruiterId) {
+    public void refuseCandidate(Long idCandidate, ID recruiterId) {
         validateRecruiter(recruiterId, volunteerRepository);
         Candidate candidate = candidateRepository.findById(idCandidate)
                 .orElseThrow(() -> new IllegalArgumentException("Candidate not found"));
         candidateRepository.delete(candidate);
         logService.logCandidate(candidate, EventType.REFUSE, "Candidate refused by recruiter " + recruiterId);
-        return candidate;
     }
 
     public Candidate addCandidate(Candidate candidate) {
@@ -80,8 +79,8 @@ public class CandidateService {
         return !volunteerService.existsVolunteerByEmail(email);
     }
 
-    private void validateRecruiter(Long recruiterId, VolunteerRepository volunteerRepository) {
-        if (!volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)) {
+    private void validateRecruiter(ID recruiterId, VolunteerRepository volunteerRepository) {
+        if (volunteerRepository.existsByIdAndPosition(recruiterId, Position.RECRUITER)) {
             throw new IllegalArgumentException("Unauthorized: recruiter role required");
         }
     }

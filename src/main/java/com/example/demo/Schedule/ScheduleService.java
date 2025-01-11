@@ -358,7 +358,7 @@
 //    private boolean isWithinWeeklyLimit(Volunteer volunteer, LocalDate date) {
 //        LocalDate startOfWeek = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 //        LocalDate endOfWeek = startOfWeek.plusDays(6);
-//        double currentWeeklyLoad = volunteer.calculateCurrentWeeklyHours(startOfWeek, endOfWeek);
+//        double currentWeeklyLoad = volunteer.calculateactualWeeklyHours(startOfWeek, endOfWeek);
 //        return currentWeeklyLoad <= volunteer.getLimitOfWeeklyHours();
 //    }
 //
@@ -416,12 +416,12 @@
 //        Volunteer updatedVolunteer = volunteerRepository.findById(volunteer.getVolunteerId())
 //                .orElseThrow(() -> new IllegalStateException("Volunteer not found after update"));
 //        // Ustawiamy obliczoną sumę jako aktualne obciążenie tygodniowe
-//        updatedVolunteer.setCurrentWeeklyHours(totalWeeklyHours);
+//        updatedVolunteer.setactualWeeklyHours(totalWeeklyHours);
 //
 //        // Zapisz zmiany do bazy
 //        volunteerRepository.save(updatedVolunteer);
 //
-//        System.out.println("Updated weekly load for volunteer " + volunteer.getVolunteerId() + ": " + volunteer.getCurrentWeeklyHours());
+//        System.out.println("Updated weekly load for volunteer " + volunteer.getVolunteerId() + ": " + volunteer.getactualWeeklyHours());
 //    }
 //
 //
@@ -430,8 +430,8 @@
 //        LocalDate startOfWeek = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
 //        LocalDate endOfWeek = startOfWeek.plusDays(6);
 //        for (Volunteer volunteer : volunteers) {
-//            double currentWeeklyLoad = volunteer.calculateCurrentWeeklyHours(startOfWeek, endOfWeek);
-//            volunteer.setCurrentWeeklyHours(currentWeeklyLoad);
+//            double currentWeeklyLoad = volunteer.calculateactualWeeklyHours(startOfWeek, endOfWeek);
+//            volunteer.setactualWeeklyHours(currentWeeklyLoad);
 //            volunteerRepository.save(volunteer);
 //        }
 //    }
@@ -548,7 +548,7 @@
 //        }
 //
 //
-//        volunteer.setCurrentWeeklyHours(volunteer.getCurrentWeeklyHours() - totalCanceledHours);
+//        volunteer.setactualWeeklyHours(volunteer.getactualWeeklyHours() - totalCanceledHours);
 //
 //        dutyRepository.saveAll(duties);
 //

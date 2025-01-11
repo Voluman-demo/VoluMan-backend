@@ -1,10 +1,10 @@
-package com.example.demo.Volunteer.Role;
+package com.example.demo.Volunteer.Position;
 
 import lombok.Getter;
 
 
 @Getter
-public enum VolunteerRole {
+public enum Position {
     CANDIDATE,
     VOLUNTEER,
     LEADER,

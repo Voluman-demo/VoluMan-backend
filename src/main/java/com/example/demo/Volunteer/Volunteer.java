@@ -1,57 +1,53 @@
 package com.example.demo.Volunteer;
 
-import com.example.demo.Action.Action;
 import com.example.demo.Action.SingleAction;
+import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Duty.Duty;
+import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Preferences.Preferences;
-import com.example.demo.Volunteer.Role.VolunteerRole;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 @Entity
 @AllArgsConstructor
-@NoArgsConstructor
 @Getter
 @Setter
 @Table(name = "volunteer")
-public class Volunteer {
+public class Volunteer extends PersonalData {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long volunteerId;
+    private ID id;
+
+    @Column(name = "valid", nullable = false)
+    private boolean valid = false;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private VolunteerRole role;
+    @Column(name = "position", nullable = false)
+    private Position position;
 
     @Column(name = "limit_of_weekly_hours", nullable = false, length = 3)
     private double limitOfWeeklyHours;
 
-    @Column(name = "current_weekly_hours", nullable = false, length = 3)
-    private double currentWeeklyHours;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "volunteer_details_id", referencedColumnName = "volunteerId")
-    private VolunteerDetails volunteerDetails;
+    @Column(name = "actual_weekly_hours", nullable = false, length = 3)
+    private double actualWeeklyHours;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "preferences_id", referencedColumnName = "preferenceId")
-    private Preferences preferences = new Preferences();
+    private Preferences preferences;
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private List<Availability> availabilities = new ArrayList<>();
+    private ArrayList<Availability> availabilities;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
@@ -60,18 +56,19 @@ public class Volunteer {
             inverseJoinColumns = @JoinColumn(name = "single_action_id")
     )
     @JsonIgnore
-    private Set<SingleAction> actions = new HashSet<>();
+    private Set<SingleAction> actions;
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-    private Set<Duty> duties = new HashSet<>();
+    private Set<Duty> duties;
 
-
-    public double calculateCurrentWeeklyHours(LocalDate startOfWeek, LocalDate endOfWeek) {
-        return duties.stream()
-                .filter(duty -> !duty.getDate().isBefore(startOfWeek) && !duty.getDate().isAfter(endOfWeek))
-                .mapToDouble(Duty::getTotalDurationHours)
-                .sum();
+    public Volunteer() {
+        this.limitOfWeeklyHours = 0.0;
+        this.actualWeeklyHours = 0.0;
+        this.preferences = new Preferences();
+        this.availabilities = new ArrayList<>();
+        this.actions = new HashSet<>();
+        this.duties = new HashSet<>();
     }
 
     @PrePersist

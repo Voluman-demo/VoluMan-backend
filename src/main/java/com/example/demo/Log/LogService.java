@@ -1,10 +1,10 @@
 package com.example.demo.Log;
 
+import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Candidate.Candidate;
+import com.example.demo.Volunteer.PersonalData;
 import com.example.demo.Volunteer.Volunteer;
-import com.example.demo.Volunteer.VolunteerDetails;
 import com.example.demo.Volunteer.VolunteerRepository;
-import org.hibernate.event.spi.SaveOrUpdateEvent;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -58,9 +58,9 @@ public class LogService {
         try {
             LogResult result = log(
                     new LogUserDto(
-                            volunteer.getVolunteerDetails().getFirstname(),
-                            volunteer.getVolunteerDetails().getLastname(),
-                            volunteer.getVolunteerDetails().getEmail()
+                            volunteer.getFirstName(),
+                            volunteer.getLastName(),
+                            volunteer.getEmail()
                     ),
                     eventType,
                     eventDesc
@@ -75,17 +75,16 @@ public class LogService {
     }
 
 
-    public void logAction(Long volunteerId, EventType eventType, String eventDesc) {
+    public void logAction(ID volunteerId, EventType eventType, String eventDesc) {
         try {
             Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
-            VolunteerDetails volunteerDetails = volunteer.get().getVolunteerDetails();
 
 
             LogResult result = log(
                     new LogUserDto(
-                            volunteerDetails.getFirstname(),
-                            volunteerDetails.getLastname(),
-                            volunteerDetails.getEmail()
+                            volunteer.get().getFirstName(),
+                            volunteer.get().getLastName(),
+                            volunteer.get().getEmail()
                     ),
                     eventType,
                     eventDesc
@@ -99,16 +98,15 @@ public class LogService {
         }
     }
 
-    public void logSchedule(Long volunteerId, EventType eventType, String eventDesc) {
+    public void logSchedule(ID volunteerId, EventType eventType, String eventDesc) {
         try {
             Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
-            VolunteerDetails volunteerDetails = volunteer.get().getVolunteerDetails();
 
             LogResult result = log(
                     new LogUserDto(
-                            volunteerDetails.getFirstname(),
-                            volunteerDetails.getLastname(),
-                            volunteerDetails.getEmail()
+                            volunteer.get().getFirstName(),
+                            volunteer.get().getLastName(),
+                            volunteer.get().getEmail()
                     ),
                     eventType,
                     eventDesc

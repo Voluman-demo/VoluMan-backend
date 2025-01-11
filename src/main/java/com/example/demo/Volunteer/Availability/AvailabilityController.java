@@ -4,6 +4,7 @@ import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
 
 
+import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.AvailabilityDTO.*;
 import com.example.demo.Volunteer.VolunteerRepository;
 import org.springframework.http.HttpStatus;
@@ -75,8 +76,8 @@ public class AvailabilityController {
         return ResponseEntity.notFound().build();
     }*/
     @PutMapping("/volunteers/{idVolunteer}/limit-weekly-hours")
-    public ResponseEntity<Void> setWeekHourLim(@PathVariable Long idVolunteer, @RequestBody limitOfHoursRequest limitOfHoursRequest){
-        if(volunteerRepository.existsByVolunteerId(idVolunteer)){
+    public ResponseEntity<Void> setWeekHourLim(@PathVariable ID idVolunteer, @RequestBody limitOfHoursRequest limitOfHoursRequest){
+        if(volunteerRepository.existsById(idVolunteer)){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
@@ -99,7 +100,7 @@ public class AvailabilityController {
 
     @PostMapping("/volunteers/{volunteerId}/availabilities")
     public ResponseEntity<?> chooseAvail(
-            @PathVariable Long volunteerId,
+            @PathVariable ID volunteerId,
             @RequestParam(defaultValue = "0") int year,
             @RequestParam(defaultValue = "0") int week,
             @RequestBody VolunteerAvailRequest volunteerAvailRequest

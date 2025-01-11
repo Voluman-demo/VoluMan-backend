@@ -1,6 +1,8 @@
 package com.example.demo.Volunteer.Preferences;
 
 import com.example.demo.Action.Action;
+import com.example.demo.Action.SingleAction;
+import com.example.demo.Model.ID;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -16,31 +18,50 @@ import java.util.Set;
 public class Preferences {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long preferenceId;
+    private ID preferenceId;
 
+    // Strongly Mine: Actions the volunteer strongly wants to participate in
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
-            name = "preferences_action_t",
+            name = "preferences_action_s",
             joinColumns = @JoinColumn(name = "preference_id"),
             inverseJoinColumns = @JoinColumn(name = "action_id")
     )
-    private Set<Action> T = new HashSet<>();
+    private Set<Action> S;
 
+    // Weakly Mine: Actions the volunteer is willing to join if necessary
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(
+            name = "preferences_action_w",
+            joinColumns = @JoinColumn(name = "preference_id"),
+            inverseJoinColumns = @JoinColumn(name = "action_id")
+    )
+    private Set<Action> W;
+
+    // Rejected: Actions the volunteer does not want to participate in
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
             name = "preferences_action_r",
             joinColumns = @JoinColumn(name = "preference_id"),
             inverseJoinColumns = @JoinColumn(name = "action_id")
     )
-    private Set<Action> R = new HashSet<>();
+    private Set<Action> R;
 
+    // Undecided: Actions the volunteer has not yet decided on
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
-            name = "preferences_action_n",
+            name = "preferences_action_u",
             joinColumns = @JoinColumn(name = "preference_id"),
             inverseJoinColumns = @JoinColumn(name = "action_id")
     )
-    private Set<Action> N = new HashSet<>();
+    private Set<SingleAction> U;
 
+    @PrePersist
+    public void initializeDefaults() {
+        if (S == null) S = new HashSet<>();
+        if (W == null) W = new HashSet<>();
+        if (R == null) R = new HashSet<>();
+        if (U == null) U = new HashSet<>();
+    }
 }
 

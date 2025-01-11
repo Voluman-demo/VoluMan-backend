@@ -3,15 +3,17 @@ package com.example.demo.Volunteer;
 
 import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
-import com.example.demo.Volunteer.Role.RoleService;
-import com.example.demo.Volunteer.Role.VolunteerRole;
+import com.example.demo.Model.Errors;
+import com.example.demo.Model.ID;
+import com.example.demo.Volunteer.Availability.Availability;
+import com.example.demo.Volunteer.Duty.Duty;
+import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.VolunteerDto.AdminRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/volunteers")
@@ -19,89 +21,102 @@ public class VolunteerController {
     private final VolunteerRepository volunteerRepository;
     private final VolunteerService volunteerService;
     private final LogService logService;
-    private final RoleService roleService;
 
-    public VolunteerController(VolunteerRepository volunteerRepository, VolunteerService volunteerService, LogService logService, RoleService roleService) {
+    public VolunteerController(VolunteerRepository volunteerRepository, VolunteerService volunteerService, LogService logService) {
         this.volunteerRepository = volunteerRepository;
         this.volunteerService = volunteerService;
         this.logService = logService;
-        this.roleService = roleService;
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Volunteer>> getVolunteers() { //DONE
+    public ResponseEntity<List<Volunteer>> getVolunteers() {
         return ResponseEntity.ok(volunteerRepository.findAll());
     }
 
     @PostMapping("")
-    public ResponseEntity<Volunteer> addVolunteer(@RequestBody Volunteer volunteer) {
-        return ResponseEntity.ok(volunteerService.addVolunteer(volunteer));
+    public ResponseEntity<?> addVolunteer(@RequestBody PersonalData details) {
+        ID createdVolunteerId = volunteerService.createAndEditVolunteer(details);
+
+        if (createdVolunteerId == null) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(createdVolunteerId);
     }
 
     @DeleteMapping("/{volunteerId}/delete")
-    public ResponseEntity<?> deleteVolunteer(@PathVariable Long volunteerId) {
-        volunteerRepository.deleteById(volunteerId);
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @GetMapping("/{idVolunteer}")
-    public ResponseEntity<Volunteer> getVolunteer(@PathVariable Long idVolunteer) { //DONE
-        Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
-        return volunteer.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-//    @GetMapping("/leaders")
-//    public ResponseEntity<List<Volunteer>> getVolunteerLeaders() { //DONE
-//        List<Volunteer> leaders = volunteerRepository.findAllByRole(VolunteerRole.LEADER);
-//        if (leaders.isEmpty()) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
-//        }
-//        return ResponseEntity.ok(leaders);
-//    }
-//
-//    @GetMapping("/leaders/{idVolunteer}")
-//    public ResponseEntity<Volunteer> getVolunteerLeader(@PathVariable Long idVolunteer) { //DONE
-//        Optional<Volunteer> leader = volunteerRepository.findByVolunteerIdAndRole(idVolunteer, VolunteerRole.LEADER);
-//        return leader.map(ResponseEntity::ok)
-//                .orElseGet(() -> ResponseEntity.notFound().build());
-//    }
-
-    @PutMapping("/{idVolunteer}/roles")
-        public ResponseEntity<Void> changeRole(@PathVariable Long idVolunteer, @RequestBody AdminRequest request, @RequestParam String role) {
-        if (!volunteerRepository.existsByVolunteerIdAndRole(request.adminId(), VolunteerRole.ADMIN)) {
+    public ResponseEntity<Void> deleteVolunteer(@PathVariable ID volunteerId, @RequestBody AdminRequest request) {
+        if (!volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        if(volunteerRepository.existsByVolunteerId(idVolunteer)){
+        Errors result = volunteerService.deleteVolunteer(volunteerId);
+        if (result == Errors.SUCCESS) {
+            logService.logVolunteer(null, EventType.DELETE, "Volunteer deleted by admin with id: " + request.adminId());
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{volunteerId}")
+    public ResponseEntity<Volunteer> getVolunteer(@PathVariable ID volunteerId) {
+        Volunteer volunteer = volunteerService.getVolunteerById(volunteerId);
+        return volunteer != null ? ResponseEntity.ok(volunteer) : ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{volunteerId}/roles")
+    public ResponseEntity<Void> changeRole(@PathVariable ID volunteerId, @RequestBody AdminRequest request, @RequestParam String role) {
+        if (volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        if (volunteerRepository.existsById(volunteerId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
 
-        if (volunteer.isPresent()) {
-            Volunteer vol = volunteer.get();
-            roleService.assignRole(vol, VolunteerRole.valueOf(role));
-
-            logService.logVolunteer(vol, EventType.UPDATE, "Promoted by admin with id: " + request.adminId());
-
+        Errors result = volunteerService.assignRole(volunteerId, Position.valueOf(role));
+        if (result == Errors.SUCCESS) {
+            logService.logVolunteer(null, EventType.UPDATE, "Promoted by admin with id: " + request.adminId());
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
     }
 
-    @DeleteMapping("/{idVolunteer}")
-    public ResponseEntity<Void> deleteVolunteer(@PathVariable Long idVolunteer, @RequestBody AdminRequest request) {
-        if (!volunteerRepository.existsByVolunteerIdAndRole(request.adminId(), VolunteerRole.ADMIN)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        Optional<Volunteer> volunteer = volunteerRepository.findById(idVolunteer);
-        if (volunteer.isPresent()) {
-            volunteerRepository.deleteById(idVolunteer);
-
-            logService.logVolunteer(volunteer.get(), EventType.DELETE, "Volunteer deleted by admin with id: " + request.adminId());
-
+    @PutMapping("/{volunteerId}/details")
+    public ResponseEntity<Void> updateVolunteerDetails(@PathVariable ID volunteerId, @RequestBody PersonalData details) {
+        Errors result = volunteerService.editVolunteer(volunteerId, details);
+        if (result == Errors.SUCCESS) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{volunteerId}/availabilities")
+    public ResponseEntity<Void> setAvailabilities(@PathVariable ID volunteerId, @RequestBody List<Availability> availabilities) {
+        Errors result = volunteerService.setAvailabilities(volunteerId, availabilities);
+        if (result == Errors.SUCCESS) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{volunteerId}/availabilities")
+    public ResponseEntity<List<Availability>> getAvailabilities(@PathVariable ID volunteerId) {
+        List<Availability> availabilities = volunteerService.getAvailabilities(volunteerId);
+        return availabilities != null ? ResponseEntity.ok(availabilities) : ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{volunteerId}/duties")
+    public ResponseEntity<Void> assignDuty(@PathVariable ID volunteerId, @RequestBody Duty duty) {
+        Errors result = volunteerService.assignDuty(volunteerId, duty);
+        if (result == Errors.SUCCESS) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{volunteerId}/duties")
+    public ResponseEntity<List<Duty>> getDuties(@PathVariable ID volunteerId) {
+        List<Duty> duties = volunteerService.getDuties(volunteerId);
+        return duties != null ? ResponseEntity.ok(duties) : ResponseEntity.notFound().build();
     }
 
 }

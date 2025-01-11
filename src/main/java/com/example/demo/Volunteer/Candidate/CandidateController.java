@@ -3,8 +3,8 @@ package com.example.demo.Volunteer.Candidate;
 
 import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
-import com.example.demo.Volunteer.User.UserRepository;
-import com.example.demo.Volunteer.Role.VolunteerRole;
+import com.example.demo.Model.ID;
+import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.VolunteerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,8 +30,8 @@ public class CandidateController {
     }
 
     @GetMapping("")
-    public ResponseEntity<List<Candidate>> getCandidates(@RequestParam Long recruiterId) {
-        if (!volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)) {
+    public ResponseEntity<List<Candidate>> getCandidates(@RequestParam ID recruiterId) {
+        if (volunteerRepository.existsByIdAndPosition(recruiterId, Position.RECRUITER)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
@@ -45,8 +45,8 @@ public class CandidateController {
 
 
     @GetMapping("/{idCandidate}")
-    public ResponseEntity<Candidate> getCandidate(@PathVariable long idCandidate, @RequestParam Long recruiterId) { //DONE
-        if (!volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)) {
+    public ResponseEntity<Candidate> getCandidate(@PathVariable long idCandidate, @RequestParam ID recruiterId) { //DONE
+        if (volunteerRepository.existsByIdAndPosition(recruiterId, Position.RECRUITER)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         Optional<Candidate> candidate = candidateRepository.findById(idCandidate);
@@ -65,7 +65,7 @@ public class CandidateController {
     }
 
     @PostMapping("{idCandidate}/accept")
-    public ResponseEntity<Candidate> acceptCandidate(@PathVariable long idCandidate, @RequestParam Long recruiterId) {
+    public ResponseEntity<Candidate> acceptCandidate(@PathVariable long idCandidate, @RequestParam ID recruiterId) {
         Optional<Candidate> candidate = candidateRepository.findById(idCandidate);
         if (candidate.isPresent()) {
             candidateService.acceptCandidate(idCandidate, recruiterId);
@@ -79,8 +79,8 @@ public class CandidateController {
     }
 
     @DeleteMapping("{idCandidate}/refuse")
-    public ResponseEntity<Candidate> refuseCandidate(@PathVariable long idCandidate, @RequestParam Long recruiterId) {
-        if (!volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)) {
+    public ResponseEntity<Candidate> refuseCandidate(@PathVariable long idCandidate, @RequestParam ID recruiterId) {
+        if (volunteerRepository.existsByIdAndPosition(recruiterId, Position.RECRUITER)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         Optional<Candidate> candidate = candidateRepository.findById(idCandidate);
