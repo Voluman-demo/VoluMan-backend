@@ -2,37 +2,51 @@ package com.example.demo.Action;
 
 import com.example.demo.Model.Errors;
 import com.example.demo.Model.ID;
-import com.example.demo.Model.Language.LangISO;
-import com.example.demo.Volunteer.Volunteer;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.example.demo.Volunteer.User.User;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
-interface Actions {
+public interface Actions {
+    LocalDate noDate = LocalDate.of(1970, 1, 1);
 
-    Errors addAction(SingleAction a);
-    Errors remAction(ID id);
-    Errors updAction(ID id, SingleAction a);
-    Errors setMy(Volunteer v, ID d);
-    Errors setRejected(Volunteer v, ID d);
-    Errors setUndecided(Volunteer v, ID d);
-    Errors setLanguage(LangISO lang, ID d);
+    ID create();
 
-    ArrayList<SingleAction> getAllActions(LangISO lang);
-//    ArrayList<SingleAction> getMyActions(Long volunteerId);
-//    ArrayList<SingleAction> getRejectedActions(Long volunteerId);
-//    ArrayList<SingleAction> getUndecidedActions(Long volunteerId);
+    Errors remove(ID actionId);
 
+    Errors setBeg(ID actionId, LocalDate beginDate);
 
-    default <T> ResponseEntity<?> isError(Errors error, T body) {
-        return switch (error) {
-            case SUCCESS -> (body != null)
-                    ? ResponseEntity.ok(body)
-                    : ResponseEntity.ok().build();
-            case NOT_FOUND -> ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-            case FAILURE -> ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        };
-    }
+    Errors setEnd(ID actionId, LocalDate endDate);
+
+    LocalDate getBeg(ID actionId);
+
+    LocalDate getEnd(ID actionId);
+
+    Errors setDesc(ID actionId, Lang language, Description description);
+
+    Errors remDesc(ID actionId, Lang language);
+
+    Description getDesc(ID actionId, Lang language);
+
+    ArrayList<ID> getAllIds();
+
+    ArrayList<Description> getAllDesc(Lang language);
+
+    Errors setStronglyMine(User user, ID actionId);
+
+    Errors setWeaklyMine(User user, ID actionId);
+
+    Errors setRejected(User user, ID actionId);
+
+    Errors setUndecided(User user, ID actionId);
+
+    ArrayList<Description> getStronglyMine(User user);
+
+    ArrayList<Description> getWeaklyMine(User user);
+
+    ArrayList<Description> getRejected(User user);
+
+    ArrayList<Description> getUndecided(User user);
+
+    Errors isError();
 }
-

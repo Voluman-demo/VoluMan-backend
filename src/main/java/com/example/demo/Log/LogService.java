@@ -2,7 +2,6 @@ package com.example.demo.Log;
 
 import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Candidate.Candidate;
-import com.example.demo.Volunteer.PersonalData;
 import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerRepository;
 import org.springframework.stereotype.Service;

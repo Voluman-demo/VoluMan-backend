@@ -2,12 +2,11 @@ package com.example.demo.Action;
 
 import com.example.demo.Model.Errors;
 import com.example.demo.Model.ID;
-import com.example.demo.Model.Language.LangISO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-
 
 @RestController
 @RequestMapping("/actions")
@@ -19,45 +18,85 @@ public class ActionController {
         this.actionService = actionService;
     }
 
+    @GetMapping("")
+    public ResponseEntity<ArrayList<ID>> getActions() {
+        return ResponseEntity.ok(actionService.getAllIds());
+    }
+
+    @GetMapping("/{actionId}")
+    public ResponseEntity<Action> getAction(@PathVariable ID actionId) {
+        Action action = actionService.getAction(actionId);
+        if (action != null) {
+            return ResponseEntity.ok(action);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{actionId}/desc")
+    public ResponseEntity<ArrayList<Version>> getActionDesc(@PathVariable ID actionId) {
+        Action action = actionService.getAction(actionId);
+        if (action != null) {
+            return ResponseEntity.ok(new ArrayList<>(action.getDescr().values()));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{actionId}/heading")
+    public ResponseEntity<String> getActionHeading(@PathVariable ID actionId, @RequestParam Lang language) {
+        Description description = actionService.getDesc(actionId, language);
+        if (description != null) {
+            return ResponseEntity.ok(description.getFullName());
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @PostMapping("")
-    public ResponseEntity<?> addAction(@RequestBody SingleAction request) {
-        Errors result = actionService.addAction(request);
-        return actionService.isError(result, null);
+    public ResponseEntity<ID> addAction(@RequestBody Action newAction) {
+        ID id = actionService.create();
+        Errors result = actionService.updateAction(id, newAction);
+        if(result == Errors.SUCCESS){
+            return ResponseEntity.status(201).body(id);
+        }
+        return ResponseEntity.internalServerError().body(id);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> removeAction(@PathVariable int id) {
-        Errors result = actionService.remAction(new ID(id));
-        return actionService.isError(result, null);
+    @DeleteMapping("/{actionId}")
+    public ResponseEntity<Void> deleteAction(@PathVariable ID actionId) {
+        Errors result = actionService.remove(actionId);
+        if (result == Errors.SUCCESS) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> updateAction(@PathVariable int id, @RequestBody SingleAction request) {
-        Errors result = actionService.updAction(new ID(id), request);
-        return actionService.isError(result, null);
+    @PutMapping("/{actionId}/desc")
+    public ResponseEntity<String> changeDesc(
+            @PathVariable ID actionId,
+            @RequestParam Lang language,
+            @RequestBody Description newDesc
+    ) {
+        Errors result = actionService.setDesc(actionId, language, newDesc);
+        if (result == Errors.SUCCESS) {
+            return ResponseEntity.ok("Description updated successfully.");
+        }
+        return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/all/{lang}")
-    public ResponseEntity<?> getAllActions(@PathVariable LangISO lang) {
-        ArrayList<SingleAction> actions = actionService.getAllActions(lang);
-        return actionService.isError(actions.isEmpty() ? Errors.NOT_FOUND : Errors.SUCCESS, actions);
+    @PutMapping("/{actionId}/begin")
+    public ResponseEntity<String> setBegin(@PathVariable ID actionId, @RequestParam LocalDate begin) {
+        Errors result = actionService.setBeg(actionId, begin);
+        if (result == Errors.SUCCESS) {
+            return ResponseEntity.ok("Begin date set successfully.");
+        }
+        return ResponseEntity.notFound().build();
     }
 
-//    @GetMapping("/my/{volunteerId}")
-//    public ResponseEntity<?> getMyActions(@PathVariable Long volunteerId) {
-//        ArrayList<SingleAction> actions = actionService.getMyActions(volunteerId);
-//        return actionService.isError(actions.isEmpty() ? Errors.NOT_FOUND : Errors.SUCCESS, actions);
-//    }
-//
-//    @GetMapping("/rejected/{volunteerId}")
-//    public ResponseEntity<?> getRejectedActions(@PathVariable Long volunteerId) {
-//        ArrayList<SingleAction> actions = actionService.getRejectedActions(volunteerId);
-//        return actionService.isError(actions.isEmpty() ? Errors.NOT_FOUND : Errors.SUCCESS, actions);
-//    }
-//
-//    @GetMapping("/undecided/{volunteerId}")
-//    public ResponseEntity<?> getUndecidedActions(@PathVariable Long volunteerId) {
-//        ArrayList<SingleAction> actions = actionService.getUndecidedActions(volunteerId);
-//        return actionService.isError(actions.isEmpty() ? Errors.NOT_FOUND : Errors.SUCCESS, actions);
-//    }
+    @PutMapping("/{actionId}/end")
+    public ResponseEntity<String> setEnd(@PathVariable ID actionId, @RequestParam LocalDate end) {
+        Errors result = actionService.setEnd(actionId, end);
+        if (result == Errors.SUCCESS) {
+            return ResponseEntity.ok("End date set successfully.");
+        }
+        return ResponseEntity.notFound().build();
+    }
 }

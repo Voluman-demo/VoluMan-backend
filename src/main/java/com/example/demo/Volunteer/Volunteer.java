@@ -1,6 +1,7 @@
 package com.example.demo.Volunteer;
 
-import com.example.demo.Action.SingleAction;
+import com.example.demo.Action.Action;
+import com.example.demo.Action.Version;
 import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Duty.Duty;
@@ -53,10 +54,10 @@ public class Volunteer extends PersonalData {
     @JoinTable(
             name = "volunteer_action",
             joinColumns = @JoinColumn(name = "volunteer_id"),
-            inverseJoinColumns = @JoinColumn(name = "single_action_id")
+            inverseJoinColumns = @JoinColumn(name = "action_id")
     )
     @JsonIgnore
-    private Set<SingleAction> actions;
+    private Set<Action> actions;
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference

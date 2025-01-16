@@ -1,7 +1,9 @@
 package com.example.demo.Volunteer;
 
+import com.example.demo.Action.Action;
 import com.example.demo.Action.ActionRepository;
-import com.example.demo.Action.SingleAction;
+import com.example.demo.Action.ActionService;
+import com.example.demo.Action.Version;
 import com.example.demo.Model.Errors;
 import com.example.demo.Model.ID;
 import com.example.demo.Model.PreferenceType;
@@ -22,11 +24,13 @@ public class VolunteerService implements Volunteers {
     private final VolunteerRepository volunteerRepository;
     private final ActionRepository actionRepository;
     private final PositionService PositionService;
+    private final ActionService actionService;
 
-    public VolunteerService(VolunteerRepository volunteerRepository, ActionRepository actionRepository, PositionService PositionService) {
+    public VolunteerService(VolunteerRepository volunteerRepository, ActionRepository actionRepository, PositionService PositionService, ActionService actionService) {
         this.volunteerRepository = volunteerRepository;
         this.actionRepository = actionRepository;
         this.PositionService = PositionService;
+        this.actionService = actionService;
     }
 
     @Override
@@ -102,7 +106,7 @@ public class VolunteerService implements Volunteers {
             Preferences preferences = new Preferences();
 
             // Przenieś wszystkie akcje do "Undecided" TODO: zmienić potem na action
-            List<SingleAction> allActions = actionRepository.findAll();
+            List<Action> allActions = actionService.getAllActions();
             preferences.getU().addAll(allActions);
 
             vol.setPreferences(preferences);

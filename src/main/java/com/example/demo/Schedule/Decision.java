@@ -1,7 +1,8 @@
 package com.example.demo.Schedule;
 
 public enum Decision {
-    T,
-    R,
-    N
+    S, //Strongly Mine
+    W, //Weakly Mine
+    R, //Rejected
+    U //Undecided
 }

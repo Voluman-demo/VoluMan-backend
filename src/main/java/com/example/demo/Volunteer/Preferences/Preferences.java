@@ -1,7 +1,7 @@
 package com.example.demo.Volunteer.Preferences;
 
 import com.example.demo.Action.Action;
-import com.example.demo.Action.SingleAction;
+import com.example.demo.Action.Version;
 import com.example.demo.Model.ID;
 import jakarta.persistence.*;
 import lombok.*;
@@ -54,7 +54,7 @@ public class Preferences {
             joinColumns = @JoinColumn(name = "preference_id"),
             inverseJoinColumns = @JoinColumn(name = "action_id")
     )
-    private Set<SingleAction> U;
+    private Set<Action> U;
 
     @PrePersist
     public void initializeDefaults() {

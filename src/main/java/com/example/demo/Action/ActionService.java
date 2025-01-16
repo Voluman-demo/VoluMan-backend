@@ -2,133 +2,201 @@ package com.example.demo.Action;
 
 import com.example.demo.Model.Errors;
 import com.example.demo.Model.ID;
-import com.example.demo.Model.Language.LangISO;
-import com.example.demo.Volunteer.*;
-import org.springframework.http.ResponseEntity;
+import com.example.demo.Volunteer.User.User;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 
 @Service
 public class ActionService implements Actions {
-
     private final ActionRepository actionRepository;
-    private final VolunteerService volunteerService;
 
-    public ActionService(ActionRepository actionRepository, VolunteerService volunteerService) {
+    private final HashMap<ID, Action> actions = new HashMap<>();
+    private int currentId = 1;
+
+    public ActionService(ActionRepository actionRepository) {
         this.actionRepository = actionRepository;
-        this.volunteerService = volunteerService;
     }
 
     @Override
-    public Errors addAction(SingleAction action) {
-        try {
-            SingleAction newAction = new SingleAction();
-            newAction.setShortName(action.getShortName());
-            newAction.setFullName(action.getFullName());
-            newAction.setPlace(action.getPlace());
-            newAction.setDescription(action.getDescription());
-            newAction.setActionEnd(action.getActionBeg());
-            newAction.setActionEnd(action.getActionEnd());
-            newAction.setRoles(action.getRoles());
-            newAction.setLanguages(action.getLanguages());
-
-            actionRepository.save(newAction);
-            return Errors.SUCCESS;
-        } catch (Exception e) {
-            return Errors.FAILURE;
-        }
-    }
-
-
-    @Override
-    public Errors setMy(Volunteer v, ID d) {
-        return null;
+    public ID create() {
+        ID id = new ID(currentId++);
+        Action action = new Action();
+        actions.put(id, action);
+        return id;
     }
 
     @Override
-    public Errors setRejected(Volunteer v, ID d) {
-        return null;
-    }
-
-    @Override
-    public Errors setUndecided(Volunteer v, ID d) {
-        return null;
-    }
-
-    @Override
-    public Errors setLanguage(LangISO lang, ID d) {
-        return null;
-    }
-
-    @Override
-    public Errors remAction(ID id) {
-        if (actionRepository.existsById((long) id.getId())) {
-            actionRepository.deleteById((long) id.getId());
+    public Errors remove(ID actionId) {
+        if (actions.containsKey(actionId)) {
+            actions.remove(actionId);
             return Errors.SUCCESS;
         }
         return Errors.NOT_FOUND;
     }
 
     @Override
-    public Errors updAction(ID id, SingleAction action) {
-        Optional<SingleAction> optionalAction = actionRepository.findById((long) id.getId());
-        if (optionalAction.isPresent()) {
-            SingleAction existingAction = optionalAction.get();
-            existingAction.setShortName(action.getShortName());
-            existingAction.setFullName(action.getFullName());
-            existingAction.setPlace(action.getPlace());
-            existingAction.setDescription(action.getDescription());
-            existingAction.setActionBeg(action.getActionBeg());
-            existingAction.setActionEnd(action.getActionEnd());
-            existingAction.setRoles(action.getRoles());
-            existingAction.setLanguages(action.getLanguages());
-            actionRepository.save(existingAction);
+    public Errors setBeg(ID actionId, LocalDate beginDate) {
+        Action action = actions.get(actionId);
+        if (action != null) {
+            action.setBegin(beginDate);
             return Errors.SUCCESS;
         }
         return Errors.NOT_FOUND;
     }
 
     @Override
-    public ArrayList<SingleAction> getAllActions(LangISO lang) {
-        List<SingleAction> actions = actionRepository.findAll().stream()
-                .filter(action -> action.getLanguages().contains(lang))
-                .toList();
-
-        return new ArrayList<>(actions);
+    public Errors setEnd(ID actionId, LocalDate endDate) {
+        Action action = actions.get(actionId);
+        if (action != null) {
+            action.setEnd(endDate);
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
     }
-
-//    @Override
-//    public ArrayList<SingleAction> getMyActions(Long volunteerId) {
-//        return getFilteredActions(volunteerId, Action::getVolunteers);
-//    }
-
-//    @Override
-//    public ArrayList<SingleAction> getRejectedActions(Long volunteerId) {
-//        return getFilteredActions(volunteerService.findVolunteerById(volunteerId), Action::getDetermined);
-//    }
-//
-//    @Override
-//    public ArrayList<SingleAction> getUndecidedActions(Long volunteerId) {
-//        return new ArrayList<>(actionRepository.findAll().stream()
-//                .filter(singleAction -> !singleAction.get().stream()
-//                        .anyMatch(v -> v.getVolunteerId().equals(volunteer.getVolunteerId())))
-//                .toList());
-//    }
 
     @Override
-    public <T> ResponseEntity<?> isError(Errors error, T body) {
-        return Actions.super.isError(error, body);
+    public LocalDate getBeg(ID actionId) {
+        Action action = actions.get(actionId);
+        return action != null ? action.getBegin() : null;
     }
 
-    private ArrayList<Object> getFilteredActions(Volunteer volunteer, Function<SingleAction, Set<Volunteer>> selector) {
-        return new ArrayList<>(actionRepository.findAll().stream()
-                .filter(action -> selector.apply(action).stream()
-                        .anyMatch(v -> v.getId().equals(volunteer.getId())))
-                .toList());
+    @Override
+    public LocalDate getEnd(ID actionId) {
+        Action action = actions.get(actionId);
+        return action != null ? action.getEnd() : null;
+    }
+
+    @Override
+    public Errors setDesc(ID actionId, Lang language, Description description) {
+        Action action = actions.get(actionId);
+        if (action != null) {
+            action.getDescr().put(language, description);
+            action.getDescr().get(language).setValid(true);
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
+    }
+
+    @Override
+    public Errors remDesc(ID actionId, Lang language) {
+        Action action = actions.get(actionId);
+        if (action != null && action.getDescr().containsKey(language)) {
+            action.getDescr().get(language).setValid(false);
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
+    }
+
+    @Override
+    public Description getDesc(ID actionId, Lang language) {
+        Action action = actions.get(actionId);
+        if (action != null) {
+            Version version = action.getDescr().get(language);
+            if (version != null && version.isValid()) {
+                Description description = new Description();
+                description.setFullName(version.getFullName());
+                description.setShortName(version.getShortName());
+                description.setPlace(version.getPlace());
+                description.setAddress(version.getAddress());
+                description.setDescription(version.getDescription());
+                description.setHours(version.getHours());
+                description.setRoles(version.getRoles());
+                description.setBegin(action.getBegin());
+                description.setEnd(action.getEnd());
+                return description;
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public ArrayList<ID> getAllIds() {
+        return new ArrayList<>(actions.keySet());
+    }
+
+    @Override
+    public ArrayList<Description> getAllDesc(Lang language) {
+        ArrayList<Description> descriptions = new ArrayList<>();
+        for (Action action : actions.values()) {
+            Description desc = getDesc(new ID(action.getActionId().getId()), language);
+            if (desc != null) {
+                descriptions.add(desc);
+            }
+        }
+        return descriptions;
+    }
+
+
+
+    @Override
+    public Errors setStronglyMine(User user, ID actionId) {
+        // Implementation for setting action as StronglyMine for a user
+        return Errors.SUCCESS;
+    }
+
+    @Override
+    public Errors setWeaklyMine(User user, ID actionId) {
+        // Implementation for setting action as WeaklyMine for a user
+        return Errors.SUCCESS;
+    }
+
+    @Override
+    public Errors setRejected(User user, ID actionId) {
+        // Implementation for setting action as Rejected for a user
+        return Errors.SUCCESS;
+    }
+
+    @Override
+    public Errors setUndecided(User user, ID actionId) {
+        // Implementation for setting action as Undecided for a user
+        return Errors.SUCCESS;
+    }
+
+    @Override
+    public ArrayList<Description> getStronglyMine(User user) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public ArrayList<Description> getWeaklyMine(User user) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public ArrayList<Description> getRejected(User user) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public ArrayList<Description> getUndecided(User user) {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public Errors isError() {
+        return Errors.SUCCESS;
+    }
+
+    public Errors updateAction(ID actionId, Action newAction) {
+        Action action = actions.get(actionId);
+        if (action != null) {
+            action.setBegin(newAction.getBegin());
+            action.setEnd(newAction.getEnd());
+            action.setDescr(newAction.getDescr());
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
+    }
+
+    public Action getAction(ID actionId) {
+        return actions.get(actionId);
+    }
+
+    public List<Action> getAllActions() {
+        return actionRepository.findAll();
     }
 }
