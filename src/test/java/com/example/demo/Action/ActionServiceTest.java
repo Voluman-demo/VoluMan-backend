@@ -104,7 +104,7 @@ public class ActionServiceTest {
 
     @Test
     public void testSetDesc_ActionExists() {
-        // Arrange: Create an action and initialize necessary data
+
         ID actionId = actionService.create();
         Lang language = Lang.EN;
 
@@ -112,16 +112,17 @@ public class ActionServiceTest {
         description.setFullName("Test Action");
 
 
-        // Act: Set the description for the action
+
         Errors result = actionService.setDesc(actionId, language, description);
 
-        // Assert: Validate the result and ensure the description is set correctly
+
         assertEquals(Errors.SUCCESS, result, "Setting the description should return SUCCESS.");
 
         Description retrievedDesc = actionService.getDesc(actionId, language);
 
 
         assertNotNull(retrievedDesc, "The retrieved description should not be null.");
+        //TODO ogarnac czemu zmienia valid
         assertEquals(true, retrievedDesc.isValid(), "The retrieved description should be valid.");
         assertEquals("Test Action", retrievedDesc.getFullName(), "The fullName should match the set value.");
     }
@@ -139,33 +140,33 @@ public class ActionServiceTest {
 
     @Test
     public void testRemDesc_ActionExists() {
-        // Arrange: Create an action and add it to the service
-        ID testActionId = actionService.create(); // Create an action with a generated ID
+
+        ID testActionId = actionService.create();
         Lang language = Lang.EN;
 
-        // Add a valid description for the action
+
         Description description = new Description();
         description.setValid(true);
         description.setFullName("Test Action Full Name");
         Errors setDescResult = actionService.setDesc(testActionId, language, description);
         assertEquals(Errors.SUCCESS, setDescResult);
 
-        // Act: Remove the description
+
         Errors result = actionService.remDesc(testActionId, language);
 
-        // Assert: Check the result
+
         assertEquals(Errors.SUCCESS, result);
 
-        // Validate that the description is now invalid
-        Action action = actionService.getAction(testActionId);
-        assertNotNull(action); // Ensure the action exists
-        Version version = action.getDescr().get(language); // Get the version directly
-        assertNotNull(version); // Ensure the version still exists
-        assertFalse(version.isValid()); // Ensure the version is marked as invalid
 
-        // Verify that getDesc no longer returns the description
+        Action action = actionService.getAction(testActionId);
+        assertNotNull(action);
+        Version version = action.getDescr().get(language);
+        assertNotNull(version);
+        assertFalse(version.isValid());
+
+
         Description updatedDesc = actionService.getDesc(testActionId, language);
-        assertNull(updatedDesc); // getDesc should return null if the version is invalid
+        assertNull(updatedDesc);
     }
 
 
