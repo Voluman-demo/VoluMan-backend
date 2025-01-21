@@ -14,6 +14,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
@@ -91,4 +92,11 @@ public class Volunteer extends PersonalData {
         }
     }
 
+    public double calculateActualWeeklyHours(LocalDate startOfWeek, LocalDate endOfWeek) {
+         this.actualWeeklyHours = duties.stream()
+                .filter(duty -> !duty.getDate().isBefore(startOfWeek) && !duty.getDate().isAfter(endOfWeek))
+                .mapToDouble(Duty::getTotalDurationHours)
+                .sum();
+         return this.actualWeeklyHours;
+    }
 }

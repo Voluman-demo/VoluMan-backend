@@ -1,6 +1,7 @@
 package com.example.demo.Schedule.ScheduleDto;
 
 
+import com.example.demo.Model.ID;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,7 +12,7 @@ import java.util.List;
 @Getter
 @Setter
 public class ActionNeedRequest {
-    private Long leaderId;
+    private ID leaderId;
     private List<DayRequest> days;
 
     @Getter

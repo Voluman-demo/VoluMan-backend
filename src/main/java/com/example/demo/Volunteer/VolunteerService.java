@@ -14,6 +14,7 @@ import com.example.demo.Volunteer.Position.PositionService;
 import com.example.demo.Volunteer.Preferences.Preferences;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -179,4 +180,10 @@ public class VolunteerService implements Volunteers {
         return volunteerRepository.existsByEmail(email);
     }
 
+    public double calculateActualWeeklyHours(ID volId, LocalDate startOfWeek, LocalDate endOfWeek) {
+        return getDuties(volId).stream()
+                .filter(duty -> !duty.getDate().isBefore(startOfWeek) && !duty.getDate().isAfter(endOfWeek))
+                .mapToDouble(Duty::getTotalDurationHours)
+                .sum();
+    }
 }

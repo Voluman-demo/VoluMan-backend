@@ -1,45 +1,280 @@
-//package com.example.demo.Schedule;
-//
-//import com.example.demo.Action.Action;
-//import com.example.demo.Action.ActionDto.ActionDto;
-//import com.example.demo.Action.ActionDto.ActionScheduleDto;
-//import com.example.demo.Action.ActionRepository;
-//import com.example.demo.Action.ActionService;
-//import com.example.demo.Action.Demand.Demand;
-//import com.example.demo.Action.Demand.DemandDto;
-//import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
-//import com.example.demo.Action.Demand.DemandInterval.DemandIntervalDto;
-//import com.example.demo.Action.Demand.DemandRepository;
-//import com.example.demo.Action.Demand.DemandService;
-//import com.example.demo.Action.SingleAction;
-//import com.example.demo.Schedule.ScheduleDto.*;
-//import com.example.demo.Volunteer.Availability.Availability;
-//import com.example.demo.Volunteer.Availability.AvailabilityDTO.VolunteerAvailRequest;
-//import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
-//import com.example.demo.Volunteer.Availability.AvailabilityService;
-//import com.example.demo.Volunteer.Duty.Duty;
-//import com.example.demo.Volunteer.Duty.DutyInterval.DutyInterval;
-//import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalDto;
-//import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalStatus;
-//import com.example.demo.Volunteer.Duty.DutyRepository;
-//import com.example.demo.Volunteer.Duty.DutyService;
-//import com.example.demo.Volunteer.Preferences.Preferences;
-//import com.example.demo.Volunteer.Role.VolunteerRole;
-//import com.example.demo.Volunteer.Volunteer;
-//import com.example.demo.Volunteer.VolunteerDto.VolunteerDto;
-//import com.example.demo.Volunteer.VolunteerRepository;
-//import com.example.demo.Volunteer.VolunteerService;
-//import jakarta.transaction.Transactional;
-//import org.springframework.stereotype.Service;
-//
-//import java.time.DayOfWeek;
-//import java.time.Duration;
-//import java.time.LocalDate;
-//import java.time.LocalTime;
-//import java.time.temporal.TemporalAdjusters;
-//import java.time.temporal.WeekFields;
-//import java.util.*;
-//import java.util.stream.Collectors;
+package com.example.demo.Schedule;
+
+import com.example.demo.Action.Action;
+import com.example.demo.Action.ActionDto.ActionScheduleDto;
+import com.example.demo.Action.ActionRepository;
+import com.example.demo.Action.Demand.Demand;
+import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
+import com.example.demo.Action.Demand.DemandService;
+import com.example.demo.Model.Errors;
+import com.example.demo.Model.ID;
+import com.example.demo.Schedule.ScheduleDto.ModifyScheduleRequest;
+import com.example.demo.Volunteer.Availability.Availability;
+import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
+import com.example.demo.Volunteer.Availability.AvailabilityService;
+import com.example.demo.Volunteer.Duty.Duty;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyInterval;
+import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalStatus;
+import com.example.demo.Volunteer.Duty.DutyService;
+import com.example.demo.Volunteer.Preferences.Preferences;
+import com.example.demo.Volunteer.Volunteer;
+import com.example.demo.Volunteer.VolunteerRepository;
+import com.example.demo.Volunteer.VolunteerService;
+import org.springframework.stereotype.Service;
+
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.temporal.TemporalAdjusters;
+import java.util.*;
+import java.util.stream.Collectors;
+
+
+@Service
+public class ScheduleService implements Schedules {
+    private final DemandService demandService;
+    private final AvailabilityService availabilityService;
+    private final VolunteerRepository volunteerRepository;
+    private final ActionRepository actionRepository;
+    private final DutyService dutyService;
+    private final ScheduleRepository scheduleRepository;
+    private final VolunteerService volunteerService;
+
+    public ScheduleService(DemandService demandService,
+                           AvailabilityService availabilityService,
+                           VolunteerRepository volunteerRepository,
+                           ActionRepository actionRepository,
+                           DutyService dutyService,
+                           ScheduleRepository scheduleRepository, VolunteerService volunteerService) {
+        this.demandService = demandService;
+        this.availabilityService = availabilityService;
+        this.volunteerRepository = volunteerRepository;
+        this.actionRepository = actionRepository;
+        this.dutyService = dutyService;
+        this.scheduleRepository = scheduleRepository;
+        this.volunteerService = volunteerService;
+    }
+
+    private final Map<ID, Schedule> schedules = new HashMap<>();
+    private int currentId = 1;
+
+    @Override
+    public ID createSchedule(Action action, LocalDate startDate, LocalDate endDate) {
+        Errors validationResult = validateScheduleDates(startDate, endDate);
+        if (validationResult != Errors.SUCCESS) {
+            return null;
+        }
+
+        ID scheduleId = new ID(currentId++);
+        Schedule schedule = new Schedule(startDate, endDate);
+        schedules.put(scheduleId, schedule);
+        return scheduleId;
+    }
+
+    @Override
+    public Schedule getScheduleById(ID scheduleId) {
+        return schedules.get(scheduleId);
+    }
+
+    @Override
+    public Errors deleteSchedule(ID scheduleId) {
+        if (schedules.containsKey(scheduleId)) {
+            schedules.remove(scheduleId);
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
+    }
+
+    @Override
+    public Errors generateSchedule(LocalDate weekStart) {
+        LocalDate startOfWeek = weekStart.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate endOfWeek = startOfWeek.plusDays(6);
+
+        Schedule schedule = new Schedule(startOfWeek, endOfWeek);
+        List<Duty> generatedDuties = new ArrayList<>();
+        List<Action> allActions = actionRepository.findAll();
+        schedule.setActions(allActions);
+
+        for (LocalDate currentDay = startOfWeek; !currentDay.isAfter(endOfWeek); currentDay = currentDay.plusDays(1)) {
+            System.out.println("Processing date: " + currentDay);
+
+            List<Availability> availabilities = availabilityService.getAvailabilitiesForDay(currentDay);
+            List<Demand> demands = demandService.getDemandsForDay(currentDay);
+
+            if (demands.isEmpty() || availabilities.isEmpty()) {
+                System.out.println("No demands or availabilities for " + currentDay);
+                continue;
+            }
+
+            for (Demand demand : demands) {
+                Set<Volunteer> interestedVolunteers = getInterestedVolunteersForAction(demand.getAction().getActionId());
+
+                List<Availability> filteredAvailabilities = availabilities.stream()
+                        .filter(availability -> interestedVolunteers.contains(availability.getVolunteer()))
+                        .collect(Collectors.toList());
+
+                for (DemandInterval demandInterval : demand.getDemandIntervals()) {
+                    List<Availability> matchingAvailabilities = filteredAvailabilities.stream()
+                            .filter(availability -> isAvailabilityMatchingInterval(availability, demandInterval))
+                            .collect(Collectors.toList());
+
+                    for (Availability matchingAvailability : matchingAvailabilities) {
+                        Volunteer volunteer = matchingAvailability.getVolunteer();
+
+                        if (isWithinWeeklyLimit(volunteer, currentDay)) {
+                            Duty duty = createDutyInterval(volunteer, demandInterval);
+                            generatedDuties.add(duty);
+
+                            demandInterval.setCurrentVolunteersNumber(demandInterval.getCurrentVolunteersNumber() + 1);
+
+                            System.out.println("Assigned volunteer " + volunteer.getId() +
+                                    " to demand interval on " + currentDay);
+
+                            if (demandInterval.getCurrentVolunteersNumber() >= demandInterval.getNeedMax()) {
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+            schedule.setDuties(generatedDuties);
+            scheduleRepository.save(schedule);
+        }
+
+        if (schedule != null) {
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
+    }
+
+    @Override
+    public Errors applyHeuristic(Action action, List<Volunteer> volunteers, List<Demand> demands) {
+        // Implementacja heurystyki dla przypisywania wolontariuszy
+        return Errors.SUCCESS;
+    }
+
+    @Override
+    public Errors modifySchedule(ID scheduleId,ModifyScheduleRequest modifications) {
+        Schedule schedule = schedules.get(scheduleId);
+        if (schedule != null) {
+
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
+    }
+
+    @Override
+    public Errors updateDemand(ID actionId, Demand demand) {
+        // Aktualizacja wymagań akcji
+        return Errors.SUCCESS;
+    }
+
+    @Override
+    public Errors adjustAssignments(ID scheduleId) {
+        Schedule schedule = schedules.get(scheduleId);
+        if (schedule != null) {
+            // Zaktualizuj przypisania wolontariuszy
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
+    }
+
+    @Override
+    public Errors assignVolunteerToDuty(ID volunteerId, Duty duty) {
+        // Przypisz wolontariusza do zadania
+        return Errors.SUCCESS;
+    }
+
+    @Override
+    public Errors removeVolunteerFromDuty(ID volunteerId, Duty duty) {
+        // Usuń wolontariusza z zadania
+        return Errors.SUCCESS;
+    }
+
+    @Override
+    public List<Schedule> getVolunteerSchedules(ID volunteerId) {
+        return schedules.values().stream()
+                .filter(schedule -> schedule.getDuties().stream()
+                        .anyMatch(duty -> duty.getVolunteer().getId().equals(volunteerId)))
+                .collect(Collectors.toList());
+    }
+
+    public List<Schedule> getActionSchedules(ID actionId) {
+        return  schedules.values().stream()
+                .filter(schedule -> schedule.getActions().stream()
+                        .anyMatch(action -> action.getActionId().equals(actionId)))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Errors validateScheduleDates(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null || endDate == null || startDate.isAfter(endDate)) {
+            return Errors.INVALID;
+        }
+        return Errors.SUCCESS;
+    }
+
+    private Set<Volunteer> getInterestedVolunteersForAction(ID actionId) {
+        Optional<Action> actionOpt = actionRepository.findById(actionId);
+
+        if (actionOpt.isPresent()) {
+            Action action = actionOpt.get();
+            return volunteerRepository.findAll().stream()
+                    .filter(volunteer -> {
+                        Preferences preferences = volunteer.getPreferences();
+                        return preferences != null &&
+                                (preferences.getS().contains(action) || preferences.getW().contains(action));
+                    })
+                    .collect(Collectors.toSet());
+        }
+
+        return Collections.emptySet();
+    }
+
+    private boolean isAvailabilityMatchingInterval(Availability availability, DemandInterval demandInterval) {
+        return availability.getSlots().stream()
+                .anyMatch(slot -> isSlotMatchingInterval(slot, demandInterval));
+    }
+
+    private boolean isSlotMatchingInterval(AvailabilityInterval slot, DemandInterval demandInterval) {
+        return !slot.getStartTime().isAfter(demandInterval.getStartTime()) &&
+                !slot.getEndTime().isBefore(demandInterval.getEndTime());
+    }
+
+    private boolean isWithinWeeklyLimit(Volunteer volunteer, LocalDate date) {
+        LocalDate startOfWeek = date.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        LocalDate endOfWeek = startOfWeek.plusDays(6);
+        double currentWeeklyLoad = volunteer.calculateActualWeeklyHours(startOfWeek, endOfWeek);
+        return currentWeeklyLoad + 1 <= volunteer.getLimitOfWeeklyHours();
+    }
+
+    private Duty createDutyInterval(Volunteer volunteer, DemandInterval demandInterval) {
+        Duty duty = volunteer.getDuties().stream()
+                .filter(d -> d.getDate().equals(demandInterval.getDemand().getDate()))
+                .findFirst()
+                .orElseGet(() -> {
+                    Duty newDuty = new Duty();
+                    newDuty.setVolunteer(volunteer);
+                    newDuty.setDate(demandInterval.getDemand().getDate());
+                    volunteer.getDuties().add(newDuty);
+                    return newDuty;
+                });
+
+        DutyInterval newInterval = new DutyInterval();
+        newInterval.setStartTime(demandInterval.getStartTime());
+        newInterval.setEndTime(demandInterval.getEndTime());
+        newInterval.setStatus(DutyIntervalStatus.ASSIGNED);
+        newInterval.setDuty(duty);
+
+        duty.getDutyIntervals().add(newInterval);
+        dutyService.addDutyInterval(newInterval, duty);
+
+        return duty;
+    }
+
+
+}
+
+
 //
 //@Service
 //public class ScheduleService {
@@ -212,7 +447,7 @@
 //            Availability availability = availabilityService.getByVolunteerIdAndDate(volunteerId, requestDate);
 //
 //            if (availability.getAvailabilityId() == null) {
-////                availability = new Availability();
+//               availability = new Availability();
 //                availability.setVolunteer(volunteer);
 //                availability.setDate(requestDate);
 //                volunteer.getAvailabilities().add(availability);

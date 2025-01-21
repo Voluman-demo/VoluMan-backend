@@ -15,4 +15,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, ID> {
     boolean existsByIdAndPosition(ID volunteerId, Position position);
 
     boolean existsByEmail(String email);
+
+    Volunteers getVolunteerById(ID volId);
+
 }
