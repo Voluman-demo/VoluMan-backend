@@ -1,28 +1,253 @@
-//package com.example.demo.Action;
-//
-//import com.example.demo.Volunteer.Volunteer;
-//import com.example.demo.Volunteer.VolunteerRepository;
-//import com.example.demo.Volunteer.Role.VolunteerRole;
-//import com.example.demo.Action.ActionDto.AddActionRequest;
-//import com.example.demo.Action.ActionDto.ChangeDescriptionRequest;
-//import com.example.demo.Action.ActionDto.CloseActionRequest;
-//import com.example.demo.Action.ActionDto.DescriptionResponse;
-//import org.junit.jupiter.api.BeforeEach;
-//import org.junit.jupiter.api.Test;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.MockitoAnnotations;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.http.ResponseEntity;
-//
-//import java.time.LocalDate;
-//import java.util.List;
-//import java.util.Objects;
-//import java.util.Optional;
-//
-//import static org.junit.jupiter.api.Assertions.assertEquals;
-//
-//import static org.mockito.Mockito.*;
+package com.example.demo.Action;
+
+import com.example.demo.Model.Errors;
+import com.example.demo.Model.ID;
+import com.example.demo.Volunteer.VolunteerRepository;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+public class ActionControllerTest {
+
+    @InjectMocks
+    private ActionController actionController;
+
+    @Mock
+    private ActionService actionService;
+
+    @Mock
+    private ActionRepository actionRepository;
+
+    @Mock
+    private VolunteerRepository volunteerRepository;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+    }
+
+    @Test
+    public void testGetActions_ReturnsOk_WhenActionsListExists() {
+        ArrayList<ID> actionIds = new ArrayList<>();
+        actionIds.add(new ID(1));
+        when(actionService.getAllIds()).thenReturn(actionIds);
+
+        ResponseEntity<ArrayList<ID>> response = actionController.getActions();
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(actionIds, response.getBody());
+    }
+
+    @Test
+    public void testGetAction_ReturnsOk_WhenActionExists() {
+        Action action = new Action();
+        when(actionService.getAction(new ID(1))).thenReturn(action);
+
+        ResponseEntity<Action> response = actionController.getAction(new ID(1));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(action, response.getBody());
+    }
+
+    @Test
+    public void testGetAction_ReturnsNotFound_WhenActionNotExist() {
+        when(actionService.getAction(new ID(1))).thenReturn(null);
+
+        ResponseEntity<Action> response = actionController.getAction(new ID(1));
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    public void testGetActionDesc_ReturnsOk_WhenActionDescExists() {
+        HashMap<Lang, Description> descriptions = new HashMap<>();
+        descriptions.put(Lang.EN, new Description());
+        Action action = new Action();
+        action.setDescr(descriptions);
+
+        when(actionService.getAction(new ID(1))).thenReturn(action);
+
+        ResponseEntity<ArrayList<Version>> response = actionController.getActionDesc(new ID(1));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(1, response.getBody().size());
+    }
+
+    @Test
+    public void testGetActionDesc_ReturnsNotFound_WhenActionDescNotExist() {
+        when(actionService.getAction(new ID(1))).thenReturn(null);
+
+        ResponseEntity<ArrayList<Version>> response = actionController.getActionDesc(new ID(1));
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    public void testGetActionHeading_ReturnsOk_WhenHeadingExists() {
+        Description description = new Description();
+        description.setFullName("Test Action");
+        when(actionService.getDesc(new ID(1), Lang.EN)).thenReturn(description);
+
+        ResponseEntity<String> response = actionController.getActionHeading(new ID(1), Lang.EN);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Test Action", response.getBody());
+    }
+
+    @Test
+    public void testGetActionHeading_ReturnsNotFound_WhenHeadingNotExist() {
+        when(actionService.getDesc(new ID(1), Lang.EN)).thenReturn(null);
+
+        ResponseEntity<String> response = actionController.getActionHeading(new ID(1), Lang.EN);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    public void testAddAction_ReturnsCreated_WhenActionAddedSuccessfully() {
+        ID actionId = new ID(1);
+        Action newAction = new Action();
+        when(actionService.create()).thenReturn(actionId);
+        when(actionService.updateAction(actionId, newAction)).thenReturn(Errors.SUCCESS);
+
+        ResponseEntity<ID> response = actionController.addAction(newAction);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(actionId, response.getBody());
+    }
+
+    @Test
+    public void testAddAction_ReturnsInternalServerError_WhenActionAdditionFails() {
+        ID actionId = new ID(1);
+        Action newAction = new Action();
+        when(actionService.create()).thenReturn(actionId);
+        when(actionService.updateAction(actionId, newAction)).thenReturn(Errors.FAILURE);
+
+        ResponseEntity<ID> response = actionController.addAction(newAction);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+    }
+
+    @Test
+    public void testChangeDescription_ReturnsOk_WhenDescriptionUpdatedSuccessfully() {
+        Description newDescription = new Description();
+        when(actionService.setDesc(new ID(1), Lang.EN, newDescription)).thenReturn(Errors.SUCCESS);
+
+        ResponseEntity<String> response = actionController.changeDesc(new ID(1), Lang.EN, newDescription);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Description updated successfully.", response.getBody());
+    }
+
+    @Test
+    public void testChangeDescription_ReturnsNotFound_WhenDescriptionUpdateFails() {
+        Description newDescription = new Description();
+        when(actionService.setDesc(new ID(1), Lang.EN, newDescription)).thenReturn(Errors.NOT_FOUND);
+
+        ResponseEntity<String> response = actionController.changeDesc(new ID(1), Lang.EN, newDescription);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+    @Test
+    public void testDeleteAction_ReturnsOk_WhenActionDeletedSuccessfully() {
+        when(actionService.remove(new ID(1))).thenReturn(Errors.SUCCESS);
+
+        ResponseEntity<Void> response = actionController.deleteAction(new ID(1));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(actionService).remove(new ID(1));
+    }
+
+    @Test
+    public void testDeleteAction_ReturnsNotFound_WhenActionDeletionFails() {
+        when(actionService.remove(new ID(1))).thenReturn(Errors.NOT_FOUND);
+
+        ResponseEntity<Void> response = actionController.deleteAction(new ID(1));
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(actionService).remove(new ID(1));
+    }
+
+    @Test
+    public void testChangeDesc_ReturnsOk_WhenDescriptionUpdatedSuccessfully() {
+        Description newDescription = new Description();
+        when(actionService.setDesc(new ID(1), Lang.EN, newDescription)).thenReturn(Errors.SUCCESS);
+
+        ResponseEntity<String> response = actionController.changeDesc(new ID(1), Lang.EN, newDescription);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Description updated successfully.", response.getBody());
+        verify(actionService).setDesc(new ID(1), Lang.EN, newDescription);
+    }
+
+    @Test
+    public void testChangeDesc_ReturnsNotFound_WhenDescriptionUpdateFails() {
+        Description newDescription = new Description();
+        when(actionService.setDesc(new ID(1), Lang.EN, newDescription)).thenReturn(Errors.NOT_FOUND);
+
+        ResponseEntity<String> response = actionController.changeDesc(new ID(1), Lang.EN, newDescription);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(actionService).setDesc(new ID(1), Lang.EN, newDescription);
+    }
+
+    @Test
+    public void testSetBegin_ReturnsOk_WhenBeginDateSetSuccessfully() {
+        when(actionService.setBeg(new ID(1), LocalDate.of(2025, 1, 1))).thenReturn(Errors.SUCCESS);
+
+        ResponseEntity<String> response = actionController.setBegin(new ID(1), LocalDate.of(2025, 1, 1));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Begin date set successfully.", response.getBody());
+        verify(actionService).setBeg(new ID(1), LocalDate.of(2025, 1, 1));
+    }
+
+    @Test
+    public void testSetBegin_ReturnsNotFound_WhenBeginDateSetFails() {
+        when(actionService.setBeg(new ID(1), LocalDate.of(2025, 1, 1))).thenReturn(Errors.NOT_FOUND);
+
+        ResponseEntity<String> response = actionController.setBegin(new ID(1), LocalDate.of(2025, 1, 1));
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(actionService).setBeg(new ID(1), LocalDate.of(2025, 1, 1));
+    }
+
+    @Test
+    public void testSetEnd_ReturnsOk_WhenEndDateSetSuccessfully() {
+        when(actionService.setEnd(new ID(1), LocalDate.of(2025, 12, 31))).thenReturn(Errors.SUCCESS);
+
+        ResponseEntity<String> response = actionController.setEnd(new ID(1), LocalDate.of(2025, 12, 31));
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("End date set successfully.", response.getBody());
+        verify(actionService).setEnd(new ID(1), LocalDate.of(2025, 12, 31));
+    }
+
+    @Test
+    public void testSetEnd_ReturnsNotFound_WhenEndDateSetFails() {
+        when(actionService.setEnd(new ID(1), LocalDate.of(2025, 12, 31))).thenReturn(Errors.NOT_FOUND);
+
+        ResponseEntity<String> response = actionController.setEnd(new ID(1), LocalDate.of(2025, 12, 31));
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(actionService).setEnd(new ID(1), LocalDate.of(2025, 12, 31));
+    }
+
+}
+
 //
 //public class ActionControllerTest {
 //
