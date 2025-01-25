@@ -190,29 +190,46 @@ public class ActionService implements Actions {
         return Errors.FAILURE;
     }
 
-    @Override
-    public ArrayList<Description> getStronglyMine(User user) {
-        Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
-        return (ArrayList<Description>) volunteer.getPreferences().getS().stream().map(action -> action.getDescr().get(Lang.UK)).toList();
-    }
+
+
 
     @Override
     public ArrayList<Description> getWeaklyMine(User user) {
         Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
-        return (ArrayList<Description>) volunteer.getPreferences().getW().stream().map(action -> action.getDescr().get(Lang.UK)).toList();
+        return volunteer.getPreferences().getW().stream()
+                .map(action -> action.getDescr().get(Lang.UK))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new)); // Explicitly create an ArrayList
     }
+
 
     @Override
     public ArrayList<Description> getRejected(User user) {
         Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
-        return (ArrayList<Description>) volunteer.getPreferences().getR().stream().map(action -> action.getDescr().get(Lang.UK)).toList();
+        return volunteer.getPreferences().getR().stream()
+                .map(action -> action.getDescr().get(Lang.UK))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new)); // Create an ArrayList explicitly
     }
 
     @Override
     public ArrayList<Description> getUndecided(User user) {
         Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
-        return (ArrayList<Description>) volunteer.getPreferences().getU().stream().map(action -> action.getDescr().get(Lang.UK)).toList();
+        return volunteer.getPreferences().getU().stream()
+                .map(action -> action.getDescr().get(Lang.UK))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new)); // Create an ArrayList explicitly
     }
+
+    @Override
+    public ArrayList<Description> getStronglyMine(User user) {
+        Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
+        return volunteer.getPreferences().getS().stream()
+                .map(action -> action.getDescr().get(Lang.UK))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new)); // Create an ArrayList explicitly
+    }
+
 
     @Override
     public Errors isError() {

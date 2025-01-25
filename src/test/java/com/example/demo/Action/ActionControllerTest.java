@@ -2,6 +2,7 @@ package com.example.demo.Action;
 
 import com.example.demo.Model.Errors;
 import com.example.demo.Model.ID;
+import com.example.demo.Volunteer.User.User;
 import com.example.demo.Volunteer.VolunteerRepository;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -244,6 +245,161 @@ public class ActionControllerTest {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         verify(actionService).setEnd(new ID(1), LocalDate.of(2025, 12, 31));
+    }
+    @Test
+    public void testAddStronglyMine_ReturnsOk_WhenPreferenceAddedSuccessfully() {
+        User user = new User();
+        when(actionService.setStronglyMine(user, new ID(1))).thenReturn(Errors.SUCCESS);
+
+        ResponseEntity<String> response = actionController.addStronglyMine(new ID(1), user);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Added to Strongly Mine successfully.", response.getBody());
+        verify(actionService).setStronglyMine(user, new ID(1));
+    }
+
+    @Test
+    public void testAddStronglyMine_ReturnsInternalServerError_WhenPreferenceAdditionFails() {
+        User user = new User();
+        when(actionService.setStronglyMine(user, new ID(1))).thenReturn(Errors.FAILURE);
+
+        ResponseEntity<String> response = actionController.addStronglyMine(new ID(1), user);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Failed to add to Strongly Mine.", response.getBody());
+        verify(actionService).setStronglyMine(user, new ID(1));
+    }
+
+    @Test
+    public void testAddWeaklyMine_ReturnsOk_WhenPreferenceAddedSuccessfully() {
+        User user = new User();
+        when(actionService.setWeaklyMine(user, new ID(1))).thenReturn(Errors.SUCCESS);
+
+        ResponseEntity<String> response = actionController.addWeaklyMine(new ID(1), user);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Added to Weakly Mine successfully.", response.getBody());
+        verify(actionService).setWeaklyMine(user, new ID(1));
+    }
+
+    @Test
+    public void testAddWeaklyMine_ReturnsInternalServerError_WhenPreferenceAdditionFails() {
+        User user = new User();
+        when(actionService.setWeaklyMine(user, new ID(1))).thenReturn(Errors.FAILURE);
+
+        ResponseEntity<String> response = actionController.addWeaklyMine(new ID(1), user);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Failed to add to Weakly Mine.", response.getBody());
+        verify(actionService).setWeaklyMine(user, new ID(1));
+    }
+
+    @Test
+    public void testAddRejected_ReturnsOk_WhenPreferenceAddedSuccessfully() {
+        User user = new User();
+        when(actionService.setRejected(user, new ID(1))).thenReturn(Errors.SUCCESS);
+
+        ResponseEntity<String> response = actionController.addRejected(new ID(1), user);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Added to Rejected successfully.", response.getBody());
+        verify(actionService).setRejected(user, new ID(1));
+    }
+
+    @Test
+    public void testAddRejected_ReturnsInternalServerError_WhenPreferenceAdditionFails() {
+        User user = new User();
+        when(actionService.setRejected(user, new ID(1))).thenReturn(Errors.FAILURE);
+
+        ResponseEntity<String> response = actionController.addRejected(new ID(1), user);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Failed to add to Rejected.", response.getBody());
+        verify(actionService).setRejected(user, new ID(1));
+    }
+
+    @Test
+    public void testAddUndecided_ReturnsOk_WhenPreferenceAddedSuccessfully() {
+        User user = new User();
+        when(actionService.setUndecided(user, new ID(1))).thenReturn(Errors.SUCCESS);
+
+        ResponseEntity<String> response = actionController.addUndecided(new ID(1), user);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("Added to Undecided successfully.", response.getBody());
+        verify(actionService).setUndecided(user, new ID(1));
+    }
+
+    @Test
+    public void testAddUndecided_ReturnsInternalServerError_WhenPreferenceAdditionFails() {
+        User user = new User();
+        when(actionService.setUndecided(user, new ID(1))).thenReturn(Errors.FAILURE);
+
+        ResponseEntity<String> response = actionController.addUndecided(new ID(1), user);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Failed to add to Undecided.", response.getBody());
+        verify(actionService).setUndecided(user, new ID(1));
+    }
+
+    @Test
+    public void testGetStronglyMine_ReturnsOk_WhenPreferencesExist() {
+        User user = new User();
+        ArrayList<Description> descriptions = new ArrayList<>();
+        descriptions.add(new Description());
+
+        when(actionService.getStronglyMine(user)).thenReturn(descriptions);
+
+        ResponseEntity<ArrayList<Description>> response = actionController.getStronglyMine(user);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(descriptions, response.getBody());
+        verify(actionService).getStronglyMine(user);
+    }
+
+    @Test
+    public void testGetWeaklyMine_ReturnsOk_WhenPreferencesExist() {
+        User user = new User();
+        ArrayList<Description> descriptions = new ArrayList<>();
+        descriptions.add(new Description());
+
+        when(actionService.getWeaklyMine(user)).thenReturn(descriptions);
+
+        ResponseEntity<ArrayList<Description>> response = actionController.getWeaklyMine(user);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(descriptions, response.getBody());
+        verify(actionService).getWeaklyMine(user);
+    }
+
+    @Test
+    public void testGetRejected_ReturnsOk_WhenPreferencesExist() {
+        User user = new User();
+        ArrayList<Description> descriptions = new ArrayList<>();
+        descriptions.add(new Description());
+
+        when(actionService.getRejected(user)).thenReturn(descriptions);
+
+        ResponseEntity<ArrayList<Description>> response = actionController.getRejected(user);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(descriptions, response.getBody());
+        verify(actionService).getRejected(user);
+    }
+
+    @Test
+    public void testGetUndecided_ReturnsOk_WhenPreferencesExist() {
+        User user = new User();
+        ArrayList<Description> descriptions = new ArrayList<>();
+        descriptions.add(new Description());
+
+        when(actionService.getUndecided(user)).thenReturn(descriptions);
+
+        ResponseEntity<ArrayList<Description>> response = actionController.getUndecided(user);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(descriptions, response.getBody());
+        verify(actionService).getUndecided(user);
     }
 
 }

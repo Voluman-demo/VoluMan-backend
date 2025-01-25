@@ -286,4 +286,104 @@ public class VolunteerControllerTest {
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
+    @Test
+    public void testChangeRole_ReturnsForbidden_WhenRequesterNotAdmin() {
+        // Arrange
+        ID volunteerId = new ID(1);
+        AdminRequest request = new AdminRequest(new ID(2)); // Admin ID: 2
+        String role = "VOLUNTEER";
+
+        // Mock that the admin requester is not an admin
+        when(volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(false);
+
+        // Act
+        ResponseEntity<Void> response = volunteerController.changeRole(volunteerId, request, role);
+
+        // Assert
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        verify(volunteerRepository, times(1)).existsByIdAndPosition(request.adminId(), Position.ADMIN);
+        verifyNoInteractions(volunteerService); // Ensure service method was not called
+    }
+
+    @Test
+    public void testChangeRole_ReturnsNotFound_WhenVolunteerDoesNotExist() {
+        // Arrange
+        ID volunteerId = new ID(1);
+        AdminRequest request = new AdminRequest(new ID(2)); // Admin ID: 2
+        String role = "VOLUNTEER";
+
+        // Mock that the admin requester is an admin
+        when(volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
+
+        // Mock that the volunteer does not exist
+        when(volunteerRepository.existsById(volunteerId)).thenReturn(false);
+
+        // Act
+        ResponseEntity<Void> response = volunteerController.changeRole(volunteerId, request, role);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(volunteerRepository, times(1)).existsByIdAndPosition(request.adminId(), Position.ADMIN);
+        verify(volunteerRepository, times(1)).existsById(volunteerId);
+        verifyNoInteractions(volunteerService); // Ensure service method was not called
+    }
+
+    @Test
+    public void testChangeRole_ReturnsOk_WhenRoleChangedSuccessfully() {
+        // Arrange
+        ID volunteerId = new ID(1);
+        AdminRequest request = new AdminRequest(new ID(2)); // Admin ID: 2
+        String role = "LEADER";
+
+        // Mock that the admin requester is an admin
+        when(volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
+
+        // Mock that the volunteer exists
+        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
+
+        // Mock the successful role change
+        when(volunteerService.assignPosition(volunteerId, Position.valueOf(role))).thenReturn(Errors.SUCCESS);
+
+        // Act
+        ResponseEntity<Void> response = volunteerController.changeRole(volunteerId, request, role);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        verify(volunteerRepository, times(1)).existsByIdAndPosition(request.adminId(), Position.ADMIN);
+        verify(volunteerRepository, times(1)).existsById(volunteerId);
+        verify(volunteerService, times(1)).assignPosition(volunteerId, Position.valueOf(role));
+        verify(logService, times(1)).logVolunteer(
+                null,
+                EventType.UPDATE,
+                "Promoted by admin with id: " + request.adminId()
+        );
+    }
+
+    @Test
+    public void testChangeRole_ReturnsNotFound_WhenAssignRoleFails() {
+        // Arrange
+        ID volunteerId = new ID(1);
+        AdminRequest request = new AdminRequest(new ID(2)); // Admin ID: 2
+        String role = "LEADER";
+
+        // Mock that the admin requester is an admin
+        when(volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
+
+        // Mock that the volunteer exists
+        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
+
+        // Mock a failure in assigning the role
+        when(volunteerService.assignPosition(volunteerId, Position.valueOf(role))).thenReturn(Errors.NOT_FOUND);
+
+        // Act
+        ResponseEntity<Void> response = volunteerController.changeRole(volunteerId, request, role);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(volunteerRepository, times(1)).existsByIdAndPosition(request.adminId(), Position.ADMIN);
+        verify(volunteerRepository, times(1)).existsById(volunteerId);
+        verify(volunteerService, times(1)).assignPosition(volunteerId, Position.valueOf(role));
+        verifyNoInteractions(logService); // Ensure no logs are created
+    }
+
 }

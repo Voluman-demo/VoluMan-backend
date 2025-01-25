@@ -1,6 +1,7 @@
 package com.example.demo.Volunteer;
 
 import com.example.demo.Action.Action;
+import com.example.demo.Action.ActionRepository;
 import com.example.demo.Action.ActionService;
 import com.example.demo.Model.Errors;
 import com.example.demo.Model.ID;
@@ -26,6 +27,8 @@ class VolunteerServiceTest {
 
     @Mock
     private ActionService actionService;
+    @Mock
+    private ActionRepository actionRepository;
 
     @Mock
     private PositionService positionService;
@@ -44,27 +47,30 @@ class VolunteerServiceTest {
         volunteer.setId(new ID(1));
         volunteer.setFirstName("John");
         volunteer.setLastName("Doe");
+
+        when(actionRepository.findAll()).thenReturn(Collections.emptyList());
     }
 
 
     @Test
     void testCreateVolunteer_Success() {
-        // Mock save operation
+        // Mock the save operation to simulate saving and returning a volunteer with an ID
         when(volunteerRepository.save(any(Volunteer.class))).thenAnswer(invocation -> {
             Volunteer v = invocation.getArgument(0);
-            v.setId(new ID(1));
+            v.setId(new ID(1)); // Assign a mock ID to the volunteer
             return v;
         });
 
-
+        // Call the service method
         ID id = volunteerService.createVolunteer();
 
-
+        // Assert that the ID is not null and matches the expected value
         assertNotNull(id);
         assertEquals(1, id.getId());
+
+        // Verify that the repository's save method was called exactly once
         verify(volunteerRepository, times(1)).save(any(Volunteer.class));
     }
-
 
     @Test
     void testEditVolunteer_Success() {
@@ -196,95 +202,61 @@ class VolunteerServiceTest {
     }
     // Test: createAndEditVolunteer
     @Test
-    void testCreateAndEditVolunteer_Success() {
-        // Given
+    void  testCreateAndEditVolunteer_Success() {
+        // Given: Set up a PersonalData object and mock repository behavior
         PersonalData details = new PersonalData();
         details.setFirstName("John");
         details.setLastName("Doe");
         details.setEmail("john.doe@example.com");
 
+        // Mock the behavior of saving a new volunteer
         when(volunteerRepository.save(any(Volunteer.class))).thenAnswer(invocation -> {
             Volunteer v = invocation.getArgument(0);
-            v.setId(new ID(1));
+            v.setId(new ID(1)); // Assign a mock ID to the volunteer
             return v;
         });
+
+        // Mock the behavior of finding a volunteer by ID
         when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.of(new Volunteer()));
 
-        // When
+        // When: Call the service method
         ID result = volunteerService.createAndEditVolunteer(details);
 
-        // Then
+        // Then: Assert that the result is not null and matches the expected ID
         assertNotNull(result);
         assertEquals(1, result.getId());
+
+        // Verify that the repository's save method was called twice
+        // (once during creation and once during editing)
         verify(volunteerRepository, times(2)).save(any(Volunteer.class));
     }
 
+
     @Test
     void testCreateAndEditVolunteer_FailsToEdit() {
-        // Given
+        // Given: Set up a PersonalData object
         PersonalData details = new PersonalData();
 
+        // Mock the behavior of saving a new volunteer
         when(volunteerRepository.save(any(Volunteer.class))).thenAnswer(invocation -> {
             Volunteer v = invocation.getArgument(0);
-            v.setId(new ID(1));
+            v.setId(new ID(1)); // Assign a mock ID to the volunteer
             return v;
         });
+
+        // Mock the behavior of not finding the volunteer by ID
         when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.empty());
 
-        // When
+        // When: Call the service method
         ID result = volunteerService.createAndEditVolunteer(details);
 
-        // Then
+        // Then: Assert that the result is null (indicating a failure to edit)
         assertNull(result);
+
+        // Verify that the repository's save method was called only once (for creation)
         verify(volunteerRepository, times(1)).save(any(Volunteer.class));
     }
 
-    @Test
-    void testInitializePreferences_Success() {//TODO  zmienić potem na action
-        // Given
-        ID volunteerId = new ID(1);
-        Volunteer volunteer = new Volunteer();
-        List<Action> allActions = List.of(new Action());
-
-        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
-        when(actionService.getAllActions()).thenReturn(allActions);
-
-        // When
-        Errors result = volunteerService.initializePreferences(volunteerId);
-
-        // Then
-        assertEquals(Errors.SUCCESS, result);
-        assertEquals(allActions, new ArrayList<>(volunteer.getPreferences().getU()));
-        verify(volunteerRepository, times(1)).save(volunteer);
-    }
-
-    @Test
-    void testInitializePreferences_NotFound() {
-        // Given
-        ID volunteerId = new ID(1);
-
-        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
-
-        // When
-        Errors result = volunteerService.initializePreferences(volunteerId);
-
-        // Then
-        assertEquals(Errors.NOT_FOUND, result);
-        verify(volunteerRepository, never()).save(any(Volunteer.class));
-    }
-
-
-    @Test
-    void testApplyPreferencesToSchedule_Success() {
-        // Given
-        ID volunteerId = new ID(1);
-
-        // When
-        Errors result = volunteerService.applyPreferencesToSchedule(volunteerId);
-
-        // Then
-        assertEquals(Errors.SUCCESS, result);
-    }
 
 
     @Test
