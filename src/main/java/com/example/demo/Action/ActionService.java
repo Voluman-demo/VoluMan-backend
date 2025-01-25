@@ -3,36 +3,36 @@ package com.example.demo.Action;
 import com.example.demo.Model.Errors;
 import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.User.User;
+import com.example.demo.Volunteer.Volunteer;
+import com.example.demo.Volunteer.VolunteerRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ActionService implements Actions {
     private final ActionRepository actionRepository;
 
-    private final HashMap<ID, Action> actions = new HashMap<>();
-    private int currentId = 1;
+    private final VolunteerRepository volunteerRepository;
 
-    public ActionService(ActionRepository actionRepository) {
+    public ActionService(ActionRepository actionRepository, VolunteerRepository volunteerRepository) {
         this.actionRepository = actionRepository;
+        this.volunteerRepository = volunteerRepository;
     }
 
     @Override
     public ID create() {
-        ID id = new ID(currentId++);
         Action action = new Action();
-        actions.put(id, action);
-        return id;
+        actionRepository.save(action);
+        return action.getActionId();
     }
 
     @Override
     public Errors remove(ID actionId) {
-        if (actions.containsKey(actionId)) {
-            actions.remove(actionId);
+        if (actionRepository.existsById(actionId)) {
+            actionRepository.deleteById(actionId);
             return Errors.SUCCESS;
         }
         return Errors.NOT_FOUND;
@@ -40,9 +40,11 @@ public class ActionService implements Actions {
 
     @Override
     public Errors setBeg(ID actionId, LocalDate beginDate) {
-        Action action = actions.get(actionId);
-        if (action != null) {
+        Optional<Action> actionOpt = actionRepository.findById(actionId);
+        if (actionOpt.isPresent()) {
+            Action action = actionOpt.get();
             action.setBegin(beginDate);
+            actionRepository.save(action);
             return Errors.SUCCESS;
         }
         return Errors.NOT_FOUND;
@@ -50,9 +52,11 @@ public class ActionService implements Actions {
 
     @Override
     public Errors setEnd(ID actionId, LocalDate endDate) {
-        Action action = actions.get(actionId);
-        if (action != null) {
+        Optional<Action> actionOpt = actionRepository.findById(actionId);
+        if (actionOpt.isPresent()) {
+            Action action = actionOpt.get();
             action.setEnd(endDate);
+            actionRepository.save(action);
             return Errors.SUCCESS;
         }
         return Errors.NOT_FOUND;
@@ -60,22 +64,26 @@ public class ActionService implements Actions {
 
     @Override
     public LocalDate getBeg(ID actionId) {
-        Action action = actions.get(actionId);
-        return action != null ? action.getBegin() : null;
+        return actionRepository.findById(actionId)
+                .map(Action::getBegin)
+                .orElse(null);
     }
 
     @Override
     public LocalDate getEnd(ID actionId) {
-        Action action = actions.get(actionId);
-        return action != null ? action.getEnd() : null;
+        return actionRepository.findById(actionId)
+                .map(Action::getEnd)
+                .orElse(null);
     }
 
     @Override
     public Errors setDesc(ID actionId, Lang language, Description description) {
-        Action action = actions.get(actionId);
-        if (action != null) {
+        Optional<Action> actionOpt = actionRepository.findById(actionId);
+        if (actionOpt.isPresent()) {
+            Action action = actionOpt.get();
             action.getDescr().put(language, description);
-            action.getDescr().get(language).setValid(true);
+            description.setValid(true);
+            actionRepository.save(action);
             return Errors.SUCCESS;
         }
         return Errors.NOT_FOUND;
@@ -83,19 +91,23 @@ public class ActionService implements Actions {
 
     @Override
     public Errors remDesc(ID actionId, Lang language) {
-        Action action = actions.get(actionId);
-        if (action != null && action.getDescr().containsKey(language)) {
-            action.getDescr().get(language).setValid(false);
-            return Errors.SUCCESS;
+        Optional<Action> actionOpt = actionRepository.findById(actionId);
+        if (actionOpt.isPresent()) {
+            Action action = actionOpt.get();
+            if (action.getDescr().containsKey(language)) {
+                action.getDescr().get(language).setValid(false);
+                actionRepository.save(action);
+                return Errors.SUCCESS;
+            }
         }
         return Errors.NOT_FOUND;
     }
 
     @Override
     public Description getDesc(ID actionId, Lang language) {
-        Action action = actions.get(actionId);
-        if (action != null) {
-            Version version = action.getDescr().get(language);
+        Optional<Action> actionOpt = actionRepository.findById(actionId);
+        if (actionOpt.isPresent()) {
+            Version version = actionOpt.get().getDescr().get(language);
             if (version != null && version.isValid()) {
                 Description description = new Description();
                 description.setFullName(version.getFullName());
@@ -105,8 +117,8 @@ public class ActionService implements Actions {
                 description.setDescription(version.getDescription());
                 description.setHours(version.getHours());
                 description.setRoles(version.getRoles());
-                description.setBegin(action.getBegin());
-                description.setEnd(action.getEnd());
+                description.setBegin(actionOpt.get().getBegin());
+                description.setEnd(actionOpt.get().getEnd());
                 return description;
             }
         }
@@ -115,65 +127,91 @@ public class ActionService implements Actions {
 
     @Override
     public ArrayList<ID> getAllIds() {
-        return new ArrayList<>(actions.keySet());
+        return actionRepository.findAll().stream()
+                .map(Action::getActionId)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     @Override
     public ArrayList<Description> getAllDesc(Lang language) {
-        ArrayList<Description> descriptions = new ArrayList<>();
-        for (Action action : actions.values()) {
-            Description desc = getDesc(new ID(action.getActionId().getId()), language);
-            if (desc != null) {
-                descriptions.add(desc);
-            }
-        }
-        return descriptions;
+        return actionRepository.findAll().stream()
+                .map(action -> getDesc(action.getActionId(), language))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
 
 
     @Override
     public Errors setStronglyMine(User user, ID actionId) {
-        // Implementation for setting action as StronglyMine for a user
-        return Errors.SUCCESS;
+        Volunteer volunteer = user.getVolunteer();
+        Optional<Action> actionOpt = actionRepository.findById(actionId);
+        if (actionOpt.isPresent()) {
+            Action action = actionOpt.get();
+            volunteer.getPreferences().getS().add(action);
+            return Errors.SUCCESS;
+        }
+        return Errors.FAILURE;
     }
 
     @Override
     public Errors setWeaklyMine(User user, ID actionId) {
-        // Implementation for setting action as WeaklyMine for a user
-        return Errors.SUCCESS;
+        Volunteer volunteer = user.getVolunteer();
+        Optional<Action> actionOpt = actionRepository.findById(actionId);
+        if (actionOpt.isPresent()) {
+            Action action = actionOpt.get();
+            volunteer.getPreferences().getW().add(action);
+            return Errors.SUCCESS;
+        }
+        return Errors.FAILURE;
     }
 
     @Override
     public Errors setRejected(User user, ID actionId) {
-        // Implementation for setting action as Rejected for a user
-        return Errors.SUCCESS;
+        Volunteer volunteer = user.getVolunteer();
+        Optional<Action> actionOpt = actionRepository.findById(actionId);
+        if (actionOpt.isPresent()) {
+            Action action = actionOpt.get();
+            volunteer.getPreferences().getR().add(action);
+            return Errors.SUCCESS;
+        }
+        return Errors.FAILURE;
     }
 
     @Override
     public Errors setUndecided(User user, ID actionId) {
-        // Implementation for setting action as Undecided for a user
-        return Errors.SUCCESS;
+        Volunteer volunteer = user.getVolunteer();
+        Optional<Action> actionOpt = actionRepository.findById(actionId);
+        if (actionOpt.isPresent()) {
+            Action action = actionOpt.get();
+            volunteer.getPreferences().getU().add(action);
+            return Errors.SUCCESS;
+        }
+        return Errors.FAILURE;
     }
 
     @Override
     public ArrayList<Description> getStronglyMine(User user) {
-        return new ArrayList<>();
+        Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
+        return (ArrayList<Description>) volunteer.getPreferences().getS().stream().map(action -> action.getDescr().get(Lang.UK)).toList();
     }
 
     @Override
     public ArrayList<Description> getWeaklyMine(User user) {
-        return new ArrayList<>();
+        Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
+        return (ArrayList<Description>) volunteer.getPreferences().getW().stream().map(action -> action.getDescr().get(Lang.UK)).toList();
     }
 
     @Override
     public ArrayList<Description> getRejected(User user) {
-        return new ArrayList<>();
+        Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
+        return (ArrayList<Description>) volunteer.getPreferences().getR().stream().map(action -> action.getDescr().get(Lang.UK)).toList();
     }
 
     @Override
     public ArrayList<Description> getUndecided(User user) {
-        return new ArrayList<>();
+        Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
+        return (ArrayList<Description>) volunteer.getPreferences().getU().stream().map(action -> action.getDescr().get(Lang.UK)).toList();
     }
 
     @Override
@@ -182,8 +220,9 @@ public class ActionService implements Actions {
     }
 
     public Errors updateAction(ID actionId, Action newAction) {
-        Action action = actions.get(actionId);
-        if (action != null) {
+        Optional<Action> actionOpt = actionRepository.findById(actionId);
+        if (actionOpt.isPresent()) {
+            Action action = actionOpt.get();
             action.setBegin(newAction.getBegin());
             action.setEnd(newAction.getEnd());
             action.setDescr(newAction.getDescr());
@@ -193,7 +232,7 @@ public class ActionService implements Actions {
     }
 
     public Action getAction(ID actionId) {
-        return actions.get(actionId);
+        return actionRepository.findById(actionId).get();
     }
 
     public List<Action> getAllActions() {

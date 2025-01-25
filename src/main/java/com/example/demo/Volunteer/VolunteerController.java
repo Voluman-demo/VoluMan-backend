@@ -72,7 +72,7 @@ public class VolunteerController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Errors result = volunteerService.assignRole(volunteerId, Position.valueOf(role));
+        Errors result = volunteerService.assignPosition(volunteerId, Position.valueOf(role));
         if (result == Errors.SUCCESS) {
             logService.logVolunteer(null, EventType.UPDATE, "Promoted by admin with id: " + request.adminId());
             return ResponseEntity.ok().build();

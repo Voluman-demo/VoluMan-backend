@@ -2,7 +2,6 @@ package com.example.demo.Volunteer;
 
 import com.example.demo.Model.Errors;
 import com.example.demo.Model.ID;
-import com.example.demo.Model.PreferenceType;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Position.Position;
@@ -13,33 +12,25 @@ import java.util.List;
 
 public interface Volunteers {
 
-    // Core lifecycle management
     ID createVolunteer();
 
-    Errors editVolunteer(ID volunteerId, PersonalData details);
+    Errors editVolunteer(ID vId, PersonalData details);
 
-    Errors deleteVolunteer(ID volunteerId);
+    Errors deleteVolunteer(ID vId);
 
-    Volunteer getVolunteerById(ID volunteerId);
+    Volunteer getVolunteerById(ID vId);
 
     // Role management
-    Errors assignRole(ID volunteerId, Position newRole);
+    Errors assignPosition(ID vId, Position p);
 
-    Position getPosition(ID volunteerId);
-
-    // Preference management
-    Errors initializePreferences(ID volunteerId);
-
-    Errors updatePreferences(ID volunteerId, ID actionId, PreferenceType type);
-
-    Errors applyPreferencesToSchedule(ID volunteerId);
+    Position getPosition(ID vId);
 
     // Availability and duties management
-    Errors setAvailabilities(ID volunteerId, List<Availability> availabilities);
+    Errors setAvailabilities(ID vId, List<Availability> availabilities);
 
-    ArrayList<Availability> getAvailabilities(ID volunteerId);
+    ArrayList<Availability> getAvailabilities(ID vId);
 
-    Errors assignDuty(ID volunteerId, Duty duty);
+    Errors assignDuty(ID vId, Duty duty);
 
-    ArrayList<Duty> getDuties(ID volunteerId);
+    ArrayList<Duty> getDuties(ID vId);
 }

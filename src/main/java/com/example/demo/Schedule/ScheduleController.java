@@ -1,12 +1,12 @@
 package com.example.demo.Schedule;
 
-import com.example.demo.Action.ActionDto.ActionScheduleDto;
 import com.example.demo.Action.ActionRepository;
 import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
 import com.example.demo.Model.Errors;
 import com.example.demo.Model.ID;
-import com.example.demo.Schedule.ScheduleDto.*;
+import com.example.demo.Schedule.ScheduleDto.GenerateScheduleRequest;
+import com.example.demo.Schedule.ScheduleDto.ModifyScheduleRequest;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.VolunteerRepository;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/schedules")
@@ -31,29 +30,6 @@ public class ScheduleController {
         this.logService = logService;
     }
 
-
-//    @PostMapping("/actions/{actionId}/preferences")
-//    public ResponseEntity<?> choosePref(
-//            @PathVariable("actionId") Long actionId,
-//            @RequestBody ActionPrefRequest actionPrefRequest
-//    ) {
-//        try {
-//            if (!actionRepository.existsById(actionId)) {
-//                return ResponseEntity.notFound().build();
-//            }
-//            if (!volunteerRepository.existsById(actionPrefRequest.volunteerId())) {
-//                return ResponseEntity.notFound().build();
-//            }
-//            scheduleService.choosePref(actionId, actionPrefRequest);
-//
-//            logService.logSchedule(actionPrefRequest.volunteerId(), EventType.UPDATE, "Choose preferences");
-//
-//            return ResponseEntity.ok().build();
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-//        }
-//    }
-        //TODO??
 
 //    @PostMapping("/actions/{actionId}/demands")
 //    public ResponseEntity<?> chooseDemands(
@@ -80,7 +56,6 @@ public class ScheduleController {
 //    }
 
 
-
     @PostMapping("/generate")
     public ResponseEntity<?> generateSchedule(@RequestBody GenerateScheduleRequest generateScheduleRequest) {
         if (!volunteerRepository.existsByIdAndPosition(generateScheduleRequest.adminId(), Position.ADMIN)) {
@@ -97,7 +72,7 @@ public class ScheduleController {
     }
 
     @PutMapping("/{scheduleId}/modify")
-    public ResponseEntity<?> modifySchedule(@PathVariable ID scheduleId,@RequestBody ModifyScheduleRequest modifyScheduleRequest) {
+    public ResponseEntity<?> modifySchedule(@PathVariable ID scheduleId, @RequestBody ModifyScheduleRequest modifyScheduleRequest) {
         if (!volunteerRepository.existsById(modifyScheduleRequest.volunteerId())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Volunteer not found.");
         }
@@ -130,7 +105,7 @@ public class ScheduleController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Volunteer not found.");
         }
 
-        List<Schedule> schedules= scheduleService.getVolunteerSchedules(volunteerId);
+        List<Schedule> schedules = scheduleService.getVolunteerSchedules(volunteerId);
         if (!schedules.isEmpty()) {
             return ResponseEntity.ok(schedules);
         }

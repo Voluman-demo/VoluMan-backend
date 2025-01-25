@@ -1,6 +1,5 @@
 package com.example.demo.Volunteer;
 
-import com.example.demo.Model.ID;
 import jakarta.persistence.*;
 import lombok.*;
 

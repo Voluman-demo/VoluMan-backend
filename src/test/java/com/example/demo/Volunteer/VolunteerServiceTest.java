@@ -8,7 +8,6 @@ import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Position.PositionService;
-import com.example.demo.Volunteer.Preferences.Preferences;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -150,10 +149,10 @@ class VolunteerServiceTest {
 
 
     @Test
-    void testAssignRole_Success() {
+    void testAssignPosition_Success() {
         when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.of(volunteer));
 
-        Errors result = volunteerService.assignRole(new ID(1), Position.LEADER);
+        Errors result = volunteerService.assignPosition(new ID(1), Position.LEADER);
 
         assertEquals(Errors.SUCCESS, result);
         verify(positionService, times(1)).assignRole(volunteer, Position.LEADER);
@@ -161,10 +160,10 @@ class VolunteerServiceTest {
     }
 
     @Test
-    void testAssignRole_NotFound() {
+    void testAssignPosition_NotFound() {
         when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.empty());
 
-        Errors result = volunteerService.assignRole(new ID(1), Position.LEADER);
+        Errors result = volunteerService.assignPosition(new ID(1), Position.LEADER);
 
         assertEquals(Errors.NOT_FOUND, result);
         verify(positionService, never()).assignRole(any(Volunteer.class), any(Position.class));

@@ -28,11 +28,11 @@ public class Availability {
 
     @ManyToOne
     @JoinColumn(name = "volunteer_id")
-    @JsonBackReference // Odwrotny odnośnik, ignorowany przy serializacji
+    @JsonBackReference
     private Volunteer volunteer;
 
     @OneToMany(mappedBy = "availability", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference // Zarządzany odnośnik dla serializacji
+    @JsonManagedReference
     private Set<AvailabilityInterval> slots;
 }
 

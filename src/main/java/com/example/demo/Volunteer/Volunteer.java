@@ -1,7 +1,6 @@
 package com.example.demo.Volunteer;
 
 import com.example.demo.Action.Action;
-import com.example.demo.Action.Version;
 import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Duty.Duty;
@@ -93,10 +92,10 @@ public class Volunteer extends PersonalData {
     }
 
     public double calculateActualWeeklyHours(LocalDate startOfWeek, LocalDate endOfWeek) {
-         this.actualWeeklyHours = duties.stream()
+        this.actualWeeklyHours = duties.stream()
                 .filter(duty -> !duty.getDate().isBefore(startOfWeek) && !duty.getDate().isAfter(endOfWeek))
                 .mapToDouble(Duty::getTotalDurationHours)
                 .sum();
-         return this.actualWeeklyHours;
+        return this.actualWeeklyHours;
     }
 }

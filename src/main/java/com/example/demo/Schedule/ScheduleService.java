@@ -1,7 +1,6 @@
 package com.example.demo.Schedule;
 
 import com.example.demo.Action.Action;
-import com.example.demo.Action.ActionDto.ActionScheduleDto;
 import com.example.demo.Action.ActionRepository;
 import com.example.demo.Action.Demand.Demand;
 import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
@@ -54,8 +53,6 @@ public class ScheduleService implements Schedules {
         this.volunteerService = volunteerService;
     }
 
-    private final Map<ID, Schedule> schedules = new HashMap<>();
-    private int currentId = 1;
 
     @Override
     public ID createSchedule(Action action, LocalDate startDate, LocalDate endDate) {
@@ -64,21 +61,22 @@ public class ScheduleService implements Schedules {
             return null;
         }
 
-        ID scheduleId = new ID(currentId++);
         Schedule schedule = new Schedule(startDate, endDate);
-        schedules.put(scheduleId, schedule);
-        return scheduleId;
+        schedule.setActions(List.of(action));
+        scheduleRepository.save(schedule);
+
+        return schedule.getScheduleId();
     }
 
     @Override
     public Schedule getScheduleById(ID scheduleId) {
-        return schedules.get(scheduleId);
+        return scheduleRepository.findById(scheduleId).orElse(null);
     }
 
     @Override
     public Errors deleteSchedule(ID scheduleId) {
-        if (schedules.containsKey(scheduleId)) {
-            schedules.remove(scheduleId);
+        if (scheduleRepository.existsById(scheduleId)) {
+            scheduleRepository.deleteById(scheduleId);
             return Errors.SUCCESS;
         }
         return Errors.NOT_FOUND;
@@ -153,10 +151,12 @@ public class ScheduleService implements Schedules {
     }
 
     @Override
-    public Errors modifySchedule(ID scheduleId,ModifyScheduleRequest modifications) {
-        Schedule schedule = schedules.get(scheduleId);
-        if (schedule != null) {
-
+    public Errors modifySchedule(ID scheduleId, ModifyScheduleRequest modifications) {
+        Optional<Schedule> scheduleOpt = scheduleRepository.findById(scheduleId);
+        if (scheduleOpt.isPresent()) {
+            Schedule schedule = scheduleOpt.get();
+            // Implementacja modyfikacji harmonogramu
+            scheduleRepository.save(schedule);
             return Errors.SUCCESS;
         }
         return Errors.NOT_FOUND;
@@ -170,9 +170,11 @@ public class ScheduleService implements Schedules {
 
     @Override
     public Errors adjustAssignments(ID scheduleId) {
-        Schedule schedule = schedules.get(scheduleId);
-        if (schedule != null) {
+        Optional<Schedule> scheduleOpt = scheduleRepository.findById(scheduleId);
+        if (scheduleOpt.isPresent()) {
+            Schedule schedule = scheduleOpt.get();
             // Zaktualizuj przypisania wolontariuszy
+            scheduleRepository.save(schedule);
             return Errors.SUCCESS;
         }
         return Errors.NOT_FOUND;
@@ -180,30 +182,43 @@ public class ScheduleService implements Schedules {
 
     @Override
     public Errors assignVolunteerToDuty(ID volunteerId, Duty duty) {
-        // Przypisz wolontariusza do zadania
-        return Errors.SUCCESS;
+        Optional<Volunteer> volunteerOpt = volunteerRepository.findById(volunteerId);
+        if (volunteerOpt.isPresent()) {
+            Volunteer volunteer = volunteerOpt.get();
+            volunteer.getDuties().add(duty);
+            volunteerRepository.save(volunteer);
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
     }
 
     @Override
     public Errors removeVolunteerFromDuty(ID volunteerId, Duty duty) {
-        // Usuń wolontariusza z zadania
-        return Errors.SUCCESS;
+        Optional<Volunteer> volunteerOpt = volunteerRepository.findById(volunteerId);
+        if (volunteerOpt.isPresent()) {
+            Volunteer volunteer = volunteerOpt.get();
+            volunteer.getDuties().remove(duty);
+            volunteerRepository.save(volunteer);
+            return Errors.SUCCESS;
+        }
+        return Errors.NOT_FOUND;
     }
 
     @Override
     public List<Schedule> getVolunteerSchedules(ID volunteerId) {
-        return schedules.values().stream()
+        return scheduleRepository.findAll().stream()
                 .filter(schedule -> schedule.getDuties().stream()
-                        .anyMatch(duty -> duty.getVolunteer().getId().equals(volunteerId)))
-                .collect(Collectors.toList());
+                        .anyMatch(duty -> duty.getVolunteer().getId().equals(volunteerId.getId())))
+                .toList();
     }
 
     public List<Schedule> getActionSchedules(ID actionId) {
-        return  schedules.values().stream()
+        return scheduleRepository.findAll().stream()
                 .filter(schedule -> schedule.getActions().stream()
-                        .anyMatch(action -> action.getActionId().equals(actionId)))
-                .collect(Collectors.toList());
+                        .anyMatch(action -> action.getActionId().equals(actionId.getId())))
+                .toList();
     }
+
 
     @Override
     public Errors validateScheduleDates(LocalDate startDate, LocalDate endDate) {

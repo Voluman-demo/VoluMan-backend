@@ -12,39 +12,39 @@ public interface Actions {
 
     ID create();
 
-    Errors remove(ID actionId);
+    Errors remove(ID aId);
 
-    Errors setBeg(ID actionId, LocalDate beginDate);
+    Errors setBeg(ID aId, LocalDate beginDate);
 
-    Errors setEnd(ID actionId, LocalDate endDate);
+    Errors setEnd(ID aId, LocalDate endDate);
 
-    LocalDate getBeg(ID actionId);
+    LocalDate getBeg(ID aId);
 
-    LocalDate getEnd(ID actionId);
+    LocalDate getEnd(ID aId);
 
-    Errors setDesc(ID actionId, Lang language, Description description);
+    Errors setDesc(ID aId, Lang l, Description desc);
 
-    Errors remDesc(ID actionId, Lang language);
+    Errors remDesc(ID aId, Lang l);
 
-    Description getDesc(ID actionId, Lang language);
+    Description getDesc(ID aId, Lang l);
 
     ArrayList<ID> getAllIds();
 
-    ArrayList<Description> getAllDesc(Lang language);
+    ArrayList<Description> getAllDesc(Lang l);
 
-    Errors setStronglyMine(User user, ID actionId);
+    Errors setStronglyMine(User u, ID aId);
 
-    Errors setWeaklyMine(User user, ID actionId);
+    Errors setWeaklyMine(User u, ID aId);
 
-    Errors setRejected(User user, ID actionId);
+    Errors setRejected(User u, ID aId);
 
-    Errors setUndecided(User user, ID actionId);
+    Errors setUndecided(User u, ID aId);
 
-    ArrayList<Description> getStronglyMine(User user);
+    ArrayList<Description> getStronglyMine(User u);
 
-    ArrayList<Description> getWeaklyMine(User user);
+    ArrayList<Description> getWeaklyMine(User u);
 
-    ArrayList<Description> getRejected(User user);
+    ArrayList<Description> getRejected(User u);
 
     ArrayList<Description> getUndecided(User user);
 

@@ -10,12 +10,10 @@ import java.util.List;
 @Repository
 public interface VolunteerRepository extends JpaRepository<Volunteer, ID> {
 
-    List<Volunteer> findAllByPosition(Position position);
-
     boolean existsByIdAndPosition(ID volunteerId, Position position);
 
     boolean existsByEmail(String email);
 
-    Volunteers getVolunteerById(ID volId);
+    Volunteer getVolunteerById(ID volId);
 
 }

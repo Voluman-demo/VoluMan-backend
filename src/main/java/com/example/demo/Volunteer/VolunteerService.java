@@ -3,10 +3,8 @@ package com.example.demo.Volunteer;
 import com.example.demo.Action.Action;
 import com.example.demo.Action.ActionRepository;
 import com.example.demo.Action.ActionService;
-import com.example.demo.Action.Version;
 import com.example.demo.Model.Errors;
 import com.example.demo.Model.ID;
-import com.example.demo.Model.PreferenceType;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Position.Position;
@@ -14,10 +12,7 @@ import com.example.demo.Volunteer.Position.PositionService;
 import com.example.demo.Volunteer.Preferences.Preferences;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class VolunteerService implements Volunteers {
@@ -38,6 +33,8 @@ public class VolunteerService implements Volunteers {
     public ID createVolunteer() {
         Volunteer volunteer = new Volunteer();
         volunteer.setPreferences(new Preferences());
+        Set<Action> actions = new HashSet<>(actionRepository.findAll());
+        volunteer.getPreferences().setU(actions);
         volunteerRepository.save(volunteer);
         return volunteer.getId();
     }
@@ -81,7 +78,7 @@ public class VolunteerService implements Volunteers {
 
 
     @Override
-    public Errors assignRole(ID volunteerId, Position newRole) {
+    public Errors assignPosition(ID volunteerId, Position newRole) {
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
         if (volunteer.isPresent()) {
             Volunteer vol = volunteer.get();
@@ -100,41 +97,10 @@ public class VolunteerService implements Volunteers {
     }
 
     @Override
-    public Errors initializePreferences(ID volunteerId) {
-        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
-        if (volunteer.isPresent()) {
-            Volunteer vol = volunteer.get();
-            Preferences preferences = new Preferences();
-
-            // Przenieś wszystkie akcje do "Undecided" TODO: zmienić potem na action
-            List<Action> allActions = actionService.getAllActions();
-            preferences.getU().addAll(allActions);
-
-            vol.setPreferences(preferences);
-            volunteerRepository.save(vol);
-            return Errors.SUCCESS;
-        }
-        return Errors.NOT_FOUND;
-    }
-
-    @Override
-    public Errors updatePreferences(ID volunteerId, ID actionId, PreferenceType type) {
-        return null;
-    }
-
-
-    @Override
-    public Errors applyPreferencesToSchedule(ID volunteerId) {
-        // Implementacja modyfikacji harmonogramu zgodnie z preferencjami
-        return Errors.SUCCESS;
-    }
-
-    @Override
     public Errors setAvailabilities(ID volunteerId, List<Availability> availabilities) {
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
         if (volunteer.isPresent()) {
             Volunteer vol = volunteer.get();
-            vol.getAvailabilities().clear();
             vol.getAvailabilities().addAll(availabilities);
             volunteerRepository.save(vol);
             return Errors.SUCCESS;
@@ -180,10 +146,4 @@ public class VolunteerService implements Volunteers {
         return volunteerRepository.existsByEmail(email);
     }
 
-    public double calculateActualWeeklyHours(ID volId, LocalDate startOfWeek, LocalDate endOfWeek) {
-        return getDuties(volId).stream()
-                .filter(duty -> !duty.getDate().isBefore(startOfWeek) && !duty.getDate().isAfter(endOfWeek))
-                .mapToDouble(Duty::getTotalDurationHours)
-                .sum();
-    }
 }
