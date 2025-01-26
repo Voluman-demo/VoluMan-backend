@@ -28,7 +28,7 @@ public class Availability {
     private LocalDate date;
 
     @ManyToOne
-    @JoinColumn(name = "volunteer_id", nullable = false)
+    @JoinColumn(name = "volunteer_id", referencedColumnName = "id", nullable = false)
     @JsonBackReference
     private Volunteer volunteer;
 

@@ -1,4 +1,5 @@
 package com.example.demo.Schedule;
+
 import com.example.demo.Action.Action;
 import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Duty.Duty;
@@ -20,9 +21,7 @@ import java.util.List;
 @Setter
 @Table(name = "schedules")
 public class Schedule {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EmbeddedId
     private ID scheduleId;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

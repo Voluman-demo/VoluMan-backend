@@ -1,6 +1,5 @@
 package com.example.demo.Action;
 
-
 import com.example.demo.Model.ID;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,13 +16,12 @@ import java.util.Objects;
 @AllArgsConstructor
 @Table(name = "action_roles")
 public class Role {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "role_id")
+    @EmbeddedId
     private ID roleId;
 
-    String name;
-    String duties;
+    private String name;
+    private String duties;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

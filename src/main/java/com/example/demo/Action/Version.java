@@ -13,10 +13,7 @@ import java.util.ArrayList;
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "versions")
 public class Version {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "version_id")
+    @EmbeddedId
     private ID versionId;
 
     @Column(name = "valid", nullable = false)
@@ -44,15 +41,7 @@ public class Version {
     @JoinColumn(name = "role_id")
     private ArrayList<Role> roles;
 
-    public boolean isValid() {
-        return this.valid;
-    }
-
-    public void setValid(boolean v) {
-        this.valid = v;
-    }
-
-    public Version(){
+    public Version() {
         valid = false;
         roles = new ArrayList<>();
     }

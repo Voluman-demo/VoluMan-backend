@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 
 @Data
+@MappedSuperclass
 public class PersonalData {
 
     @Column(name = "first_name", nullable = false, length = 50)

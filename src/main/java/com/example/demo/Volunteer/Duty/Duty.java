@@ -1,6 +1,7 @@
 package com.example.demo.Volunteer.Duty;
 
 import com.example.demo.Model.ID;
+import com.example.demo.Schedule.Schedule;
 import com.example.demo.Volunteer.Duty.DutyInterval.DutyInterval;
 import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalStatus;
 import com.example.demo.Volunteer.Volunteer;
@@ -12,7 +13,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
-
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
@@ -20,23 +20,22 @@ import java.util.Set;
 @Setter
 @Table(name = "duty")
 public class Duty {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "duty_id")
+    @EmbeddedId
     private ID dutyId;
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @ManyToOne
-    @JoinColumn(name = "volunteer_id", nullable = false)
-    @JsonBackReference
-    private Volunteer volunteer;
+    @JoinColumn(name = "schedule_id", nullable = false)
+    private Schedule schedule;
 
+    @ManyToOne
+    @JoinColumn(name = "volunteer_id", nullable = false)
+    private Volunteer volunteer;
 
     @OneToMany(mappedBy = "duty", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DutyInterval> dutyIntervals = new HashSet<>();
-
 
     public double getTotalDurationHours() {
         return dutyIntervals.stream()

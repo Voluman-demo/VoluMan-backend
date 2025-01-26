@@ -9,14 +9,15 @@ import lombok.Setter;
 import java.time.LocalDate;
 import java.util.HashMap;
 
+
+
 @Entity
 @AllArgsConstructor
 @Getter
 @Setter
 @Table(name = "actions")
 public class Action {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EmbeddedId
     private ID actionId;
 
     @Column(name = "begin_date")
@@ -34,7 +35,6 @@ public class Action {
     @MapKeyEnumerated(EnumType.STRING)
     @MapKeyColumn(name = "language")
     private HashMap<Lang, Description> descr;
-
 
     public Action() {
         this.descr = new HashMap<>();

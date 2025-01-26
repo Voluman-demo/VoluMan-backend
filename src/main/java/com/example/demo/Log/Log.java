@@ -1,6 +1,5 @@
 package com.example.demo.Log;
 
-
 import com.example.demo.Model.ID;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,14 +16,11 @@ import java.time.LocalDateTime;
 @Setter
 @Table(name = "log")
 public class Log {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EmbeddedId
     private ID id;
 
     private String firstName;
-
     private String lastName;
-
     private String email;
 
     @Enumerated(EnumType.STRING)

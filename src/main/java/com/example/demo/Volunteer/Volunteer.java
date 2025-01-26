@@ -6,8 +6,6 @@ import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Preferences.Preferences;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,10 +21,9 @@ import java.util.Set;
 @Getter
 @Setter
 @Table(name = "volunteers")
+@AttributeOverride(name = "email", column = @Column(name = "email", unique = true, nullable = false, length = 50))
 public class Volunteer extends PersonalData {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "volunteer_id")
+    @EmbeddedId
     private ID volunteerId;
 
     @Column(name = "valid", nullable = false)
@@ -47,7 +44,6 @@ public class Volunteer extends PersonalData {
     private Preferences preferences;
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
     private ArrayList<Availability> availabilities;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
@@ -56,11 +52,9 @@ public class Volunteer extends PersonalData {
             joinColumns = @JoinColumn(name = "volunteer_id"),
             inverseJoinColumns = @JoinColumn(name = "action_id")
     )
-    @JsonIgnore
     private Set<Action> actions;
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
     private Set<Duty> duties;
 
     public Volunteer() {
@@ -70,25 +64,6 @@ public class Volunteer extends PersonalData {
         this.availabilities = new ArrayList<>();
         this.actions = new HashSet<>();
         this.duties = new HashSet<>();
-    }
-
-    @PrePersist
-    public void prePersist() {
-        if (this.preferences == null) {
-            this.preferences = new Preferences();
-        }
-
-        if (this.actions == null) {
-            this.actions = new HashSet<>();
-        }
-
-        if (this.duties == null) {
-            this.duties = new HashSet<>();
-        }
-
-        if (this.availabilities == null) {
-            this.availabilities = new ArrayList<>();
-        }
     }
 
     public double calculateActualWeeklyHours(LocalDate startOfWeek, LocalDate endOfWeek) {

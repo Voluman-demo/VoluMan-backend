@@ -32,7 +32,7 @@ public class User {
     private LocalDate dateOfChangePassword;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "volunteer_id", referencedColumnName = "volunteer_id")
+    @JoinColumn(name = "volunteer_id", referencedColumnName = "id")
     @JsonIgnore
     private Volunteer volunteer;
 
