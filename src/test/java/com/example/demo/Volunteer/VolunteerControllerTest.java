@@ -9,6 +9,7 @@ import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Position.Position;
+import com.example.demo.Volunteer.Preferences.Preferences;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -39,7 +41,7 @@ public class VolunteerControllerTest {
 
     @Test
     public void testGetVolunteers_ReturnsOk_WhenVolunteersFound() {
-       when(volunteerRepository.findAll()).thenReturn(List.of(new Volunteer()));
+        when(volunteerRepository.findAll()).thenReturn(List.of(new Volunteer()));
 
 
         ResponseEntity<List<Volunteer>> response = volunteerController.getVolunteers();
@@ -292,14 +294,14 @@ public class VolunteerControllerTest {
         String role = "VOLUNTEER";
 
         // Mock that the admin requester is not an admin
-        when(volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(false);
+        when(volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(false);
 
         // Act
         ResponseEntity<Void> response = volunteerController.changeRole(volunteerId, request, role);
 
         // Assert
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        verify(volunteerRepository, times(1)).existsByIdAndPosition(request.adminId(), Position.ADMIN);
+        verify(volunteerRepository, times(1)).existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN);
         verifyNoInteractions(volunteerService); // Ensure service method was not called
     }
 
@@ -311,7 +313,7 @@ public class VolunteerControllerTest {
         String role = "VOLUNTEER";
 
         // Mock that the admin requester is an admin
-        when(volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
+        when(volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
 
         // Mock that the volunteer does not exist
         when(volunteerRepository.existsById(volunteerId)).thenReturn(false);
@@ -321,7 +323,7 @@ public class VolunteerControllerTest {
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        verify(volunteerRepository, times(1)).existsByIdAndPosition(request.adminId(), Position.ADMIN);
+        verify(volunteerRepository, times(1)).existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN);
         verify(volunteerRepository, times(1)).existsById(volunteerId);
         verifyNoInteractions(volunteerService); // Ensure service method was not called
     }
@@ -334,7 +336,7 @@ public class VolunteerControllerTest {
         String role = "LEADER";
 
         // Mock that the admin requester is an admin
-        when(volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
+        when(volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
 
         // Mock that the volunteer exists
         when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
@@ -347,7 +349,7 @@ public class VolunteerControllerTest {
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        verify(volunteerRepository, times(1)).existsByIdAndPosition(request.adminId(), Position.ADMIN);
+        verify(volunteerRepository, times(1)).existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN);
         verify(volunteerRepository, times(1)).existsById(volunteerId);
         verify(volunteerService, times(1)).assignPosition(volunteerId, Position.valueOf(role));
         verify(logService, times(1)).logVolunteer(
@@ -365,7 +367,7 @@ public class VolunteerControllerTest {
         String role = "LEADER";
 
         // Mock that the admin requester is an admin
-        when(volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
+        when(volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
 
         // Mock that the volunteer exists
         when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
@@ -378,7 +380,7 @@ public class VolunteerControllerTest {
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-        verify(volunteerRepository, times(1)).existsByIdAndPosition(request.adminId(), Position.ADMIN);
+        verify(volunteerRepository, times(1)).existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN);
         verify(volunteerRepository, times(1)).existsById(volunteerId);
         verify(volunteerService, times(1)).assignPosition(volunteerId, Position.valueOf(role));
         verifyNoInteractions(logService); // Ensure no logs are created

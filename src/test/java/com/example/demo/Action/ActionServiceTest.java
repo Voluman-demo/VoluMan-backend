@@ -1,8 +1,10 @@
-//package com.example.demo.Action;
 package com.example.demo.Action;
 
 import com.example.demo.Model.Errors;
 import com.example.demo.Model.ID;
+import com.example.demo.Volunteer.Preferences.Preferences;
+import com.example.demo.Volunteer.User.User;
+import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,11 +13,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 public class ActionServiceTest {
 
@@ -28,245 +29,639 @@ public class ActionServiceTest {
     @Mock
     private VolunteerRepository volunteerRepository;
 
+    private Action mockAction;
     private ID testActionId;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
         testActionId = new ID(1);
+        mockAction = new Action();
+        mockAction.setActionId(testActionId);
     }
 
     @Test
     public void testCreate() {
+        when(actionRepository.save(any(Action.class))).thenAnswer(invocation -> {
+            Action action = invocation.getArgument(0);
+            action.setActionId(new ID(1));
+            return action;
+        });
+
         ID newActionId = actionService.create();
 
         assertNotNull(newActionId);
         assertEquals(1, newActionId.getId());
+        verify(actionRepository, times(1)).save(any(Action.class));
     }
 
     @Test
     public void testRemove_ActionExists() {
-        actionService.create();
+        when(actionRepository.existsById(testActionId)).thenReturn(true);
+
         Errors result = actionService.remove(testActionId);
 
         assertEquals(Errors.SUCCESS, result);
+        verify(actionRepository, times(1)).deleteById(testActionId);
     }
 
     @Test
     public void testRemove_ActionNotFound() {
+        when(actionRepository.existsById(testActionId)).thenReturn(false);
+
         Errors result = actionService.remove(testActionId);
 
         assertEquals(Errors.NOT_FOUND, result);
+        verify(actionRepository, never()).deleteById(testActionId);
     }
 
     @Test
     public void testSetBeg_ActionExists() {
-        actionService.create();
         LocalDate beginDate = LocalDate.of(2025, 1, 1);
+        when(actionRepository.findById(testActionId)).thenReturn(Optional.of(mockAction));
 
         Errors result = actionService.setBeg(testActionId, beginDate);
 
         assertEquals(Errors.SUCCESS, result);
-        assertEquals(beginDate, actionService.getBeg(testActionId));
+        assertEquals(beginDate, mockAction.getBegin());
+        verify(actionRepository, times(1)).save(mockAction);
     }
 
     @Test
     public void testSetBeg_ActionNotFound() {
-        LocalDate beginDate = LocalDate.of(2025, 1, 1);
+        when(actionRepository.findById(testActionId)).thenReturn(Optional.empty());
 
-        Errors result = actionService.setBeg(testActionId, beginDate);
+        Errors result = actionService.setBeg(testActionId, LocalDate.of(2025, 1, 1));
 
         assertEquals(Errors.NOT_FOUND, result);
+        verify(actionRepository, never()).save(any(Action.class));
     }
 
     @Test
     public void testSetEnd_ActionExists() {
-        actionService.create();
         LocalDate endDate = LocalDate.of(2025, 12, 31);
+        when(actionRepository.findById(testActionId)).thenReturn(Optional.of(mockAction));
 
         Errors result = actionService.setEnd(testActionId, endDate);
 
         assertEquals(Errors.SUCCESS, result);
-        assertEquals(endDate, actionService.getEnd(testActionId));
+        assertEquals(endDate, mockAction.getEnd());
+        verify(actionRepository, times(1)).save(mockAction);
     }
 
     @Test
     public void testSetEnd_ActionNotFound() {
-        LocalDate endDate = LocalDate.of(2025, 12, 31);
+        when(actionRepository.findById(testActionId)).thenReturn(Optional.empty());
 
-        Errors result = actionService.setEnd(testActionId, endDate);
+        Errors result = actionService.setEnd(testActionId, LocalDate.of(2025, 12, 31));
 
         assertEquals(Errors.NOT_FOUND, result);
+        verify(actionRepository, never()).save(any(Action.class));
     }
 
     @Test
     public void testSetDesc_ActionExists() {
-
-        ID actionId = actionService.create();
         Lang language = Lang.EN;
-
         Description description = new Description();
-        description.setFullName("Test Action");
+        description.setFullName("Test Action Description");
 
+        when(actionRepository.findById(testActionId)).thenReturn(Optional.of(mockAction));
 
+        Errors result = actionService.setDesc(testActionId, language, description);
 
-        Errors result = actionService.setDesc(actionId, language, description);
-
-
-        assertEquals(Errors.SUCCESS, result, "Setting the description should return SUCCESS.");
-
-        Description retrievedDesc = actionService.getDesc(actionId, language);
-
-
-        assertNotNull(retrievedDesc, "The retrieved description should not be null.");
-        //TODO ogarnac czemu zmienia valid
-        assertEquals(true, retrievedDesc.isValid(), "The retrieved description should be valid.");
-        assertEquals("Test Action", retrievedDesc.getFullName(), "The fullName should match the set value.");
+        assertEquals(Errors.SUCCESS, result);
+        assertEquals(description, mockAction.getDescr().get(language));
+        assertTrue(mockAction.getDescr().get(language).isValid());
+        verify(actionRepository, times(1)).save(mockAction);
     }
-
 
     @Test
     public void testSetDesc_ActionNotFound() {
         Lang language = Lang.EN;
         Description description = new Description();
 
+        when(actionRepository.findById(testActionId)).thenReturn(Optional.empty());
+
         Errors result = actionService.setDesc(testActionId, language, description);
 
         assertEquals(Errors.NOT_FOUND, result);
+        verify(actionRepository, never()).save(any(Action.class));
     }
 
     @Test
     public void testRemDesc_ActionExists() {
-
-        ID testActionId = actionService.create();
         Lang language = Lang.EN;
-
-
         Description description = new Description();
         description.setValid(true);
-        description.setFullName("Test Action Full Name");
-        Errors setDescResult = actionService.setDesc(testActionId, language, description);
-        assertEquals(Errors.SUCCESS, setDescResult);
 
+        mockAction.getDescr().put(language, description);
+        when(actionRepository.findById(testActionId)).thenReturn(Optional.of(mockAction));
 
         Errors result = actionService.remDesc(testActionId, language);
 
-
         assertEquals(Errors.SUCCESS, result);
-
-
-        Action action = actionService.getAction(testActionId);
-        assertNotNull(action);
-        Version version = action.getDescr().get(language);
-        assertNotNull(version);
-        assertFalse(version.isValid());
-
-
-        Description updatedDesc = actionService.getDesc(testActionId, language);
-        assertNull(updatedDesc);
+        assertFalse(mockAction.getDescr().get(language).isValid());
+        verify(actionRepository, times(1)).save(mockAction);
     }
-
-
-
-
 
     @Test
     public void testRemDesc_ActionNotFound() {
-        Lang language = Lang.EN;
+        when(actionRepository.findById(testActionId)).thenReturn(Optional.empty());
 
-        Errors result = actionService.remDesc(testActionId, language);
+        Errors result = actionService.remDesc(testActionId, Lang.EN);
 
         assertEquals(Errors.NOT_FOUND, result);
+        verify(actionRepository, never()).save(any(Action.class));
     }
 
     @Test
-    public void testGetDesc_ActionExists() {
-        actionService.create();
-        Lang language = Lang.EN;
-        Description description = new Description();
-        description.setFullName("Test Action");
-        actionService.setDesc(testActionId, language, description);
+    public void testGetDesc_ValidDescription() {
+        // Arrange: Create an Action with a valid description
+        ID actionId = new ID(1);
+        Action action = new Action();
+        action.setActionId(actionId);
+        action.setBegin(LocalDate.of(2025, 1, 1));
+        action.setEnd(LocalDate.of(2025, 12, 31));
 
-        Description result = actionService.getDesc(testActionId, language);
+        Description validDescription = new Description();
+        validDescription.setFullName("Valid Action Description");
+        validDescription.setShortName("Short Desc");
+        validDescription.setPlace("Test Place");
+        validDescription.setAddress("123 Test Address");
+        validDescription.setDescription("Detailed description of the action.");
+        validDescription.setHours("10:00-15:00");
+        validDescription.setRoles(new ArrayList<>(List.of(
+                new Role(new ID(1), "helper", "work"),
+                new Role(new ID(2), "worker", "helps")
+        ))); // Use Role objects
+        validDescription.setValid(true); // Mark as valid
 
-        assertNotNull(result);
-        assertEquals("Test Action", result.getFullName());
+        // Add the valid description for the specified language
+        action.getDescr().put(Lang.EN, validDescription);
+
+        // Mock the repository to return the action
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
+
+        // Act: Call the method under test
+        Description result = actionService.getDesc(actionId, Lang.EN);
+
+        // Assert: Verify that the description matches the expected values
+        assertNotNull(result, "The description should not be null.");
+        assertEquals("Valid Action Description", result.getFullName(), "The full name should match.");
+        assertEquals("Short Desc", result.getShortName(), "The short name should match.");
+        assertEquals("Test Place", result.getPlace(), "The place should match.");
+        assertEquals("123 Test Address", result.getAddress(), "The address should match.");
+        assertEquals("Detailed description of the action.", result.getDescription(), "The detailed description should match.");
+        assertEquals("10:00-15:00", result.getHours(), "The hours should match.");
+
+        // Compare roles individually
+        assertNotNull(result.getRoles(), "Roles should not be null.");
+        assertEquals(2, result.getRoles().size(), "There should be 2 roles.");
+        Role expectedRole1 = new Role(new ID(1), "helper", "work");
+        Role expectedRole2 = new Role(new ID(2), "worker", "helps");
+
+        Role actualRole1 = result.getRoles().get(0);
+        Role actualRole2 = result.getRoles().get(1);
+
+        assertEquals(expectedRole1.getRoleId(), actualRole1.getRoleId(), "Role 1 ID should match.");
+        assertEquals(expectedRole1.getName(), actualRole1.getName(), "Role 1 name should match.");
+        assertEquals(expectedRole1.getDuties(), actualRole1.getDuties(), "Role 1 duties should match.");
+
+        assertEquals(expectedRole2.getRoleId(), actualRole2.getRoleId(), "Role 2 ID should match.");
+        assertEquals(expectedRole2.getName(), actualRole2.getName(), "Role 2 name should match.");
+        assertEquals(expectedRole2.getDuties(), actualRole2.getDuties(), "Role 2 duties should match.");
+
+        assertEquals(LocalDate.of(2025, 1, 1), result.getBegin(), "The begin date should match.");
+        assertEquals(LocalDate.of(2025, 12, 31), result.getEnd(), "The end date should match.");
+    }
+
+
+
+
+
+    @Test
+    public void testGetDesc_InvalidDescription() {
+        // Arrange: Create an Action with an invalid description
+        ID actionId = new ID(2);
+        Action action = new Action();
+        action.setActionId(actionId);
+
+        Description invalidDescription = new Description();
+        invalidDescription.setFullName("Invalid Action Description");
+        invalidDescription.setValid(false); // Mark as invalid
+
+        // Add the invalid description for the specified language
+        action.getDescr().put(Lang.EN, invalidDescription);
+
+        // Mock the repository to return the action
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
+
+        // Act: Call the method under test
+        Description result = actionService.getDesc(actionId, Lang.EN);
+
+        // Assert: Verify that the result is null for invalid descriptions
+        assertNull(result, "The result should be null for an invalid description.");
+    }
+
+    @Test
+    public void testGetDesc_NoDescription() {
+        // Arrange: Create an Action without a description
+        ID actionId = new ID(3);
+        Action action = new Action();
+        action.setActionId(actionId);
+
+        // Mock the repository to return the action
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
+
+        // Act: Call the method under test
+        Description result = actionService.getDesc(actionId, Lang.EN);
+
+        // Assert: Verify that the result is null when no description exists
+        assertNull(result, "The result should be null when no description exists for the specified language.");
     }
 
     @Test
     public void testGetDesc_ActionNotFound() {
-        Lang language = Lang.EN;
+        // Arrange: Mock the repository to return empty for a non-existent action
+        ID actionId = new ID(4);
+        when(actionRepository.findById(actionId)).thenReturn(Optional.empty());
 
-        Description result = actionService.getDesc(testActionId, language);
+        // Act: Call the method under test
+        Description result = actionService.getDesc(actionId, Lang.EN);
 
-        assertNull(result);
+        // Assert: Verify that the result is null when the action does not exist
+        assertNull(result, "The result should be null when the action does not exist.");
     }
+
+
+
 
     @Test
     public void testGetAllIds() {
-        actionService.create();
-        actionService.create();
+        Action action1 = new Action();
+        action1.setActionId(new ID(1));
+        Action action2 = new Action();
+        action2.setActionId(new ID(2));
+        List<Action> actions = List.of(action1, action2);
 
-        List<ID> actionIds = actionService.getAllIds();
+        when(actionRepository.findAll()).thenReturn(actions);
 
-        assertEquals(2, actionIds.size());
-        assertEquals(1, actionIds.get(0).getId());
-        assertEquals(2, actionIds.get(1).getId());
+        ArrayList<ID> ids = actionService.getAllIds();
+
+        assertEquals(2, ids.size());
+        assertEquals(1, ids.get(0).getId());
+        assertEquals(2, ids.get(1).getId());
     }
 
     @Test
     public void testGetAllDesc() {
-        // Arrange: Properly create actions and set their descriptions
-        ID actionId1 = new ID(1);
-        ID actionId2 = new ID(2);
-
-        // Manually create and initialize actions with proper IDs
+        // Arrange: Create multiple actions with valid and invalid descriptions
         Action action1 = new Action();
-        action1.setActionId(actionId1);
+        action1.setActionId(new ID(1));
+        Description desc1 = new Description();
+        desc1.setFullName("Description 1");
+        desc1.setValid(true); // Ensure this description is valid
+        action1.getDescr().put(Lang.EN, desc1);
 
         Action action2 = new Action();
-        action2.setActionId(actionId2);
+        action2.setActionId(new ID(2));
+        Description desc2 = new Description();
+        desc2.setFullName("Description 2");
+        desc2.setValid(true); // Ensure this description is valid
+        action2.getDescr().put(Lang.EN, desc2);
 
-        // Add actions to the service's internal storage
-        actionService.create(); // Mock the creation behavior
-        actionService.create(); // Simulate adding two actions
+        Action action3 = new Action();
+        action3.setActionId(new ID(3));
+        Description desc3 = new Description();
+        desc3.setFullName("Description 3");
+        desc3.setValid(false); // This description is invalid
+        action3.getDescr().put(Lang.EN, desc3);
 
-        Lang language = Lang.EN;
+        Action action4 = new Action();
+        action4.setActionId(new ID(4));
+        // No description for Lang.EN
 
-        // Create and set a valid description for the first action
-        Description description1 = new Description();
-        description1.setFullName("Test Action 1");
-        description1.setBegin(LocalDate.of(2025, 1, 1));
-        description1.setEnd(LocalDate.of(2025, 1, 31));
-        Errors result1 = actionService.setDesc(actionId1, language, description1);
-        assertEquals(Errors.SUCCESS, result1);
+        // Mock the repository to return these actions
+        when(actionRepository.findAll()).thenReturn(List.of(action1, action2, action3, action4));
+        when(actionRepository.findById(new ID(1))).thenReturn(Optional.of(action1));
+        when(actionRepository.findById(new ID(2))).thenReturn(Optional.of(action2));
+        when(actionRepository.findById(new ID(3))).thenReturn(Optional.of(action3));
+        when(actionRepository.findById(new ID(4))).thenReturn(Optional.of(action4));
 
-        // Create and set a valid description for the second action
-        Description description2 = new Description();
-        description2.setFullName("Test Action 2");
-        description2.setBegin(LocalDate.of(2025, 2, 1));
-        description2.setEnd(LocalDate.of(2025, 2, 28));
-        Errors result2 = actionService.setDesc(actionId2, language, description2);
-        assertEquals(Errors.SUCCESS, result2);
+        // Act: Call the method under test
+        ArrayList<Description> result = actionService.getAllDesc(Lang.EN);
 
-        // Act: Retrieve all descriptions for the specified language
-        ArrayList<Description> descriptions = actionService.getAllDesc(language);
+        // Assert: Validate the result
+        assertEquals(2, result.size(), "Expected 2 valid descriptions to be returned");
 
-        // Assert: Verify that the descriptions are retrieved correctly
-        assertEquals(2, descriptions.size());
+        // Validate the details of the first description
+        assertEquals("Description 1", result.get(0).getFullName(), "First description should match");
+        assertEquals("Description 2", result.get(1).getFullName(), "Second description should match");
 
-        // Validate the first description
-        Description retrievedDesc1 = descriptions.get(0);
-        assertEquals("Test Action 1", retrievedDesc1.getFullName());
-        assertEquals(LocalDate.of(2025, 1, 1), retrievedDesc1.getBegin());
-        assertEquals(LocalDate.of(2025, 1, 31), retrievedDesc1.getEnd());
-
-        // Validate the second description
-        Description retrievedDesc2 = descriptions.get(1);
-        assertEquals("Test Action 2", retrievedDesc2.getFullName());
-        assertEquals(LocalDate.of(2025, 2, 1), retrievedDesc2.getBegin());
-        assertEquals(LocalDate.of(2025, 2, 28), retrievedDesc2.getEnd());
+        // Debugging Output
+        System.out.println("Descriptions returned: " + result);
     }
+    @Test
+    public void testSetStronglyMine_Success() {
+        // Arrange
+        Volunteer volunteer = new Volunteer();
+        Preferences preferences = mock(Preferences.class); // Mock the Preferences object
+        Set<Action> stronglyMineSet = new HashSet<>(); // Mock the "S" set
+        when(preferences.getS()).thenReturn(stronglyMineSet); // Stub the "S" getter
+        volunteer.setPreferences(preferences);
+
+        User user = new User();
+        user.setVolunteer(volunteer);
+
+        Action action = new Action();
+        ID actionId = new ID(1);
+        action.setActionId(actionId);
+
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
+
+        // Act
+        Errors result = actionService.setStronglyMine(user, actionId);
+
+        // Assert
+        assertEquals(Errors.SUCCESS, result, "Expected SUCCESS when adding action to strongly mine.");
+        assertTrue(stronglyMineSet.contains(action), "The action should be added to the strongly mine set.");
+        verify(actionRepository, times(1)).findById(actionId);
+        verify(preferences, times(1)).getS(); // Verify that the Preferences object was called
+    }
+
+
+    @Test
+    public void testSetWeaklyMine_Success() {
+        // Arrange
+        Volunteer volunteer = new Volunteer();
+        Preferences preferences = mock(Preferences.class);
+        Set<Action> weaklyMineSet = new HashSet<>();
+        when(preferences.getW()).thenReturn(weaklyMineSet);
+        volunteer.setPreferences(preferences);
+
+        User user = new User();
+        user.setVolunteer(volunteer);
+
+        Action action = new Action();
+        ID actionId = new ID(1);
+        action.setActionId(actionId);
+
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
+
+        // Act
+        Errors result = actionService.setWeaklyMine(user, actionId);
+
+        // Assert
+        assertEquals(Errors.SUCCESS, result, "Expected SUCCESS when adding action to weakly mine.");
+        assertTrue(weaklyMineSet.contains(action), "The action should be added to the weakly mine set.");
+        verify(actionRepository, times(1)).findById(actionId);
+        verify(preferences, times(1)).getW();
+    }
+
+
+    @Test
+    public void testSetRejected_Success() {
+        // Arrange
+        Volunteer volunteer = new Volunteer();
+        Preferences preferences = mock(Preferences.class); // Mock the Preferences object
+        Set<Action> rejectedSet = new HashSet<>(); // Mock the "R" set
+        when(preferences.getR()).thenReturn(rejectedSet); // Stub the "R" getter
+        volunteer.setPreferences(preferences);
+
+        User user = new User();
+        user.setVolunteer(volunteer);
+
+        Action action = new Action();
+        ID actionId = new ID(1);
+        action.setActionId(actionId);
+
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
+
+        // Act
+        Errors result = actionService.setRejected(user, actionId);
+
+        // Assert
+        assertEquals(Errors.SUCCESS, result, "Expected SUCCESS when adding action to rejected.");
+        assertTrue(rejectedSet.contains(action), "The action should be added to the rejected set.");
+        verify(actionRepository, times(1)).findById(actionId);
+        verify(preferences, times(1)).getR(); // Verify that the Preferences object was called
+    }
+
+
+    @Test
+    public void testSetUndecided_Success() {
+        // Arrange
+        Volunteer volunteer = new Volunteer();
+        Preferences preferences = mock(Preferences.class);
+        Set<Action> undecidedSet = new HashSet<>();
+        when(preferences.getU()).thenReturn(undecidedSet);
+        volunteer.setPreferences(preferences);
+
+        User user = new User();
+        user.setVolunteer(volunteer);
+
+        Action action = new Action();
+        ID actionId = new ID(1);
+        action.setActionId(actionId);
+
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
+
+        // Act
+        Errors result = actionService.setUndecided(user, actionId);
+
+        // Assert
+        assertEquals(Errors.SUCCESS, result, "Expected SUCCESS when adding action to undecided.");
+        assertTrue(undecidedSet.contains(action), "The action should be added to the undecided set.");
+        verify(actionRepository, times(1)).findById(actionId);
+        verify(preferences, times(1)).getU();
+    }
+
+
+    @Test
+    public void testSetStronglyMine_ActionNotFound() {
+        // Arrange
+        User user = new User();
+        Volunteer volunteer = new Volunteer();
+        volunteer.setPreferences(new Preferences());
+        user.setVolunteer(volunteer);
+
+        ID actionId = new ID(1);
+
+        when(actionRepository.findById(actionId)).thenReturn(Optional.empty());
+
+        // Act
+        Errors result = actionService.setStronglyMine(user, actionId);
+
+        // Assert
+        assertEquals(Errors.FAILURE, result, "Expected FAILURE when action is not found.");
+        verify(actionRepository, times(1)).findById(actionId);
+    }
+    @Test
+    public void testGetStronglyMine() {
+        // Arrange
+        Volunteer volunteer = new Volunteer();
+        Preferences preferences = mock(Preferences.class);
+        Set<Action> stronglyMineSet = new HashSet<>();
+        Action action = new Action();
+        action.setActionId(new ID(1));
+        Description description = new Description();
+        description.setFullName("Strongly Mine Action");
+        action.getDescr().put(Lang.UK, description);
+        stronglyMineSet.add(action);
+        when(preferences.getS()).thenReturn(stronglyMineSet);
+        volunteer.setPreferences(preferences);
+
+        User user = new User();
+        user.setVolunteer(volunteer);
+
+        when(volunteerRepository.getVolunteerByVolunteerId(volunteer.getVolunteerId())).thenReturn(volunteer);
+
+        // Act
+        ArrayList<Description> result = actionService.getStronglyMine(user);
+
+        // Assert
+        assertEquals(1, result.size(), "Expected 1 strongly mine description");
+        assertEquals("Strongly Mine Action", result.get(0).getFullName(), "Expected description to match");
+        verify(volunteerRepository, times(1)).getVolunteerByVolunteerId(volunteer.getVolunteerId());
+    }
+
+    @Test
+    public void testUpdateAction_Success() {
+        // Arrange
+        ID actionId = new ID(1);
+        Action existingAction = new Action();
+        existingAction.setActionId(actionId);
+
+        Action newAction = new Action();
+        newAction.setBegin(LocalDate.of(2025, 1, 1));
+        newAction.setEnd(LocalDate.of(2025, 12, 31));
+        newAction.setDescr(new HashMap<>());
+
+        when(actionRepository.findById(actionId)).thenReturn(Optional.of(existingAction));
+
+        // Act
+        Errors result = actionService.updateAction(actionId, newAction);
+
+        // Assert
+        assertEquals(Errors.SUCCESS, result, "Expected SUCCESS when updating action.");
+        assertEquals(LocalDate.of(2025, 1, 1), existingAction.getBegin(), "Expected begin date to be updated.");
+        assertEquals(LocalDate.of(2025, 12, 31), existingAction.getEnd(), "Expected end date to be updated.");
+        verify(actionRepository, times(1)).findById(actionId);
+    }
+
+    @Test
+    public void testUpdateAction_NotFound() {
+        // Arrange
+        ID actionId = new ID(1);
+        Action newAction = new Action();
+
+        when(actionRepository.findById(actionId)).thenReturn(Optional.empty());
+
+        // Act
+        Errors result = actionService.updateAction(actionId, newAction);
+
+        // Assert
+        assertEquals(Errors.NOT_FOUND, result, "Expected NOT_FOUND when action does not exist.");
+        verify(actionRepository, times(1)).findById(actionId);
+    }
+    @Test
+    public void testGetWeaklyMine() {
+        // Arrange
+        // Create a mock volunteer and their preferences
+        Volunteer volunteer = new Volunteer();
+        volunteer.setVolunteerId(new ID(1));
+        Preferences preferences = new Preferences();
+
+        // Create a mock action with a valid description
+        Action action = new Action();
+        action.setActionId(new ID(100));
+        Description description = new Description();
+        description.setFullName("Weakly Mine Action");
+        description.setValid(true);
+        action.getDescr().put(Lang.UK, description);
+
+        // Add the action to the weakly mine set in preferences
+        Set<Action> weaklyMineSet = new HashSet<>();
+        weaklyMineSet.add(action);
+        preferences.setW(weaklyMineSet);
+        volunteer.setPreferences(preferences);
+
+        // Mock the User and VolunteerRepository behavior
+        User user = new User();
+        user.setVolunteer(volunteer);
+
+        when(volunteerRepository.getVolunteerByVolunteerId(volunteer.getVolunteerId())).thenReturn(volunteer);
+
+        // Act
+        ArrayList<Description> result = new ArrayList<>(actionService.getWeaklyMine(user)); // Ensure conversion to ArrayList
+
+        // Assert
+        assertNotNull(result, "The result should not be null.");
+        assertEquals(1, result.size(), "The result should contain one description.");
+        assertEquals("Weakly Mine Action", result.get(0).getFullName(), "The description's full name should match.");
+        verify(volunteerRepository, times(1)).getVolunteerByVolunteerId(volunteer.getVolunteerId());
+    }
+
+    @Test
+    public void testGetRejected() {
+        // Arrange
+        Volunteer volunteer = new Volunteer();
+        Preferences preferences = mock(Preferences.class);
+        Set<Action> rejectedSet = new HashSet<>();
+        Action action = new Action();
+        action.setActionId(new ID(1));
+        Description description = new Description();
+        description.setFullName("Rejected Action");
+        action.getDescr().put(Lang.UK, description);
+        rejectedSet.add(action);
+        when(preferences.getR()).thenReturn(rejectedSet);
+        volunteer.setPreferences(preferences);
+
+        User user = new User();
+        user.setVolunteer(volunteer);
+
+        when(volunteerRepository.getVolunteerByVolunteerId(volunteer.getVolunteerId())).thenReturn(volunteer);
+
+        // Act
+        ArrayList<Description> result = actionService.getRejected(user);
+
+        // Assert
+        assertEquals(1, result.size(), "Expected 1 rejected description");
+        assertEquals("Rejected Action", result.get(0).getFullName(), "Expected description to match");
+        verify(volunteerRepository, times(1)).getVolunteerByVolunteerId(volunteer.getVolunteerId());
+    }
+    @Test
+    public void testGetUndecided() {
+        // Arrange
+        Volunteer volunteer = new Volunteer();
+        Preferences preferences = mock(Preferences.class);
+        Set<Action> undecidedSet = new HashSet<>();
+        Action action = new Action();
+        action.setActionId(new ID(1));
+        Description description = new Description();
+        description.setFullName("Undecided Action");
+        action.getDescr().put(Lang.UK, description);
+        undecidedSet.add(action);
+        when(preferences.getU()).thenReturn(undecidedSet);
+        volunteer.setPreferences(preferences);
+
+        User user = new User();
+        user.setVolunteer(volunteer);
+
+        when(volunteerRepository.getVolunteerByVolunteerId(volunteer.getVolunteerId())).thenReturn(volunteer);
+
+        // Act
+        ArrayList<Description> result = actionService.getUndecided(user);
+
+        // Assert
+        assertEquals(1, result.size(), "Expected 1 undecided description");
+        assertEquals("Undecided Action", result.get(0).getFullName(), "Expected description to match");
+        verify(volunteerRepository, times(1)).getVolunteerByVolunteerId(volunteer.getVolunteerId());
+    }
+
+
+
+
 
 
 
@@ -497,3 +892,8 @@ public class ActionServiceTest {
 //        assertTrue(action.getVolunteers().contains(volunteer));
 //    }
 //}
+
+
+
+
+
