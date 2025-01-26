@@ -29,25 +29,25 @@
 //
 //    private void setupCandidateMethods(CandidateService candidateService) {
 //        methodRegistry.put("getCandidates", params -> {
-//            Long recruiterId = Long.valueOf(params.get("recruiterId"));
+//            ID recruiterId = ID.valueOf(params.get("recruiterId"));
 //            return candidateService.getCandidates(recruiterId);
 //        });
 //
 //        methodRegistry.put("getCandidate", params -> {
-//            Long recruiterId = Long.valueOf(params.get("recruiterId"));
-//            Long idCandidate = Long.valueOf(params.get("idCandidate"));
+//            ID recruiterId = ID.valueOf(params.get("recruiterId"));
+//            ID idCandidate = ID.valueOf(params.get("idCandidate"));
 //            return candidateService.getCandidate(idCandidate, recruiterId);
 //        });
 //
 //        methodRegistry.put("acceptCandidate", params -> {
-//            Long recruiterId = Long.valueOf(params.get("recruiterId"));
-//            Long idCandidate = Long.valueOf(params.get("idCandidate"));
+//            ID recruiterId = ID.valueOf(params.get("recruiterId"));
+//            ID idCandidate = ID.valueOf(params.get("idCandidate"));
 //            return candidateService.acceptCandidate(idCandidate, recruiterId);
 //        });
 //
 //        methodRegistry.put("refuseCandidate", params -> {
-//            Long recruiterId = Long.valueOf(params.get("recruiterId"));
-//            Long idCandidate = Long.valueOf(params.get("idCandidate"));
+//            ID recruiterId = ID.valueOf(params.get("recruiterId"));
+//            ID idCandidate = ID.valueOf(params.get("idCandidate"));
 //            return candidateService.refuseCandidate(idCandidate, recruiterId);
 //        });
 //

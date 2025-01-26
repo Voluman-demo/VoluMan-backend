@@ -36,32 +36,27 @@ public class AvailabilityController {
     }
 
     @GetMapping("/volunteers/{volunteerId}/availabilities")
-    public ResponseEntity<?> getAvailability(@PathVariable Long volunteerId) {
+    public ResponseEntity<?> getAvailability(@PathVariable ID volunteerId) {
         try {
-            // Sprawdź, czy wolontariusz istnieje
             if (!volunteerRepository.existsById(volunteerId)) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Volunteer not found.");
             }
 
-            // Pobierz dostępności wolontariusza
             List<Availability> availabilities = availabilityRepository.findAllByVolunteer_VolunteerId(volunteerId);
 
-            // Sprawdź, czy istnieją jakiekolwiek dostępności
             if (availabilities.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No availabilities found for this volunteer.");
             }
 
             VolunteerAvailResponse response = new VolunteerAvailResponse(volunteerId, availabilities);
 
-            // Zwróć odpowiedź
             return ResponseEntity.ok(response);
         } catch (Exception e) {
-            // Obsługa wyjątków
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
    /* @PutMapping("/volunteers/{idVolunteer}/limit-weekly-hours")
-    public ResponseEntity<Void> setWeekHourLim(@PathVariable Long idVolunteer, @RequestParam Long limitOfHours){
+    public ResponseEntity<Void> setWeekHourLim(@PathVariable ID idVolunteer, @RequestParam ID limitOfHours){
         if(!volunteerRepository.existsByVolunteerId(idVolunteer)){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -85,7 +80,7 @@ public class AvailabilityController {
         return ResponseEntity.ok().build();
     }
     @GetMapping("/volunteers/{idVolunteer}/limit-weekly-hours")
-    public ResponseEntity<WeeklyHourLimitResponse> getWeekHourLim(@PathVariable Long idVolunteer) {
+    public ResponseEntity<WeeklyHourLimitResponse> getWeekHourLim(@PathVariable ID idVolunteer) {
         if (!volunteerRepository.existsById(idVolunteer)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

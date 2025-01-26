@@ -1,6 +1,7 @@
 package com.example.demo.Log;
 
 
+import com.example.demo.Model.ID;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 public class Log {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private ID id;
 
     private String firstName;
 

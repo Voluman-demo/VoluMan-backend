@@ -1,7 +1,9 @@
 package com.example.demo.Auth;
 
 
+import com.example.demo.Model.ID;
+
 public record AuthDto(
-        Long idUser,
+        ID idUser,
         String token
 ){}

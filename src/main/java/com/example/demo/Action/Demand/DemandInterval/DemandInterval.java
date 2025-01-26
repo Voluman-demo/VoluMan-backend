@@ -2,6 +2,7 @@ package com.example.demo.Action.Demand.DemandInterval;
 
 
 import com.example.demo.Action.Demand.Demand;
+import com.example.demo.Model.ID;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ public class DemandInterval {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "interval_id")
-    private Long intervalId;
+    private ID intervalId;
 
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;

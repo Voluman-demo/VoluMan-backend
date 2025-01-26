@@ -1,18 +1,18 @@
-package com.example.demo.Action.ActionDto;
-
-import com.example.demo.Action.ActionStatus;
-
-import java.time.LocalDate;
-
-public record AddActionRequest(
-        Long adminId,
-        String heading,
-        String description,
-        ActionStatus status,
-        LocalDate startDay,
-        LocalDate endDay,
-        Long leaderId
-) {}
+//package com.example.demo.Action.ActionDto;
+//
+//import com.example.demo.Action.ActionStatus;
+//
+//import java.time.LocalDate;
+//
+//public record AddActionRequest(
+//        ID adminId,
+//        String heading,
+//        String description,
+//        ActionStatus status,
+//        LocalDate startDay,
+//        LocalDate endDay,
+//        ID leaderId
+//) {}
 
 /*
 {

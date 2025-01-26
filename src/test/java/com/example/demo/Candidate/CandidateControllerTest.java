@@ -42,7 +42,7 @@
 //
 //    @Test
 //    void testGetCandidates_ReturnsForbidden_WhenVolunteerIsNotRecruiter() {
-//        Long recruiterId = 1L;
+//        ID recruiterId = 1L;
 //
 //        when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(false);
 //
@@ -55,7 +55,7 @@
 //    @Test
 //    void testGetCandidates_ReturnsNotFound_WhenCandidateIsNotFound() {
 //        // Arrange
-//        Long recruiterId = 1L;
+//        ID recruiterId = 1L;
 //        when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(true);
 //        when(candidateRepository.findAll()).thenReturn(Collections.emptyList());
 //
@@ -71,7 +71,7 @@
 //
 //    @Test
 //    void testGetCandidates_ReturnsOk_WhenVolunteerIsRecruiter() {
-//        Long recruiterId = 1L;
+//        ID recruiterId = 1L;
 //
 //        Candidate candidate1 = new Candidate(1L, "John", "Doe", "john@example.com", "123456789", LocalDate.of(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
 //        Candidate candidate2 = new Candidate(2L, "Jane", "Doe", "jane@example.com", "987654321", LocalDate.of(91, 2, 2), "Street", "City", "1", "2", "12345", "Female");
@@ -91,8 +91,8 @@
 //
 //    @Test
 //    void testGetCandidate_ReturnsForbidden_WhenVolunteerIsNotRecruiter() {
-//        Long recruiterId = 1L;
-//        long candidateId = 1L;
+//        ID recruiterId = 1L;
+//        ID candidateId = 1L;
 //
 //
 //        when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(false);
@@ -106,8 +106,8 @@
 //
 //    @Test
 //    void testGetCandidate_ReturnsNotFound_WhenCandidateNotExists() {
-//        Long recruiterId = 1L;
-//        Long candidateId = 1L;
+//        ID recruiterId = 1L;
+//        ID candidateId = 1L;
 //
 //
 //        when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(true);
@@ -122,8 +122,8 @@
 //
 //    @Test
 //    void testGetCandidate_ReturnsOk_WhenCandidateFound() {
-//        Long recruiterId = 1L;
-//        Long candidateId = 1L;
+//        ID recruiterId = 1L;
+//        ID candidateId = 1L;
 //
 //        Candidate candidate = new Candidate(candidateId, "John", "Doe", "john@example.com", "123456789", LocalDate.of(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
 //
@@ -154,8 +154,8 @@
 //
 ////    @Test
 ////    void testAcceptCandidate_ReturnsForbidden_WhenVolunteerIsNotRecruiter() {
-////        Long recruiterId = 1L;
-////        Long candidateId = 1L;
+////        ID recruiterId = 1L;
+////        ID candidateId = 1L;
 ////
 ////
 ////        when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(false);
@@ -170,8 +170,8 @@
 //
 ////    @Test
 ////    void testAcceptCandidate_ReturnsNotFound_WhenCandidateNotFound() {
-////        Long recruiterId = 1L;
-////        Long candidateId = 1L;
+////        ID recruiterId = 1L;
+////        ID candidateId = 1L;
 ////
 ////
 ////        when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(true);
@@ -187,8 +187,8 @@
 //
 ////    @Test
 ////    void testAcceptCandidate_ReturnsOk_WhenRecruiterAcceptCandidate() {
-////        Long recruiterId = 1L;
-////        Long candidateId = 1L;
+////        ID recruiterId = 1L;
+////        ID candidateId = 1L;
 ////
 ////        Candidate candidate = new Candidate(candidateId, "John", "Doe", "john@example.com", "123456789", LocalDate.of(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
 ////
@@ -204,8 +204,8 @@
 //
 ////    @Test
 ////    void testRefuseCandidate_ReturnsForbidden_WhenVolunteerIsNotRecruiter() {
-////        Long recruiterId = 1L;
-////        Long candidateId = 1L;
+////        ID recruiterId = 1L;
+////        ID candidateId = 1L;
 ////
 ////
 ////        when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(false);
@@ -220,8 +220,8 @@
 //
 ////    @Test
 ////    void testRefuseCandidate_ReturnsNotFound_WhenCandidateNotFound() {
-////        Long recruiterId = 1L;
-////        Long candidateId = 1L;
+////        ID recruiterId = 1L;
+////        ID candidateId = 1L;
 ////
 ////
 ////        when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(true);
@@ -237,8 +237,8 @@
 //
 ////    @Test
 ////    void testRefuseCandidate_ReturnsOk_WhenRecruiterRefuseCandidate() {
-////        Long recruiterId = 1L;
-////        Long candidateId = 1L;
+////        ID recruiterId = 1L;
+////        ID candidateId = 1L;
 ////
 ////        Candidate candidate = new Candidate(candidateId, "John", "Doe", "john@example.com", "123456789", LocalDate.of(90, 1, 1), "Street", "City", "1", "2", "12345", "Male");
 ////

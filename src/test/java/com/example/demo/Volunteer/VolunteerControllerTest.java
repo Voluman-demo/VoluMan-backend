@@ -9,7 +9,6 @@ import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Position.Position;
-import com.example.demo.Volunteer.Preferences.Preferences;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -20,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -169,7 +167,7 @@ public class VolunteerControllerTest {
         ID idVolunteer = new ID(1);
         AdminRequest request = new AdminRequest(new ID(2));
 
-        when(volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(false);
+        when(volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(false);
 
         ResponseEntity<Void> response = volunteerController.deleteVolunteer(idVolunteer, request);
 
@@ -181,7 +179,7 @@ public class VolunteerControllerTest {
         ID idVolunteer = new ID(1);
         AdminRequest request = new AdminRequest(new ID(2));
 
-        when(volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
+        when(volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
         when(volunteerService.deleteVolunteer(idVolunteer)).thenReturn(Errors.NOT_FOUND);
 
         ResponseEntity<Void> response = volunteerController.deleteVolunteer(idVolunteer, request);
@@ -195,7 +193,7 @@ public class VolunteerControllerTest {
         AdminRequest request = new AdminRequest(new ID(2));
 
 
-        when(volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
+        when(volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
         when(volunteerService.deleteVolunteer(idVolunteer)).thenReturn(Errors.SUCCESS);
 
 

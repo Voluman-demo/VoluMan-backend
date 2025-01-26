@@ -7,6 +7,6 @@ import com.example.demo.Volunteer.Duty.DutyInterval.DutyInterval;
 import java.util.List;
 
 public record ModifyScheduleRequest(
-    ID volunteerId,
+        ID volunteerId,
     List<DutyInterval> dutyIntervals
 ) {}

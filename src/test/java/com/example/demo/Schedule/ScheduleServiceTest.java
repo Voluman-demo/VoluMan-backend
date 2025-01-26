@@ -275,7 +275,7 @@
 //    @Test
 //    public void testModifySchedule_Success() {
 //        // Setup test data
-//        Long volunteerId = 1L;
+//        ID volunteerId = 1L;
 //        int year = 2023;
 //        int week = 30;
 //
@@ -320,7 +320,7 @@
 //        // Note: You can initialize the set with Collections.singleton for simplicity
 //        demand.setDemandIntervals(new HashSet<>(Collections.singleton(demandInterval)));
 //
-//        when(demandService.findAllByActionId(any(Long.class))).thenReturn(Collections.singletonList(demand));
+//        when(demandService.findAllByActionId(any(ID.class))).thenReturn(Collections.singletonList(demand));
 //
 //        // Prepare request
 //        ModifyScheduleRequest modifyScheduleRequest = new ModifyScheduleRequest(1L, new ArrayList<>(duty.getDutyIntervals()));
@@ -342,7 +342,7 @@
 ////    @Test
 ////    public void testGetScheduleByVolunteer_Success() {
 ////        // Setup test data
-////        Long volunteerId = 1L;
+////        ID volunteerId = 1L;
 ////        int year = 2023;
 ////        int week = 30;
 ////
@@ -437,7 +437,7 @@
 ////    @Test
 ////    public void testGetScheduleByVolunteer_Success_One() {
 ////        // Setup test data
-////        Long volunteerId = 1L;
+////        ID volunteerId = 1L;
 ////        int year = 2023;
 ////        int week = 30;
 ////
@@ -517,7 +517,7 @@
 //    @Test
 //    void testGetScheduleByAction_One() {
 //        // Create mock data
-//        Long actionId = 1L;
+//        ID actionId = 1L;
 //
 //        Action action = new Action();
 //        action.setActionId(actionId);
@@ -600,7 +600,7 @@
 //    @Test
 //    void testGetScheduleByAction_ThreeDutiesThreeDemands() {
 //        // Create mock data
-//        Long actionId = 1L;
+//        ID actionId = 1L;
 //
 //        Action action = new Action();
 //        action.setActionId(actionId);
@@ -614,10 +614,10 @@
 //            LocalDate date = LocalDate.of(2024, 7, 20).plusDays(i);
 //
 //            Demand demand = new Demand();
-//            demand.setDemandId((long) (i + 1));
+//            demand.setDemandId((ID) (i + 1));
 //            demand.setDate(date);
 //            DemandInterval demandInterval = new DemandInterval();
-//            demandInterval.setIntervalId((long) (i + 1));
+//            demandInterval.setIntervalId((ID) (i + 1));
 //            demandInterval.setStartTime(LocalTime.of(9, 0));
 //            demandInterval.setEndTime(LocalTime.of(12, 0));
 //            demandInterval.setDemand(demand);
@@ -625,7 +625,7 @@
 //            demands.add(demand);
 //
 //            Volunteer volunteer = new Volunteer();
-//            volunteer.setVolunteerId((long) (i + 1));
+//            volunteer.setVolunteerId((ID) (i + 1));
 //            PersonalData details = new PersonalData();
 //            details.setFirstname("John" + i);
 //            details.setLastname("Doe" + i);
@@ -635,7 +635,7 @@
 //            duty.setVolunteer(volunteer);
 //            duty.setDate(date);
 //            DutyInterval dutyInterval = new DutyInterval();
-//            dutyInterval.setIntervalId((long) (i + 1));
+//            dutyInterval.setIntervalId((ID) (i + 1));
 //            dutyInterval.setStartTime(LocalTime.of(9, 0));
 //            dutyInterval.setEndTime(LocalTime.of(12, 0));
 //            dutyInterval.setDuty(duty);
@@ -664,7 +664,7 @@
 //
 //        for (int i = 0; i < 3; i++) {
 //            DemandDto demandDto = demandDtos.get(i);
-//            assertEquals((long) (i + 1), demandDto.demandId());
+//            assertEquals((ID) (i + 1), demandDto.demandId());
 //            assertEquals(LocalDate.of(2024, 7, 20).plusDays(i), demandDto.date());
 //
 //            List<DemandIntervalDto> intervalDtos = demandDto.demandIntervals();
@@ -672,7 +672,7 @@
 //            assertEquals(1, intervalDtos.size());
 //
 //            DemandIntervalDto intervalDto = intervalDtos.get(0);
-//            assertEquals((long) (i + 1), intervalDto.intervalId());
+//            assertEquals((ID) (i + 1), intervalDto.intervalId());
 //            assertEquals(LocalTime.of(9, 0), intervalDto.startTime());
 //            assertEquals(LocalTime.of(12, 0), intervalDto.endTime());
 //
@@ -681,7 +681,7 @@
 //            assertEquals(1, assignedVolunteers.size());
 //
 //            VolunteerDto volunteerDto = assignedVolunteers.get(0);
-//            assertEquals((long) (i + 1), volunteerDto.volunteerId());
+//            assertEquals((ID) (i + 1), volunteerDto.volunteerId());
 //            assertEquals("John" + i, volunteerDto.firstname());
 //            assertEquals("Doe" + i, volunteerDto.lastname());
 //        }

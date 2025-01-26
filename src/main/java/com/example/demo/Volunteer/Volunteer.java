@@ -22,12 +22,12 @@ import java.util.Set;
 @AllArgsConstructor
 @Getter
 @Setter
-@Table(name = "volunteer")
+@Table(name = "volunteers")
 public class Volunteer extends PersonalData {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private ID id;
+    @Column(name = "volunteer_id")
+    private ID volunteerId;
 
     @Column(name = "valid", nullable = false)
     private boolean valid = false;
@@ -43,7 +43,7 @@ public class Volunteer extends PersonalData {
     private double actualWeeklyHours;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "preferences_id", referencedColumnName = "preferenceId")
+    @JoinColumn(name = "preferences_id")
     private Preferences preferences;
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -52,7 +52,7 @@ public class Volunteer extends PersonalData {
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
-            name = "volunteer_action",
+            name = "volunteers_actions",
             joinColumns = @JoinColumn(name = "volunteer_id"),
             inverseJoinColumns = @JoinColumn(name = "action_id")
     )

@@ -124,7 +124,7 @@ public class ScheduleService implements Schedules {
 
                             demandInterval.setCurrentVolunteersNumber(demandInterval.getCurrentVolunteersNumber() + 1);
 
-                            System.out.println("Assigned volunteer " + volunteer.getId() +
+                            System.out.println("Assigned volunteer " + volunteer.getVolunteerId() +
                                     " to demand interval on " + currentDay);
 
                             if (demandInterval.getCurrentVolunteersNumber() >= demandInterval.getNeedMax()) {
@@ -208,7 +208,7 @@ public class ScheduleService implements Schedules {
     public List<Schedule> getVolunteerSchedules(ID volunteerId) {
         return scheduleRepository.findAll().stream()
                 .filter(schedule -> schedule.getDuties().stream()
-                        .anyMatch(duty -> duty.getVolunteer().getId().equals(volunteerId.getId())))
+                        .anyMatch(duty -> duty.getVolunteer().getVolunteerId().equals(volunteerId.getId())))
                 .toList();
     }
 
@@ -317,7 +317,7 @@ public class ScheduleService implements Schedules {
 //    }
 //
 //
-//    public void choosePref(Long actionId, ActionPrefRequest actionPrefRequest) {
+//    public void choosePref(ID actionId, ActionPrefRequest actionPrefRequest) {
 //        switch (actionPrefRequest.decision()) {
 //            case "T":
 //                actionService.addDetermined(actionId, actionPrefRequest.volunteerId());
@@ -338,7 +338,7 @@ public class ScheduleService implements Schedules {
 //    }
 //
 //
-//    public void scheduleNeedAction(Long actionId, int year, int week, ActionNeedRequest actionNeedRequest) throws Exception {
+//    public void scheduleNeedAction(ID actionId, int year, int week, ActionNeedRequest actionNeedRequest) throws Exception {
 //        // Validate leader
 //        if (!volunteerRepository.existsByVolunteerIdAndRole(actionNeedRequest.getLeaderId(), VolunteerRole.LEADER)) {
 //            throw new Exception("Leader not found or not authorized.");
@@ -387,8 +387,8 @@ public class ScheduleService implements Schedules {
 //            for (ActionNeedRequest.SlotRequest slotRequest : dayRequest.getSlots()) {
 //                LocalTime slotStart = slotRequest.getStartTime();
 //                LocalTime slotEnd = slotRequest.getEndTime();
-//                Long needMin = slotRequest.getNeedMin();
-//                Long needMax = slotRequest.getNeedMax();
+//                ID needMin = slotRequest.getNeedMin();
+//                ID needMax = slotRequest.getNeedMax();
 //
 //                // Check if an interval with the same times and needs already exists
 //                boolean intervalExists = false;
@@ -432,7 +432,7 @@ public class ScheduleService implements Schedules {
 //    }
 //
 //
-//    public Optional<SingleAction> getActionById(Long actionId) {
+//    public Optional<SingleAction> getActionById(ID actionId) {
 //        return actionRepository.findById(actionId);
 //    }
 //
@@ -443,7 +443,7 @@ public class ScheduleService implements Schedules {
 //                .plusWeeks(week - 1);
 //    }
 //
-//    public void chooseAvailabilities(Long volunteerId, int year, int week, VolunteerAvailRequest availRequest) throws Exception {
+//    public void chooseAvailabilities(ID volunteerId, int year, int week, VolunteerAvailRequest availRequest) throws Exception {
 //        // Validate volunteer
 //        Volunteer volunteer = volunteerRepository.findById(volunteerId)
 //                .orElseThrow(() -> new Exception("Volunteer not found"));
@@ -452,10 +452,10 @@ public class ScheduleService implements Schedules {
 //        for (VolunteerAvailRequest.DayAvailabilityRequest dayRequest : availRequest.getDays()) {
 //            LocalDate requestDate = dayRequest.getDate();
 //
-//            // Validate if the date belongs to the specified week
+//            // Validate if the date beIDs to the specified week
 //            int requestWeek = requestDate.get(WeekFields.ISO.weekOfWeekBasedYear());
 //            if (requestDate.getYear() != year || requestWeek != week) {
-//                throw new Exception("Date " + requestDate + " does not belong to week " + week + " of year " + year);
+//                throw new Exception("Date " + requestDate + " does not beID to week " + week + " of year " + year);
 //            }
 //
 //            // Create or update availability for the volunteer for this date
@@ -571,7 +571,7 @@ public class ScheduleService implements Schedules {
 //        volunteerRepository.save(updatedVolunteer);
 //    }
 //
-//    public Set<Volunteer> getInterestedVolunteersForAction(Long actionId) {
+//    public Set<Volunteer> getInterestedVolunteersForAction(ID actionId) {
 //        Optional<Action> actionOpt = actionRepository.findById(actionId);
 //
 //        if (actionOpt.isPresent()) {
@@ -701,7 +701,7 @@ public class ScheduleService implements Schedules {
 //        // Implementacja zależna od specyfiki Twojej aplikacji
 //    }
 //
-//    public ActionScheduleDto getScheduleByAction(Long actionId) {
+//    public ActionScheduleDto getScheduleByAction(ID actionId) {
 //        Action action = actionRepository.findById(actionId)
 //                .orElseThrow(() -> new IllegalArgumentException("Action not found"));
 //
@@ -754,7 +754,7 @@ public class ScheduleService implements Schedules {
 //
 //
 //    @Transactional
-//    public void modifySchedule(Long volunteerId, int year, int week, ModifyScheduleRequest modifyScheduleRequest) {
+//    public void modifySchedule(ID volunteerId, int year, int week, ModifyScheduleRequest modifyScheduleRequest) {
 //        Volunteer volunteer = volunteerRepository.findById(volunteerId)
 //                .orElseThrow(() -> new IllegalArgumentException("Volunteer not found"));
 //
@@ -805,7 +805,7 @@ public class ScheduleService implements Schedules {
 //        volunteerRepository.save(volunteer);
 //    }
 //
-//    public VolunteerScheduleDto getScheduleByVolunteer(Long volunteerId, int year, int week) {
+//    public VolunteerScheduleDto getScheduleByVolunteer(ID volunteerId, int year, int week) {
 //        Volunteer volunteer = volunteerRepository.findById(volunteerId)
 //                .orElseThrow(() -> new IllegalArgumentException("Volunteer not found"));
 //

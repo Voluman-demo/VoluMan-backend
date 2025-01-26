@@ -1,5 +1,6 @@
 package com.example.demo.Volunteer.Duty;
 
+import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Duty.DutyInterval.DutyInterval;
 import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalStatus;
 import com.example.demo.Volunteer.Volunteer;
@@ -22,13 +23,13 @@ public class Duty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "duty_id")
-    private Long dutyId;
+    private ID dutyId;
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
     @ManyToOne
-    @JoinColumn(name = "volunteer_id")
+    @JoinColumn(name = "volunteer_id", nullable = false)
     @JsonBackReference
     private Volunteer volunteer;
 

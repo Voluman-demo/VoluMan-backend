@@ -49,12 +49,12 @@ public class AvailabilityService {
         ).collect(Collectors.toList());
     }
 
-    public Availability getByVolunteerIdAndDate(Long volunteerId, LocalDate requestDate) {
+    public Availability getByVolunteerIdAndDate(ID volunteerId, LocalDate requestDate) {
         return availabilityRepository.findByVolunteer_VolunteerIdAndDate(volunteerId, requestDate)
                 .orElse(new Availability());
     }
 
-    public void setWeekHourLim(Long volunteerId, limitOfHoursRequest limitOfHoursRequest){
+    public void setWeekHourLim(ID volunteerId, limitOfHoursRequest limitOfHoursRequest){
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
 
         if (volunteer.isPresent()) {
@@ -64,7 +64,7 @@ public class AvailabilityService {
 
         }
     }
-    public Double getWeekHourLim(Long idVolunteer) {
+    public Double getWeekHourLim(ID idVolunteer) {
         return volunteerRepository.findById(idVolunteer)
                 .map(Volunteer::getLimitOfWeeklyHours)
                 .orElse(0.0); // Domyślnie 0.0, jeśli wolontariusz nie istnieje
@@ -83,10 +83,10 @@ public class AvailabilityService {
         for (VolunteerAvailRequest.DayAvailabilityRequest dayRequest : availRequest.getDays()) {
             LocalDate requestDate = dayRequest.getDate();
 
-            // Validate if the date belongs to the specified week
+            // Validate if the date beIDs to the specified week
             int requestWeek = requestDate.get(WeekFields.ISO.weekOfWeekBasedYear());
             if (requestDate.getYear() != year || requestWeek != week) {
-                throw new Exception("Date " + requestDate + " does not belong to week " + week + " of year " + year);
+                throw new Exception("Date " + requestDate + " does not beID to week " + week + " of year " + year);
             }
 
             // Create or update availability for the volunteer for this date

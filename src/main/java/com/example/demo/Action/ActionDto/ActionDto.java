@@ -1,6 +1,8 @@
 package com.example.demo.Action.ActionDto;
 
+import com.example.demo.Model.ID;
+
 public record ActionDto(
-        Long actionId,
+        ID actionId,
         String heading
 ) {}

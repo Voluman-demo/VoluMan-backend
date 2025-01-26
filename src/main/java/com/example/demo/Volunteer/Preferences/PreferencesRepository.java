@@ -4,5 +4,5 @@
 //import org.springframework.stereotype.Repository;
 //
 //@Repository
-//public interface PreferencesRepository extends JpaRepository<Preferences, Long> {
+//public interface PreferencesRepository extends JpaRepository<Preferences, ID> {
 //}

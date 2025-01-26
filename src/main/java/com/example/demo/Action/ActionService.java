@@ -195,7 +195,7 @@ public class ActionService implements Actions {
 
     @Override
     public ArrayList<Description> getWeaklyMine(User user) {
-        Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
+        Volunteer volunteer = volunteerRepository.getVolunteerByVolunteerId(user.getVolunteer().getVolunteerId());
         return volunteer.getPreferences().getW().stream()
                 .map(action -> action.getDescr().get(Lang.UK))
                 .filter(Objects::nonNull)
@@ -205,7 +205,7 @@ public class ActionService implements Actions {
 
     @Override
     public ArrayList<Description> getRejected(User user) {
-        Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
+        Volunteer volunteer = volunteerRepository.getVolunteerByVolunteerId(user.getVolunteer().getVolunteerId());
         return volunteer.getPreferences().getR().stream()
                 .map(action -> action.getDescr().get(Lang.UK))
                 .filter(Objects::nonNull)
@@ -214,7 +214,7 @@ public class ActionService implements Actions {
 
     @Override
     public ArrayList<Description> getUndecided(User user) {
-        Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
+        Volunteer volunteer = volunteerRepository.getVolunteerByVolunteerId(user.getVolunteer().getVolunteerId());
         return volunteer.getPreferences().getU().stream()
                 .map(action -> action.getDescr().get(Lang.UK))
                 .filter(Objects::nonNull)
@@ -223,7 +223,7 @@ public class ActionService implements Actions {
 
     @Override
     public ArrayList<Description> getStronglyMine(User user) {
-        Volunteer volunteer = volunteerRepository.getVolunteerById(user.getVolunteer().getId());
+        Volunteer volunteer = volunteerRepository.getVolunteerByVolunteerId(user.getVolunteer().getVolunteerId());
         return volunteer.getPreferences().getS().stream()
                 .map(action -> action.getDescr().get(Lang.UK))
                 .filter(Objects::nonNull)

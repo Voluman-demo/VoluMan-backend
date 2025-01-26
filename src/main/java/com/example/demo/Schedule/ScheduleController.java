@@ -5,6 +5,7 @@ import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
 import com.example.demo.Model.Errors;
 import com.example.demo.Model.ID;
+import com.example.demo.Model.ID;
 import com.example.demo.Schedule.ScheduleDto.GenerateScheduleRequest;
 import com.example.demo.Schedule.ScheduleDto.ModifyScheduleRequest;
 import com.example.demo.Volunteer.Position.Position;
@@ -58,7 +59,7 @@ public class ScheduleController {
 
     @PostMapping("/generate")
     public ResponseEntity<?> generateSchedule(@RequestBody GenerateScheduleRequest generateScheduleRequest) {
-        if (!volunteerRepository.existsByIdAndPosition(generateScheduleRequest.adminId(), Position.ADMIN)) {
+        if (!volunteerRepository.existsByVolunteerIdAndPosition(generateScheduleRequest.adminId(), Position.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Admin authorization required.");
         }
 

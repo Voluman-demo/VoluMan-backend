@@ -1,7 +1,6 @@
 package com.example.demo.Log;
 
 import com.example.demo.Model.ID;
-import com.example.demo.Volunteer.Candidate.Candidate;
 import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerRepository;
 import org.springframework.stereotype.Service;
@@ -36,11 +35,11 @@ public class LogService {
         }
     }
 
-    public void logCandidate(Candidate candidate, EventType eventType, String eventDesc) {
+    public void logCandidate(Volunteer candidate, EventType eventType, String eventDesc) {
         try {
 
             LogResult result = log(
-                    new LogUserDto(candidate.getFirstname(), candidate.getLastname(), candidate.getEmail()),
+                    new LogUserDto(candidate.getFirstName(), candidate.getLastName(), candidate.getEmail()),
                     eventType,
                     eventDesc
             );

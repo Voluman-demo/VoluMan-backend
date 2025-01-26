@@ -46,7 +46,7 @@ public class VolunteerController {
 
     @DeleteMapping("/{volunteerId}/delete")
     public ResponseEntity<Void> deleteVolunteer(@PathVariable ID volunteerId, @RequestBody AdminRequest request) {
-        if (!volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)) {
+        if (!volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         Errors result = volunteerService.deleteVolunteer(volunteerId);
@@ -65,10 +65,10 @@ public class VolunteerController {
 
     @PutMapping("/{volunteerId}/roles")
     public ResponseEntity<Void> changeRole(@PathVariable ID volunteerId, @RequestBody AdminRequest request, @RequestParam String role) {
-        if (!volunteerRepository.existsByIdAndPosition(request.adminId(), Position.ADMIN)) {
+        if (volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        if (!volunteerRepository.existsById(volunteerId)) {
+        if (volunteerRepository.existsById(volunteerId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 

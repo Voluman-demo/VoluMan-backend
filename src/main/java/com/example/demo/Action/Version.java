@@ -10,6 +10,7 @@ import java.util.ArrayList;
 @Getter
 @Setter
 @AllArgsConstructor
+@Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "versions")
 public class Version {
 
@@ -22,22 +23,22 @@ public class Version {
     private boolean valid;
 
     @Column(name = "full_name", nullable = false)
-    private String fullName; // Full name of the action
+    private String fullName;
 
     @Column(name = "short_name", nullable = false)
-    private String shortName; // Abbreviation or acronym
+    private String shortName;
 
     @Column(name = "place", nullable = false)
-    private String place; // Name of the place
+    private String place;
 
     @Column(name = "address", nullable = false)
-    private String address; // Address of the action
+    private String address;
 
     @Column(name = "description", nullable = false)
-    private String description; // Description of the action
+    private String description;
 
     @Column(name = "hours", nullable = false)
-    private String hours; // Working hours
+    private String hours;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "role_id")

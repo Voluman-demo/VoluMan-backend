@@ -1,5 +1,5 @@
-package com.example.demo.Volunteer.Candidate;
-
-public record RecruiterRequest (
-        Long recruiterId
-){}
+//package com.example.demo.Volunteer.Candidate;
+//
+//public record RecruiterRequest (
+//        ID recruiterId
+//){}

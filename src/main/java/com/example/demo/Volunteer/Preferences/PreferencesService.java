@@ -20,7 +20,7 @@
 //    }
 //
 //
-//    public void removeActionFromOtherPreferences(Version action, Long preferencesId, Decision decision) {
+//    public void removeActionFromOtherPreferences(Version action, ID preferencesId, Decision decision) {
 //        Preferences pref = preferencesRepository.findById(preferencesId).orElse(null);
 //
 //        if (pref != null) {

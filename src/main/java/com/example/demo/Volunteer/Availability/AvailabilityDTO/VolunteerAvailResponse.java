@@ -1,5 +1,6 @@
 package com.example.demo.Volunteer.Availability.AvailabilityDTO;
 
+import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.Availability;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,6 +12,6 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class VolunteerAvailResponse {
-    private Long volunteerId;
+    private ID volunteerId;
     private List<Availability> availabilities;
 }

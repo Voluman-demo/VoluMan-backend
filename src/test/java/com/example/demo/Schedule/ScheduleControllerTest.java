@@ -84,7 +84,7 @@
 //
 //    @Test
 //    void testChoosePref_ReturnsNotFound_WhenActionNotFound() {
-//        Long actionId = 1L;
+//        ID actionId = 1L;
 //        ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 //
 //        when(actionRepository.existsById(actionId)).thenReturn(false);
@@ -96,7 +96,7 @@
 //
 //    @Test
 //    void testChoosePref_ReturnsNotFound_VolunteerNotFound() {
-//        Long actionId = 1L;
+//        ID actionId = 1L;
 //        ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 //
 //        when(actionRepository.existsById(actionId)).thenReturn(true);
@@ -109,7 +109,7 @@
 //
 ////    @Test
 ////    void testChoose_ReturnsOk_WhenSuccess() {
-////        Long actionId = 1L;
+////        ID actionId = 1L;
 ////        ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 ////
 ////        when(actionRepository.existsById(actionId)).thenReturn(true);
@@ -124,7 +124,7 @@
 ////    void testChooseNeed_ReturnsOk_Success() throws Exception {
 ////        int year = 2024;
 ////        int week = 27;
-////        Long actionId = 1L;
+////        ID actionId = 1L;
 ////        ActionNeedRequest request = createActionNeedRequest();
 ////        request.setLeaderId(1L);
 ////
@@ -136,7 +136,7 @@
 ////        action.setLeader(new LeaderDto(request.getLeaderId(), "John", "Doe", "john.doe@example.com", "123456789"));
 ////        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
 ////        // Assuming the service call is expected to succeed
-////        doNothing().when(scheduleService).scheduleNeedAction(anyLong(), anyInt(), anyInt(), any(ActionNeedRequest.class));
+////        doNothing().when(scheduleService).scheduleNeedAction(anyID(), anyInt(), anyInt(), any(ActionNeedRequest.class));
 ////
 ////        ResponseEntity<?> response = scheduleController.chooseNeed(actionId, year, week,  request);
 ////
@@ -148,8 +148,8 @@
 ////        // Given
 ////        int year = 2024;
 ////        int week = 27;
-////        Long actionId = 1L;
-////        Long VolunteerId = 1L;
+////        ID actionId = 1L;
+////        ID VolunteerId = 1L;
 ////        ActionNeedRequest request = createActionNeedRequest();
 ////        request.setLeaderId(VolunteerId);
 ////
@@ -169,7 +169,7 @@
 ////        // Given
 ////        int year = 2024;
 ////        int week = 27;
-////        Long actionId = 1L;
+////        ID actionId = 1L;
 ////
 ////        ActionNeedRequest request = createActionNeedRequest();
 ////        request.setLeaderId(1L);
@@ -196,8 +196,8 @@
 ////        // Given
 ////        int year = 2024;
 ////        int week = 27;
-////        Long actionId = 1L;
-////        Long leaderId = 1L;
+////        ID actionId = 1L;
+////        ID leaderId = 1L;
 ////        ActionNeedRequest request = createActionNeedRequest();
 ////        request.setLeaderId(leaderId);
 ////
@@ -209,7 +209,7 @@
 ////        action.setLeader(new LeaderDto(leaderId, "John", "Doe", "john.doe@example.com", "123456789"));
 ////        when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
 ////        // Mockowanie wyjątku z serwisu
-////        doThrow(new RuntimeException("Error")).when(scheduleService).scheduleNeedAction(anyLong(), anyInt(), anyInt(), any(ActionNeedRequest.class));
+////        doThrow(new RuntimeException("Error")).when(scheduleService).scheduleNeedAction(anyID(), anyInt(), anyInt(), any(ActionNeedRequest.class));
 ////
 ////        // When
 ////        ResponseEntity<?> response = scheduleController.chooseNeed(actionId, year, week,  request);
@@ -223,14 +223,14 @@
 ////    void testChooseAvail_ReturnsOk_Success() throws Exception {
 ////        int year = 2024;
 ////        int week = 27;
-////        Long volunteerId = 1L;
+////        ID volunteerId = 1L;
 ////        VolunteerAvailRequest request = createVolunteerAvailRequest();
 ////
 ////        // Mock the existence of the volunteer
 ////        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
 ////
 ////        // Assuming the service call is expected to succeed
-////        doNothing().when(scheduleService).chooseAvailabilities(anyLong(), anyInt(), anyInt(), any(VolunteerAvailRequest.class));
+////        doNothing().when(scheduleService).chooseAvailabilities(anyID(), anyInt(), anyInt(), any(VolunteerAvailRequest.class));
 ////
 ////        ResponseEntity<?> response = scheduleController.chooseAvail(volunteerId, year, week,  request);
 ////
@@ -241,7 +241,7 @@
 //   *//* void testChooseAvail_ReturnsNotFound_WhenVolunteerNotFound() {
 //        int year = 2024;
 //        int week = 27;
-//        Long volunteerId = 1L;
+//        ID volunteerId = 1L;
 //        VolunteerAvailRequest request = createVolunteerAvailRequest();
 //
 //        // Mock the non-existence of the volunteer
@@ -256,14 +256,14 @@
 //    void testChooseAvail_Exception() throws Exception {
 //        int year = 2024;
 //        int week = 27;
-//        Long volunteerId = 1L;
+//        ID volunteerId = 1L;
 //        VolunteerAvailRequest request = createVolunteerAvailRequest();
 //
 //        // Mock the existence of the volunteer
 //        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
 //
 //        // Mocking an exception from the service
-//        doThrow(new RuntimeException("Error")).when(scheduleService).chooseAvailabilities(anyLong(), anyInt(), anyInt(), any(VolunteerAvailRequest.class));
+//        doThrow(new RuntimeException("Error")).when(scheduleService).chooseAvailabilities(anyID(), anyInt(), anyInt(), any(VolunteerAvailRequest.class));
 //
 //        ResponseEntity<?> response = scheduleController.chooseAvail(volunteerId, year, week, request);
 //
@@ -279,7 +279,7 @@
 ////        LocalDate date = LocalDate.of(year, 7, 1);
 ////        GenerateScheduleRequest request = new GenerateScheduleRequest(1L, date);
 ////
-////        when(volunteerRepository.existsByVolunteerIdAndRole(any(Long.class), any(VolunteerRole.class))).thenReturn(true);
+////        when(volunteerRepository.existsByVolunteerIdAndRole(any(ID.class), any(VolunteerRole.class))).thenReturn(true);
 ////
 ////        ResponseEntity<?> response = scheduleController.generateSchedule(year, week, request);
 ////
@@ -297,7 +297,7 @@
 //        int week = 27;
 //        GenerateScheduleRequest request = new GenerateScheduleRequest(1L, LocalDate.of(year, 1, 1));
 //
-//        when(volunteerRepository.existsByVolunteerIdAndRole(any(Long.class), any(VolunteerRole.class))).thenReturn(false);
+//        when(volunteerRepository.existsByVolunteerIdAndRole(any(ID.class), any(VolunteerRole.class))).thenReturn(false);
 //
 //        ResponseEntity<?> response = scheduleController.generateSchedule(year, week, request);
 //
@@ -311,7 +311,7 @@
 //        int week = 27;
 //        GenerateScheduleRequest request = new GenerateScheduleRequest(1L, LocalDate.of(year, 1, 1));
 //
-//        when(volunteerRepository.existsByVolunteerIdAndRole(any(Long.class), any(VolunteerRole.class))).thenReturn(true);
+//        when(volunteerRepository.existsByVolunteerIdAndRole(any(ID.class), any(VolunteerRole.class))).thenReturn(true);
 //
 //        ResponseEntity<?> response = scheduleController.generateSchedule(year, week, request);
 //
@@ -326,7 +326,7 @@
 //        LocalDate date = LocalDate.of(year, 7, 1);
 //        GenerateScheduleRequest request = new GenerateScheduleRequest(1L, date);
 //
-//        when(volunteerRepository.existsByVolunteerIdAndRole(any(Long.class), any(VolunteerRole.class))).thenReturn(true);
+//        when(volunteerRepository.existsByVolunteerIdAndRole(any(ID.class), any(VolunteerRole.class))).thenReturn(true);
 //        doThrow(new RuntimeException("Error")).when(scheduleService).generateSchedule(date);
 //
 //        ResponseEntity<?> response = scheduleController.generateSchedule(year, week, request);
@@ -337,8 +337,8 @@
 //
 //    @Test
 //    void testGetScheduleByAction_ReturnsNotFound_WhenActionNotFound() {
-//        Long actionId = 1L;
-//        Long leaderId = 1L;
+//        ID actionId = 1L;
+//        ID leaderId = 1L;
 //
 //        when(actionRepository.existsById(actionId)).thenReturn(false);
 //
@@ -349,8 +349,8 @@
 //
 //    @Test
 //    void testGetScheduleByAction_ReturnsForbidden_LeaderNotFound() {
-//        Long actionId = 1L;
-//        Long leaderId = 1L;
+//        ID actionId = 1L;
+//        ID leaderId = 1L;
 //
 //        when(actionRepository.existsById(actionId)).thenReturn(true);
 //        when(volunteerRepository.existsByVolunteerIdAndRole(leaderId, VolunteerRole.LEADER)).thenReturn(false);
@@ -362,8 +362,8 @@
 //
 //    @Test
 //    void testGetScheduleByAction_ReturnsConflict_WhenLeaderMismatch() {
-//        Long actionId = 1L;
-//        Long leaderId = 2L;
+//        ID actionId = 1L;
+//        ID leaderId = 2L;
 //
 //        when(actionRepository.existsById(actionId)).thenReturn(true);
 //        when(volunteerRepository.existsByVolunteerIdAndRole(leaderId, VolunteerRole.LEADER)).thenReturn(true);
@@ -379,8 +379,8 @@
 //
 //    @Test
 //    void testGetScheduleByAction_ReturnsOk_Success() {
-//        Long actionId = 1L;
-//        Long leaderId = 1L;
+//        ID actionId = 1L;
+//        ID leaderId = 1L;
 //        ActionScheduleDto scheduleDto = new ActionScheduleDto(actionId, "Heading", "Description", Collections.emptyList());
 //
 //        when(actionRepository.existsById(actionId)).thenReturn(true);
@@ -400,7 +400,7 @@
 //    void testModifySchedule_ReturnsNotFound_VolunteerNotFound() {
 //        int year = 2024;
 //        int week = 27;
-//        Long volunteerId = 1L;
+//        ID volunteerId = 1L;
 //        ModifyScheduleRequest request = new ModifyScheduleRequest(1L, Collections.emptyList());
 //
 //        when(volunteerRepository.existsById(volunteerId)).thenReturn(false);
@@ -414,7 +414,7 @@
 ////    void testModifySchedule_Success() throws Exception {
 ////        int year = 2024;
 ////        int week = 27;
-////        Long volunteerId = 1L;
+////        ID volunteerId = 1L;
 ////        ModifyScheduleRequest request = new ModifyScheduleRequest(1L, Collections.emptyList());
 ////
 ////        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
@@ -429,7 +429,7 @@
 //    void testModifySchedule_Exception() throws Exception {
 //        int year = 2024;
 //        int week = 27;
-//        Long volunteerId = 1L;
+//        ID volunteerId = 1L;
 //        ModifyScheduleRequest request = new ModifyScheduleRequest(1L, Collections.emptyList());
 //
 //        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
@@ -445,7 +445,7 @@
 //    void testGetScheduleByVolunteer_Success() {
 //        int year = 2023;
 //        int week = 10;
-//        Long volunteerId = 1L;
+//        ID volunteerId = 1L;
 //
 //        VolunteerScheduleDto scheduleDto = new VolunteerScheduleDto(
 //                volunteerId,
@@ -483,7 +483,7 @@
 //    void testGetScheduleByVolunteer_ReturnsNotFound_WhenVolunteerNotFound() {
 //        int year = 2023;
 //        int week = 10;
-//        Long volunteerId = 1L;
+//        ID volunteerId = 1L;
 //
 //        when(volunteerRepository.existsById(volunteerId)).thenReturn(false);
 //
@@ -496,7 +496,7 @@
 //    void testGetScheduleByVolunteer_Exception() {
 //        int year = 2023;
 //        int week = 10;
-//        Long volunteerId = 1L;
+//        ID volunteerId = 1L;
 //
 //        when(volunteerRepository.existsById(volunteerId)).thenReturn(true);
 //        when(scheduleService.getScheduleByVolunteer(volunteerId, year, week)).thenThrow(new RuntimeException("Error"));

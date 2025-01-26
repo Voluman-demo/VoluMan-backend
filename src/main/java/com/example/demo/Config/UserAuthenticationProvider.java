@@ -5,6 +5,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.demo.Auth.AuthDto;
+import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.User.UserService;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +35,7 @@ public class UserAuthenticationProvider {
     }
 
 
-    public String createToken(Long idAccount) {
+    public String createToken(ID idAccount) {
         Date now = new Date();
         Date validity = new Date(now.getTime() + 3_600_000 * 10); // 10 hours
 
@@ -54,7 +55,9 @@ public class UserAuthenticationProvider {
 
         DecodedJWT decoded = verifier.verify(token);
 
-        AuthDto acc = userService.findByUserId(decoded.getSubject());
+        ID userId = new ID(Integer.parseInt(decoded.getSubject()));
+
+        AuthDto acc = userService.findByUserId(userId);
 
         return new UsernamePasswordAuthenticationToken(acc, null, Collections.emptyList());
     }
@@ -67,7 +70,9 @@ public class UserAuthenticationProvider {
 
         DecodedJWT decoded = verifier.verify(token);
 
-        AuthDto user = userService.findByUserId(decoded.getSubject());
+        ID userId = new ID(Integer.parseInt(decoded.getSubject()));
+
+        AuthDto user = userService.findByUserId(userId);
 
         return new UsernamePasswordAuthenticationToken(user, null, Collections.emptyList());
     }

@@ -1,6 +1,7 @@
 package com.example.demo.Action;
 
 
+import com.example.demo.Model.ID;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,7 +20,7 @@ public class Role {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "role_id")
-    private Long roleId;
+    private ID roleId;
 
     String name;
     String duties;

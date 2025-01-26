@@ -1,8 +1,10 @@
 package com.example.demo.Action.ActionDto;
 
 
+import com.example.demo.Model.ID;
+
 public record ChangeDescriptionRequest(
-    Long leaderId,
+    ID leaderId,
     String description
 ){}
 

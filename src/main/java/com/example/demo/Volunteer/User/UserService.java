@@ -2,7 +2,8 @@ package com.example.demo.Volunteer.User;
 
 import com.example.demo.Auth.AuthDto;
 import com.example.demo.Config.AppException;
-import com.example.demo.Volunteer.Candidate.Candidate;
+import com.example.demo.Model.ID;
+import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -28,12 +29,12 @@ public class UserService {
         this.volunteerService = volunteerService;
     }
 
-    public void register(Optional<Candidate> candidate) {
+    public void register(Optional<Volunteer> candidate) {
         if(candidate.isPresent()) {
             User user = new User();
             user.setEmail(candidate.get().getEmail());
             user.setPassword(generatePassword(candidate.get().getPhone()));
-            user.setVolunteer(volunteerService.addVolunteerFromCandidate(candidate));
+            user.setVolunteer(candidate.get());
 
             if(user.getVolunteer() == null){
                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Invalid email or password");
@@ -63,8 +64,8 @@ public class UserService {
         return userRepository.existsByEmailAndPassword(email,password);
     }
 
-    public AuthDto findByUserId(String userId) {
-        User user = userRepository.findById(Long.valueOf(userId))
+    public AuthDto findByUserId(ID userId) {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         return new AuthDto(user.getUserId(), null);
     }

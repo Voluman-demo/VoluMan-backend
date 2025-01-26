@@ -1,7 +1,9 @@
 package com.example.demo.Schedule.ScheduleDto;
 
+import com.example.demo.Model.ID;
+
 public record ActionPrefRequest(
-        Long volunteerId,
+        ID volunteerId,
         String decision
 ) {
 }

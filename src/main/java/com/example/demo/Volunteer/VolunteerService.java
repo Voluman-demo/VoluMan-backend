@@ -36,7 +36,7 @@ public class VolunteerService implements Volunteers {
         Set<Action> actions = new HashSet<>(actionRepository.findAll());
         volunteer.getPreferences().setU(actions);
         volunteerRepository.save(volunteer);
-        return volunteer.getId();
+        return volunteer.getVolunteerId();
     }
 
     @Override

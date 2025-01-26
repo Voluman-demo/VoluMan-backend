@@ -1,6 +1,5 @@
 package com.example.demo.Action;
 
-import com.example.demo.Model.ID;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,10 +15,10 @@ import java.time.LocalDate;
 @Setter
 @Table(name = "descriptions")
 public class Description extends Version {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "description_id")
-    private ID descriptionId;
+//    @Id
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @Column(name = "description_id")
+//    private ID descriptionId;
 
     private LocalDate begin;
     private LocalDate end;

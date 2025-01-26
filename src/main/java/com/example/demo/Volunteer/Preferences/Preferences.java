@@ -1,8 +1,8 @@
 package com.example.demo.Volunteer.Preferences;
 
 import com.example.demo.Action.Action;
-import com.example.demo.Action.Version;
 import com.example.demo.Model.ID;
+import com.example.demo.Volunteer.Volunteer;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +18,7 @@ import java.util.Set;
 public class Preferences {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "preference_id")
     private ID preferenceId;
 
     // Strongly Mine: Actions the volunteer strongly wants to participate in
@@ -55,6 +56,9 @@ public class Preferences {
             inverseJoinColumns = @JoinColumn(name = "action_id")
     )
     private Set<Action> U;
+
+    @OneToOne(mappedBy = "preferences")
+    private Volunteer volunteer;
 
     @PrePersist
     public void initializeDefaults() {

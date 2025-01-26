@@ -1,6 +1,7 @@
 package com.example.demo.Action.Demand;
 
 import com.example.demo.Action.Action;
+import com.example.demo.Model.ID;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -27,7 +28,7 @@ public class DemandService {
         return demandRepository.findAllByDate(date);
     }
 
-    public List<Demand> findAllByActionId(Long actionId) {
+    public List<Demand> findAllByActionId(ID actionId) {
         return demandRepository.findAllByAction_ActionId(actionId);
     }
 }
