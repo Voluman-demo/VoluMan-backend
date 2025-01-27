@@ -6,6 +6,7 @@ import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Preferences.Preferences;
 import com.example.demo.Volunteer.User.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -15,6 +16,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 //@AttributeOverride(name = "email", column = @Column(name = "email", unique = true, nullable = false, length = 50))
@@ -45,14 +47,16 @@ public class Volunteer extends PersonalData {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "preferences_id")
+    //TODO NAPRAWIC REKURENCJE
     private Preferences preferences;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
+
     private User user;
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private ArrayList<Availability> availabilities;
+    private List<Availability> availabilities;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     @JoinTable(
@@ -70,9 +74,14 @@ public class Volunteer extends PersonalData {
     public Volunteer() {
         this.limitOfWeeklyHours = 0.0;
         this.actualWeeklyHours = 0.0;
-        this.preferences = new Preferences();
-        this.availabilities = new ArrayList<>();
-        this.actions = new HashSet<>();
+        this.setEmail("");
+        this.setFirstName("");
+        this.setLastName("");
+        this.setPhone("");
+        this.setDateOfBirth(LocalDate.now());
+        this.setAddress("");
+        this.setSex("");
+        this.position= Position.CANDIDATE;
     }
 
 

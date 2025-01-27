@@ -18,3 +18,4 @@ public class VolunteerRequest {
     private Position position;
     private double limitOfWeeklyHours;
 }
+

@@ -49,7 +49,6 @@ public class VolunteerService implements Volunteers {
             vol.setDateOfBirth(request.getDateOfBirth());
             vol.setAddress(request.getAddress());
             vol.setSex(request.getSex());
-
             volunteerRepository.save(vol);
             return Errors.SUCCESS;
         }
@@ -105,11 +104,11 @@ public class VolunteerService implements Volunteers {
         return Errors.NOT_FOUND;
     }
 
-    @Override
-    public ArrayList<Availability> getAvailabilities(Long volunteerId) {
+    /*@Override
+    public List<Availability> getAvailabilities(Long volunteerId) {
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
         return volunteer.map(Volunteer::getAvailabilities).orElse(null);
-    }
+    }*/
 
 //    @Override
 //    public Errors assignDuty(Long volunteerId, Duty duty) {

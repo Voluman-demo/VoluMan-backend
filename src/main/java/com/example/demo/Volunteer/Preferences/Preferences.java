@@ -57,6 +57,7 @@ public class Preferences {
     private Set<Action> U;
 
     @OneToOne(mappedBy = "preferences")
+
     private Volunteer volunteer;
 
     @PrePersist

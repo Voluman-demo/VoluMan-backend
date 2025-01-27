@@ -97,11 +97,11 @@ public class VolunteerController {
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/{volunteerId}/availabilities")
+    /*@GetMapping("/{volunteerId}/availabilities")
     public ResponseEntity<List<Availability>> getAvailabilities(@PathVariable Long volunteerId) {
         List<Availability> availabilities = volunteerService.getAvailabilities(volunteerId);
         return availabilities != null ? ResponseEntity.ok(availabilities) : ResponseEntity.notFound().build();
-    }
+    }*/
 
 //    @PutMapping("/{volunteerId}/duties")
 //    public ResponseEntity<Void> assignDuty(@PathVariable Long volunteerId, @RequestBody Duty duty) {
