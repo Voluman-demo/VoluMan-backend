@@ -2,11 +2,9 @@ package com.example.demo.Volunteer;
 
 import com.example.demo.Action.Action;
 import com.example.demo.Action.ActionRepository;
-import com.example.demo.Action.ActionService;
 import com.example.demo.Model.Errors;
-import com.example.demo.Model.ID;
+
 import com.example.demo.Volunteer.Availability.Availability;
-import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Position.PositionService;
 import com.example.demo.Volunteer.Preferences.Preferences;
@@ -20,19 +18,18 @@ public class VolunteerService implements Volunteers {
     private final VolunteerRepository volunteerRepository;
     private final ActionRepository actionRepository;
     private final PositionService PositionService;
-    private final ActionService actionService;
 
-    public VolunteerService(VolunteerRepository volunteerRepository, ActionRepository actionRepository, PositionService PositionService, ActionService actionService) {
+    public VolunteerService(VolunteerRepository volunteerRepository, ActionRepository actionRepository, PositionService PositionService) {
         this.volunteerRepository = volunteerRepository;
         this.actionRepository = actionRepository;
         this.PositionService = PositionService;
-        this.actionService = actionService;
     }
 
     @Override
-    public ID createVolunteer() {
+    public Long createVolunteer() {
         Volunteer volunteer = new Volunteer();
         volunteer.setPreferences(new Preferences());
+        volunteer.setAvailabilities(new ArrayList<>());
         Set<Action> actions = new HashSet<>(actionRepository.findAll());
         volunteer.getPreferences().setU(actions);
         volunteerRepository.save(volunteer);
@@ -40,18 +37,18 @@ public class VolunteerService implements Volunteers {
     }
 
     @Override
-    public Errors editVolunteer(ID volunteerId, PersonalData details) {
+    public Errors editVolunteer(Long volunteerId, VolunteerRequest request) {
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
         if (volunteer.isPresent()) {
             Volunteer vol = volunteer.get();
 
-            vol.setFirstName(details.getFirstName());
-            vol.setLastName(details.getLastName());
-            vol.setEmail(details.getEmail());
-            vol.setPhone(details.getPhone());
-            vol.setDateOfBirth(details.getDateOfBirth());
-            vol.setAddress(details.getAddress());
-            vol.setSex(details.getSex());
+            vol.setFirstName(request.getFirstName());
+            vol.setLastName(request.getLastName());
+            vol.setEmail(request.getEmail());
+            vol.setPhone(request.getPhone());
+            vol.setDateOfBirth(request.getDateOfBirth());
+            vol.setAddress(request.getAddress());
+            vol.setSex(request.getSex());
 
             volunteerRepository.save(vol);
             return Errors.SUCCESS;
@@ -60,7 +57,7 @@ public class VolunteerService implements Volunteers {
     }
 
     @Override
-    public Errors deleteVolunteer(ID volunteerId) {
+    public Errors deleteVolunteer(Long volunteerId) {
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
         if (volunteer.isPresent()) {
             Volunteer vol = volunteer.get();
@@ -72,13 +69,13 @@ public class VolunteerService implements Volunteers {
     }
 
     @Override
-    public Volunteer getVolunteerById(ID volunteerId) {
+    public Volunteer getVolunteerById(Long volunteerId) {
         return volunteerRepository.findById(volunteerId).orElse(null);
     }
 
 
     @Override
-    public Errors assignPosition(ID volunteerId, Position newRole) {
+    public Errors assignPosition(Long volunteerId, Position newRole) {
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
         if (volunteer.isPresent()) {
             Volunteer vol = volunteer.get();
@@ -90,14 +87,14 @@ public class VolunteerService implements Volunteers {
     }
 
     @Override
-    public Position getPosition(ID volunteerId) {
+    public Position getPosition(Long volunteerId) {
         return volunteerRepository.findById(volunteerId)
                 .map(Volunteer::getPosition)
                 .orElse(null);
     }
 
     @Override
-    public Errors setAvailabilities(ID volunteerId, List<Availability> availabilities) {
+    public Errors setAvailabilities(Long volunteerId, List<Availability> availabilities) {
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
         if (volunteer.isPresent()) {
             Volunteer vol = volunteer.get();
@@ -109,33 +106,33 @@ public class VolunteerService implements Volunteers {
     }
 
     @Override
-    public ArrayList<Availability> getAvailabilities(ID volunteerId) {
+    public ArrayList<Availability> getAvailabilities(Long volunteerId) {
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
         return volunteer.map(Volunteer::getAvailabilities).orElse(null);
     }
 
-    @Override
-    public Errors assignDuty(ID volunteerId, Duty duty) {
-        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
-        if (volunteer.isPresent()) {
-            Volunteer vol = volunteer.get();
-            vol.getDuties().add(duty);
-            volunteerRepository.save(vol);
-            return Errors.SUCCESS;
-        }
-        return Errors.NOT_FOUND;
-    }
+//    @Override
+//    public Errors assignDuty(Long volunteerId, Duty duty) {
+//        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+//        if (volunteer.isPresent()) {
+//            Volunteer vol = volunteer.get();
+//            vol.getDuties().add(duty);
+//            volunteerRepository.save(vol);
+//            return Errors.SUCCESS;
+//        }
+//        return Errors.NOT_FOUND;
+//    }
+//
+//    @Override
+//    public ArrayList<Duty> getDuties(Long volunteerId) {
+//        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+//        return volunteer.map(vol -> new ArrayList<>(vol.getDuties())).orElse(null);
+//    }
 
-    @Override
-    public ArrayList<Duty> getDuties(ID volunteerId) {
-        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
-        return volunteer.map(vol -> new ArrayList<>(vol.getDuties())).orElse(null);
-    }
+    public Long createAndEditVolunteer(VolunteerRequest request) {
+        Long newVolunteerId = createVolunteer();
 
-    public ID createAndEditVolunteer(PersonalData details) {
-        ID newVolunteerId = createVolunteer();
-
-        Errors result = editVolunteer(newVolunteerId, details);
+        Errors result = editVolunteer(newVolunteerId, request);
         if (result == Errors.SUCCESS) {
             return newVolunteerId;
         }

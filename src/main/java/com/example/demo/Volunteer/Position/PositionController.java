@@ -1,6 +1,5 @@
 package com.example.demo.Volunteer.Position;
 
-import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,7 +37,7 @@ public class PositionController {
 
     @PostMapping("/assign")
     public ResponseEntity<String> assignRole(
-            @RequestParam ID userId,
+            @RequestParam Long userId,
             @RequestParam Position newPosition) {
         Volunteer volunteer = volunteerService.getVolunteerById(userId);
 

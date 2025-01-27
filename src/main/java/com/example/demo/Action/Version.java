@@ -1,6 +1,5 @@
 package com.example.demo.Action;
 
-import com.example.demo.Model.ID;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,8 +12,9 @@ import java.util.ArrayList;
 @Inheritance(strategy = InheritanceType.JOINED)
 @Table(name = "versions")
 public class Version {
-    @EmbeddedId
-    private ID versionId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long versionId;
 
     @Column(name = "valid", nullable = false)
     private boolean valid;

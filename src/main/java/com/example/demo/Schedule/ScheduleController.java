@@ -1,11 +1,10 @@
 package com.example.demo.Schedule;
 
 import com.example.demo.Action.ActionRepository;
+import com.example.demo.Action.Demand.Demand;
 import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
 import com.example.demo.Model.Errors;
-import com.example.demo.Model.ID;
-import com.example.demo.Model.ID;
 import com.example.demo.Schedule.ScheduleDto.GenerateScheduleRequest;
 import com.example.demo.Schedule.ScheduleDto.ModifyScheduleRequest;
 import com.example.demo.Volunteer.Position.Position;
@@ -31,32 +30,6 @@ public class ScheduleController {
         this.logService = logService;
     }
 
-
-//    @PostMapping("/actions/{actionId}/demands")
-//    public ResponseEntity<?> chooseDemands(
-//            @PathVariable("actionId") ID actionId,
-//            @RequestBody ActionNeedRequest actionNeedRequest
-//    ) {
-//        if (!actionRepository.existsById(actionId)) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Action not found.");
-//        }
-//        if (!volunteerRepository.existsByIdAndPosition(actionNeedRequest.getLeaderId(), Position.LEADER)) {
-//            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Leader not authorized.");
-//        }
-//        if (!Objects.equals(actionRepository.findById(actionId).get().getLeaderId(), actionNeedRequest.getLeaderId())) {
-//            return ResponseEntity.status(HttpStatus.CONFLICT).body("Leader does not match action.");
-//        }
-//
-//        Errors result = scheduleService.scheduleNeedAction(actionId, actionNeedRequest);
-//
-//        if (result == Errors.SUCCESS) {
-//            logService.logSchedule(actionNeedRequest.getLeaderId(), EventType.UPDATE, "Choose action needs with id: " + actionId);
-//            return ResponseEntity.ok().body("Demands scheduled successfully.");
-//        }
-//        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Failed to schedule demands.");
-//    }
-
-
     @PostMapping("/generate")
     public ResponseEntity<?> generateSchedule(@RequestBody GenerateScheduleRequest generateScheduleRequest) {
         if (!volunteerRepository.existsByVolunteerIdAndPosition(generateScheduleRequest.adminId(), Position.ADMIN)) {
@@ -73,7 +46,7 @@ public class ScheduleController {
     }
 
     @PutMapping("/{scheduleId}/modify")
-    public ResponseEntity<?> modifySchedule(@PathVariable ID scheduleId, @RequestBody ModifyScheduleRequest modifyScheduleRequest) {
+    public ResponseEntity<?> modifySchedule(@PathVariable Long scheduleId, @RequestBody ModifyScheduleRequest modifyScheduleRequest) {
         if (!volunteerRepository.existsById(modifyScheduleRequest.volunteerId())) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Volunteer not found.");
         }
@@ -87,8 +60,20 @@ public class ScheduleController {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error modifying schedule.");
     }
 
+    @DeleteMapping("/{scheduleId}")
+    public ResponseEntity<?> deleteSchedule(@PathVariable Long scheduleId) {
+        Errors result = scheduleService.deleteSchedule(scheduleId);
+
+        if (result == Errors.SUCCESS) {
+            logService.logSchedule(scheduleId, EventType.DELETE, "Schedule deleted with Long: " + scheduleId);
+            return ResponseEntity.ok("Schedule deleted successfully.");
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Schedule not found.");
+    }
+
     @GetMapping("/actions/{actionId}")
-    public ResponseEntity<?> getScheduleByAction(@PathVariable ID actionId) {
+    public ResponseEntity<?> getScheduleByAction(@PathVariable Long actionId) {
         if (!actionRepository.existsById(actionId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Action not found.");
         }
@@ -101,7 +86,7 @@ public class ScheduleController {
     }
 
     @GetMapping("/volunteers/{volunteerId}")
-    public ResponseEntity<?> getScheduleByVolunteer(@PathVariable ID volunteerId) {
+    public ResponseEntity<?> getScheduleByVolunteer(@PathVariable Long volunteerId) {
         if (!volunteerRepository.existsById(volunteerId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Volunteer not found.");
         }
@@ -113,8 +98,17 @@ public class ScheduleController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Schedule not found for the volunteer.");
     }
 
-
+    @PutMapping("/actions/{actionId}/demands")
+    public ResponseEntity<String> updateDemand(
+            @PathVariable Long actionId,
+            @RequestBody Demand updatedDemand
+    ) {
+        Errors result = scheduleService.updateDemand(actionId, updatedDemand);
+        if (result == Errors.SUCCESS) {
+            return ResponseEntity.ok("Demand updated successfully.");
+        } else if (result == Errors.CREATED) {
+            return ResponseEntity.status(HttpStatus.CREATED).body("New demand created successfully.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Action not found.");
+    }
 }
-
-
-

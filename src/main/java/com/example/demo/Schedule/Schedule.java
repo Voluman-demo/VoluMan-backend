@@ -1,8 +1,8 @@
 package com.example.demo.Schedule;
 
 import com.example.demo.Action.Action;
-import com.example.demo.Model.ID;
-import com.example.demo.Volunteer.Duty.Duty;
+import com.example.demo.Action.Demand.Demand;
+
 import com.example.demo.Volunteer.Volunteer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -21,8 +21,9 @@ import java.util.List;
 @Setter
 @Table(name = "schedules")
 public class Schedule {
-    @EmbeddedId
-    private ID scheduleId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long scheduleId;
 
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(
@@ -47,7 +48,7 @@ public class Schedule {
     private List<Volunteer> volunteers = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "schedule", orphanRemoval = true)
-    private List<Duty> duties = new ArrayList<>();
+    private List<Demand> demands = new ArrayList<>();
 
     public Schedule(LocalDate startDate, LocalDate endDate) {
         this.startDate = startDate != null ? startDate : LocalDate.now();

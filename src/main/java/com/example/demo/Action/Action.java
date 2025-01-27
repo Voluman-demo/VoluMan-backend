@@ -1,6 +1,6 @@
 package com.example.demo.Action;
 
-import com.example.demo.Model.ID;
+import com.example.demo.Volunteer.Volunteer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +8,8 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.util.HashMap;
-
+import java.util.HashSet;
+import java.util.Set;
 
 
 @Entity
@@ -17,8 +18,10 @@ import java.util.HashMap;
 @Setter
 @Table(name = "actions")
 public class Action {
-    @EmbeddedId
-    private ID actionId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "action_id")
+    private Long actionId;
 
     @Column(name = "begin_date")
     private LocalDate begin;
@@ -35,6 +38,9 @@ public class Action {
     @MapKeyEnumerated(EnumType.STRING)
     @MapKeyColumn(name = "language")
     private HashMap<Lang, Description> descr;
+
+    @ManyToMany(mappedBy = "actions", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    private Set<Volunteer> volunteers = new HashSet<>();
 
     public Action() {
         this.descr = new HashMap<>();

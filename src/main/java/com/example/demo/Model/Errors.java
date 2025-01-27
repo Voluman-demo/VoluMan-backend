@@ -5,5 +5,6 @@ public enum Errors {
     FAILURE,
     NOT_FOUND,
     FORBIDDEN,
+    CREATED,
     INVALID
 }

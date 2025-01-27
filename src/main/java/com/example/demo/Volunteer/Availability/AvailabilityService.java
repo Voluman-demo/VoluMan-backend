@@ -1,6 +1,5 @@
 package com.example.demo.Volunteer.Availability;
 
-import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.AvailabilityDTO.AvailIntervalResponse;
 import com.example.demo.Volunteer.Availability.AvailabilityDTO.AvailResponse;
 import com.example.demo.Volunteer.Availability.AvailabilityDTO.limitOfHoursRequest;
@@ -49,12 +48,12 @@ public class AvailabilityService {
         ).collect(Collectors.toList());
     }
 
-    public Availability getByVolunteerIdAndDate(ID volunteerId, LocalDate requestDate) {
+    public Availability getByVolunteerIdAndDate(Long volunteerId, LocalDate requestDate) {
         return availabilityRepository.findByVolunteer_VolunteerIdAndDate(volunteerId, requestDate)
                 .orElse(new Availability());
     }
 
-    public void setWeekHourLim(ID volunteerId, limitOfHoursRequest limitOfHoursRequest){
+    public void setWeekHourLim(Long volunteerId, limitOfHoursRequest limitOfHoursRequest){
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
 
         if (volunteer.isPresent()) {
@@ -64,7 +63,7 @@ public class AvailabilityService {
 
         }
     }
-    public Double getWeekHourLim(ID idVolunteer) {
+    public Double getWeekHourLim(Long idVolunteer) {
         return volunteerRepository.findById(idVolunteer)
                 .map(Volunteer::getLimitOfWeeklyHours)
                 .orElse(0.0); // Domyślnie 0.0, jeśli wolontariusz nie istnieje
@@ -74,7 +73,7 @@ public class AvailabilityService {
     public List<Availability> getAvailabilitiesForDay(LocalDate date) {
         return availabilityRepository.findAllByDate(date);
     }
-    public void chooseAvailabilities(ID volunteerId, int year, int week, VolunteerAvailRequest availRequest) throws Exception {
+    public void chooseAvailabilities(Long volunteerId, int year, int week, VolunteerAvailRequest availRequest) throws Exception {
         // Validate volunteer
         Volunteer volunteer = volunteerRepository.findById(volunteerId)
                 .orElseThrow(() -> new Exception("Volunteer not found"));

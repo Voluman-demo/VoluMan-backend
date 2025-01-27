@@ -1,6 +1,5 @@
 package com.example.demo.Log;
 
-import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerRepository;
 import org.springframework.stereotype.Service;
@@ -73,7 +72,7 @@ public class LogService {
     }
 
 
-    public void logAction(ID volunteerId, EventType eventType, String eventDesc) {
+    public void logAction(Long volunteerId, EventType eventType, String eventDesc) {
         try {
             Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
 
@@ -96,7 +95,7 @@ public class LogService {
         }
     }
 
-    public void logSchedule(ID volunteerId, EventType eventType, String eventDesc) {
+    public void logSchedule(Long volunteerId, EventType eventType, String eventDesc) {
         try {
             Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
 

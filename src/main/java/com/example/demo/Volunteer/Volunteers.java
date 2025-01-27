@@ -1,9 +1,7 @@
 package com.example.demo.Volunteer;
 
 import com.example.demo.Model.Errors;
-import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.Availability;
-import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Position.Position;
 
 import java.util.ArrayList;
@@ -12,25 +10,25 @@ import java.util.List;
 
 public interface Volunteers {
 
-    ID createVolunteer();
+    Long createVolunteer();
 
-    Errors editVolunteer(ID vId, PersonalData details);
+    Errors editVolunteer(Long vId, VolunteerRequest details);
 
-    Errors deleteVolunteer(ID vId);
+    Errors deleteVolunteer(Long vId);
 
-    Volunteer getVolunteerById(ID vId);
+    Volunteer getVolunteerById(Long vId);
 
     // Role management
-    Errors assignPosition(ID vId, Position p);
+    Errors assignPosition(Long vId, Position p);
 
-    Position getPosition(ID vId);
+    Position getPosition(Long vId);
 
     // Availability and duties management
-    Errors setAvailabilities(ID vId, List<Availability> availabilities);
+    Errors setAvailabilities(Long vId, List<Availability> availabilities);
 
-    ArrayList<Availability> getAvailabilities(ID vId);
-
-    Errors assignDuty(ID vId, Duty duty);
-
-    ArrayList<Duty> getDuties(ID vId);
+    ArrayList<Availability> getAvailabilities(Long vId);
+//
+//    Errors assignDuty(Long vId, Duty duty);
+//
+//    ArrayList<Duty> getDuties(Long vId);
 }

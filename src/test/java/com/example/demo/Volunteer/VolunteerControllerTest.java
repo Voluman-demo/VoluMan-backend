@@ -5,11 +5,8 @@ import com.example.demo.Log.LogService;
 import com.example.demo.Volunteer.VolunteerDto.AdminRequest;
 
 import com.example.demo.Model.Errors;
-import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.Availability;
-import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Position.Position;
-import com.example.demo.Volunteer.Preferences.Preferences;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -55,8 +52,8 @@ public class VolunteerControllerTest {
 
     @Test
     public void testAddVolunteer_ReturnsCreated_WhenVolunteerCreated() {
-        PersonalData details = new PersonalData();
-        ID newId = new ID(1);
+        VolunteerRequest details = new VolunteerRequest();
+        Long newId = 1L;
 
         when(volunteerService.createAndEditVolunteer(details)).thenReturn(newId);
 
@@ -68,7 +65,7 @@ public class VolunteerControllerTest {
 
     @Test
     public void testAddVolunteer_ReturnsInternalServerError_WhenCreationFails() {
-        PersonalData details = new PersonalData();
+        VolunteerRequest details = new VolunteerRequest();
 
         when(volunteerService.createAndEditVolunteer(details)).thenReturn(null);
 
@@ -79,7 +76,7 @@ public class VolunteerControllerTest {
 
     @Test
     public void testGetVolunteer_ReturnsOk_WhenVolunteerFound() {
-        ID idVolunteer = new ID(1);
+        Long idVolunteer = 1L;
         Volunteer volunteer = new Volunteer();
 
         when(volunteerService.getVolunteerById(idVolunteer)).thenReturn(volunteer);
@@ -92,7 +89,7 @@ public class VolunteerControllerTest {
 
     @Test
     public void testGetVolunteer_ReturnsNotFound_WhenVolunteerNotFound() {
-        ID idVolunteer = new ID(1);
+        Long idVolunteer = 1L;
 
         when(volunteerService.getVolunteerById(idVolunteer)).thenReturn(null);
 
@@ -102,7 +99,7 @@ public class VolunteerControllerTest {
     }
     @Test
     public void testSetAvailabilities_ReturnsOk_WhenAvailabilitiesSetSuccessfully() {
-        ID volunteerId = new ID(1);
+        Long volunteerId = 1L;
         List<Availability> availabilities = List.of(new Availability()); // Example availability
 
         when(volunteerService.setAvailabilities(volunteerId, availabilities)).thenReturn(Errors.SUCCESS);
@@ -115,7 +112,7 @@ public class VolunteerControllerTest {
 
     @Test
     public void testSetAvailabilities_ReturnsNotFound_WhenVolunteerNotFound() {
-        ID volunteerId = new ID(1);
+        Long volunteerId = 1L;
         List<Availability> availabilities = List.of(new Availability());
 
         when(volunteerService.setAvailabilities(volunteerId, availabilities)).thenReturn(Errors.NOT_FOUND);
@@ -129,7 +126,7 @@ public class VolunteerControllerTest {
     @Test
     public void testGetAvailabilities_ReturnsOk_WhenAvailabilitiesFound() {
         // Given
-        ID volunteerId = new ID(1);
+        Long volunteerId = 1L;
         ArrayList<Availability> availabilities = new ArrayList<>();
         availabilities.add(new Availability());
 
@@ -149,7 +146,7 @@ public class VolunteerControllerTest {
     @Test
     public void testGetAvailabilities_ReturnsNotFound_WhenAvailabilitiesNotFound() {
         // Given
-        ID volunteerId = new ID(1);
+        Long volunteerId = 1L;
 
         // When
         when(volunteerService.getAvailabilities(volunteerId)).thenReturn(null);
@@ -166,8 +163,8 @@ public class VolunteerControllerTest {
 
     @Test
     public void testDeleteVolunteer_ReturnsForbidden_WhenNotAdmin() {
-        ID idVolunteer = new ID(1);
-        AdminRequest request = new AdminRequest(new ID(2));
+        Long idVolunteer = 1L;
+        AdminRequest request = new AdminRequest(2L);
 
         when(volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(false);
 
@@ -178,8 +175,8 @@ public class VolunteerControllerTest {
 
     @Test
     public void testDeleteVolunteer_ReturnsNotFound_WhenVolunteerNotExists() {
-        ID idVolunteer = new ID(1);
-        AdminRequest request = new AdminRequest(new ID(2));
+        Long idVolunteer = 1L;
+        AdminRequest request = new AdminRequest(2L);
 
         when(volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
         when(volunteerService.deleteVolunteer(idVolunteer)).thenReturn(Errors.NOT_FOUND);
@@ -191,8 +188,8 @@ public class VolunteerControllerTest {
 
     @Test
     public void testDeleteVolunteer_ReturnsOk_WhenVolunteerDeleted() {
-        ID idVolunteer = new ID(1);
-        AdminRequest request = new AdminRequest(new ID(2));
+        Long idVolunteer = 1L;
+        AdminRequest request = new AdminRequest(2L);
 
 
         when(volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(true);
@@ -215,8 +212,8 @@ public class VolunteerControllerTest {
 
     @Test
     public void testUpdateVolunteerDetails_ReturnsOk_WhenDetailsUpdated() {
-        ID idVolunteer = new ID(1);
-        PersonalData details = new PersonalData();
+        Long idVolunteer = 1L;
+        VolunteerRequest details = new VolunteerRequest();
 
         when(volunteerService.editVolunteer(idVolunteer, details)).thenReturn(Errors.SUCCESS);
 
@@ -227,8 +224,8 @@ public class VolunteerControllerTest {
 
     @Test
     public void testUpdateVolunteerDetails_ReturnsNotFound_WhenVolunteerNotFound() {
-        ID idVolunteer = new ID(1);
-        PersonalData details = new PersonalData();
+        Long idVolunteer = 1L;
+        VolunteerRequest details = new VolunteerRequest();
 
         when(volunteerService.editVolunteer(idVolunteer, details)).thenReturn(Errors.NOT_FOUND);
 
@@ -238,59 +235,59 @@ public class VolunteerControllerTest {
     }
 
 
-
-    @Test
-    public void testAssignDuty_ReturnsOk_WhenDutyAssigned() {
-        ID idVolunteer = new ID(1);
-        Duty duty = new Duty();
-
-        when(volunteerService.assignDuty(idVolunteer, duty)).thenReturn(Errors.SUCCESS);
-
-        ResponseEntity<Void> response = volunteerController.assignDuty(idVolunteer, duty);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
-
-    @Test
-    public void testAssignDuty_ReturnsNotFound_WhenVolunteerNotFound() {
-        ID idVolunteer = new ID(1);
-        Duty duty = new Duty();
-
-        when(volunteerService.assignDuty(idVolunteer, duty)).thenReturn(Errors.NOT_FOUND);
-
-        ResponseEntity<Void> response = volunteerController.assignDuty(idVolunteer, duty);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
-
-    @Test
-    public void testGetDuties_ReturnsOk_WhenDutiesFound() {
-        ID idVolunteer = new ID(1);
-        List<Duty> duties = List.of(new Duty());
-
-        when(volunteerService.getDuties(idVolunteer)).thenReturn(new ArrayList<>(duties));
-
-        ResponseEntity<List<Duty>> response = volunteerController.getDuties(idVolunteer);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(duties, response.getBody());
-    }
-
-    @Test
-    public void testGetDuties_ReturnsNotFound_WhenNoDutiesFound() {
-        ID idVolunteer = new ID(1);
-
-        when(volunteerService.getDuties(idVolunteer)).thenReturn(null);
-
-        ResponseEntity<List<Duty>> response = volunteerController.getDuties(idVolunteer);
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
+//
+//    @Test
+//    public void testAssignDuty_ReturnsOk_WhenDutyAssigned() {
+//        Long idVolunteer = 1L;
+//        Duty duty = new Duty();
+//
+//        when(volunteerService.assignDuty(idVolunteer, duty)).thenReturn(Errors.SUCCESS);
+//
+//        ResponseEntity<Void> response = volunteerController.assignDuty(idVolunteer, duty);
+//
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//    }
+//
+//    @Test
+//    public void testAssignDuty_ReturnsNotFound_WhenVolunteerNotFound() {
+//        Long idVolunteer = 1L;
+//        Duty duty = new Duty();
+//
+//        when(volunteerService.assignDuty(idVolunteer, duty)).thenReturn(Errors.NOT_FOUND);
+//
+//        ResponseEntity<Void> response = volunteerController.assignDuty(idVolunteer, duty);
+//
+//        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+//    }
+//
+//    @Test
+//    public void testGetDuties_ReturnsOk_WhenDutiesFound() {
+//        Long idVolunteer = 1L;
+//        List<Duty> duties = List.of(new Duty());
+//
+//        when(volunteerService.getDuties(idVolunteer)).thenReturn(new ArrayList<>(duties));
+//
+//        ResponseEntity<List<Duty>> response = volunteerController.getDuties(idVolunteer);
+//
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//        assertEquals(duties, response.getBody());
+//    }
+//
+//    @Test
+//    public void testGetDuties_ReturnsNotFound_WhenNoDutiesFound() {
+//        Long idVolunteer = 1L;
+//
+//        when(volunteerService.getDuties(idVolunteer)).thenReturn(null);
+//
+//        ResponseEntity<List<Duty>> response = volunteerController.getDuties(idVolunteer);
+//
+//        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+//    }
     @Test
     public void testChangeRole_ReturnsForbidden_WhenRequesterNotAdmin() {
         // Arrange
-        ID volunteerId = new ID(1);
-        AdminRequest request = new AdminRequest(new ID(2)); // Admin ID: 2
+        Long volunteerId = 1L;
+        AdminRequest request = new AdminRequest(2L); // Admin Long: 2
         String role = "VOLUNTEER";
 
         // Mock that the admin requester is not an admin
@@ -308,8 +305,8 @@ public class VolunteerControllerTest {
     @Test
     public void testChangeRole_ReturnsNotFound_WhenVolunteerDoesNotExist() {
         // Arrange
-        ID volunteerId = new ID(1);
-        AdminRequest request = new AdminRequest(new ID(2)); // Admin ID: 2
+        Long volunteerId = 1L;
+        AdminRequest request = new AdminRequest(2L); // Admin Long: 2
         String role = "VOLUNTEER";
 
         // Mock that the admin requester is an admin
@@ -331,8 +328,8 @@ public class VolunteerControllerTest {
     @Test
     public void testChangeRole_ReturnsOk_WhenRoleChangedSuccessfully() {
         // Arrange
-        ID volunteerId = new ID(1);
-        AdminRequest request = new AdminRequest(new ID(2)); // Admin ID: 2
+        Long volunteerId = 1L;
+        AdminRequest request = new AdminRequest(2L); // Admin Long: 2
         String role = "LEADER";
 
         // Mock that the admin requester is an admin
@@ -362,8 +359,8 @@ public class VolunteerControllerTest {
     @Test
     public void testChangeRole_ReturnsNotFound_WhenAssignRoleFails() {
         // Arrange
-        ID volunteerId = new ID(1);
-        AdminRequest request = new AdminRequest(new ID(2)); // Admin ID: 2
+        Long volunteerId = 1L;
+        AdminRequest request = new AdminRequest(2L); // Admin Long: 2
         String role = "LEADER";
 
         // Mock that the admin requester is an admin

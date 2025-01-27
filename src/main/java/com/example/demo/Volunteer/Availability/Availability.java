@@ -1,7 +1,6 @@
 package com.example.demo.Volunteer.Availability;
 
 
-import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
 import com.example.demo.Volunteer.Volunteer;
 import com.fasterxml.jackson.annotation.JsonBackReference;
@@ -22,13 +21,13 @@ public class Availability {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "availability_id")
-    private ID availabilityId;
+    private Long availabilityId;
 
     @Column(name = "date", nullable = false)
     private LocalDate date;
 
-    @ManyToOne
-    @JoinColumn(name = "volunteer_id", referencedColumnName = "id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "volunteer_id", nullable = false)
     @JsonBackReference
     private Volunteer volunteer;
 

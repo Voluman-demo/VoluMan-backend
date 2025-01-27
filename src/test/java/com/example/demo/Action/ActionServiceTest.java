@@ -1,7 +1,7 @@
 package com.example.demo.Action;
 
 import com.example.demo.Model.Errors;
-import com.example.demo.Model.ID;
+
 import com.example.demo.Volunteer.Preferences.Preferences;
 import com.example.demo.Volunteer.User.User;
 import com.example.demo.Volunteer.Volunteer;
@@ -30,12 +30,12 @@ public class ActionServiceTest {
     private VolunteerRepository volunteerRepository;
 
     private Action mockAction;
-    private ID testActionId;
+    private Long testActionId;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        testActionId = new ID(1);
+        testActionId = 1L;
         mockAction = new Action();
         mockAction.setActionId(testActionId);
     }
@@ -44,14 +44,14 @@ public class ActionServiceTest {
     public void testCreate() {
         when(actionRepository.save(any(Action.class))).thenAnswer(invocation -> {
             Action action = invocation.getArgument(0);
-            action.setActionId(new ID(1));
+            action.setActionId(1L);
             return action;
         });
 
-        ID newActionId = actionService.create();
+        Long newActionId = actionService.create();
 
         assertNotNull(newActionId);
-        assertEquals(1, newActionId.getId());
+        assertEquals(1, newActionId);
         verify(actionRepository, times(1)).save(any(Action.class));
     }
 
@@ -177,7 +177,7 @@ public class ActionServiceTest {
     @Test
     public void testGetDesc_ValidDescription() {
         // Arrange: Create an Action with a valid description
-        ID actionId = new ID(1);
+        Long actionId = 1L;
         Action action = new Action();
         action.setActionId(actionId);
         action.setBegin(LocalDate.of(2025, 1, 1));
@@ -191,8 +191,8 @@ public class ActionServiceTest {
         validDescription.setDescription("Detailed description of the action.");
         validDescription.setHours("10:00-15:00");
         validDescription.setRoles(new ArrayList<>(List.of(
-                new Role(new ID(1), "helper", "work"),
-                new Role(new ID(2), "worker", "helps")
+                new Role(1L, "helper", "work"),
+                new Role(2L, "worker", "helps")
         ))); // Use Role objects
         validDescription.setValid(true); // Mark as valid
 
@@ -217,17 +217,17 @@ public class ActionServiceTest {
         // Compare roles individually
         assertNotNull(result.getRoles(), "Roles should not be null.");
         assertEquals(2, result.getRoles().size(), "There should be 2 roles.");
-        Role expectedRole1 = new Role(new ID(1), "helper", "work");
-        Role expectedRole2 = new Role(new ID(2), "worker", "helps");
+        Role expectedRole1 = new Role(1L, "helper", "work");
+        Role expectedRole2 = new Role(2L, "worker", "helps");
 
         Role actualRole1 = result.getRoles().get(0);
         Role actualRole2 = result.getRoles().get(1);
 
-        assertEquals(expectedRole1.getRoleId(), actualRole1.getRoleId(), "Role 1 ID should match.");
+        assertEquals(expectedRole1.getRoleId(), actualRole1.getRoleId(), "Role 1 Long should match.");
         assertEquals(expectedRole1.getName(), actualRole1.getName(), "Role 1 name should match.");
         assertEquals(expectedRole1.getDuties(), actualRole1.getDuties(), "Role 1 duties should match.");
 
-        assertEquals(expectedRole2.getRoleId(), actualRole2.getRoleId(), "Role 2 ID should match.");
+        assertEquals(expectedRole2.getRoleId(), actualRole2.getRoleId(), "Role 2 Long should match.");
         assertEquals(expectedRole2.getName(), actualRole2.getName(), "Role 2 name should match.");
         assertEquals(expectedRole2.getDuties(), actualRole2.getDuties(), "Role 2 duties should match.");
 
@@ -242,7 +242,7 @@ public class ActionServiceTest {
     @Test
     public void testGetDesc_InvalidDescription() {
         // Arrange: Create an Action with an invalid description
-        ID actionId = new ID(2);
+        Long actionId = 2L;
         Action action = new Action();
         action.setActionId(actionId);
 
@@ -266,7 +266,7 @@ public class ActionServiceTest {
     @Test
     public void testGetDesc_NoDescription() {
         // Arrange: Create an Action without a description
-        ID actionId = new ID(3);
+        Long actionId = 3L;
         Action action = new Action();
         action.setActionId(actionId);
 
@@ -283,7 +283,7 @@ public class ActionServiceTest {
     @Test
     public void testGetDesc_ActionNotFound() {
         // Arrange: Mock the repository to return empty for a non-existent action
-        ID actionId = new ID(4);
+        Long actionId = 4L;
         when(actionRepository.findById(actionId)).thenReturn(Optional.empty());
 
         // Act: Call the method under test
@@ -299,54 +299,54 @@ public class ActionServiceTest {
     @Test
     public void testGetAllIds() {
         Action action1 = new Action();
-        action1.setActionId(new ID(1));
+        action1.setActionId(1L);
         Action action2 = new Action();
-        action2.setActionId(new ID(2));
+        action2.setActionId(2L);
         List<Action> actions = List.of(action1, action2);
 
         when(actionRepository.findAll()).thenReturn(actions);
 
-        ArrayList<ID> ids = actionService.getAllIds();
+        ArrayList<Long> ids = actionService.getAllIds();
 
         assertEquals(2, ids.size());
-        assertEquals(1, ids.get(0).getId());
-        assertEquals(2, ids.get(1).getId());
+        assertEquals(1, ids.get(0));
+        assertEquals(2, ids.get(1));
     }
 
     @Test
     public void testGetAllDesc() {
         // Arrange: Create multiple actions with valid and invalid descriptions
         Action action1 = new Action();
-        action1.setActionId(new ID(1));
+        action1.setActionId(1L);
         Description desc1 = new Description();
         desc1.setFullName("Description 1");
         desc1.setValid(true); // Ensure this description is valid
         action1.getDescr().put(Lang.EN, desc1);
 
         Action action2 = new Action();
-        action2.setActionId(new ID(2));
+        action2.setActionId(2L);
         Description desc2 = new Description();
         desc2.setFullName("Description 2");
         desc2.setValid(true); // Ensure this description is valid
         action2.getDescr().put(Lang.EN, desc2);
 
         Action action3 = new Action();
-        action3.setActionId(new ID(3));
+        action3.setActionId(3L);
         Description desc3 = new Description();
         desc3.setFullName("Description 3");
         desc3.setValid(false); // This description is invalid
         action3.getDescr().put(Lang.EN, desc3);
 
         Action action4 = new Action();
-        action4.setActionId(new ID(4));
+        action4.setActionId(4L);
         // No description for Lang.EN
 
         // Mock the repository to return these actions
         when(actionRepository.findAll()).thenReturn(List.of(action1, action2, action3, action4));
-        when(actionRepository.findById(new ID(1))).thenReturn(Optional.of(action1));
-        when(actionRepository.findById(new ID(2))).thenReturn(Optional.of(action2));
-        when(actionRepository.findById(new ID(3))).thenReturn(Optional.of(action3));
-        when(actionRepository.findById(new ID(4))).thenReturn(Optional.of(action4));
+        when(actionRepository.findById(1L)).thenReturn(Optional.of(action1));
+        when(actionRepository.findById(2L)).thenReturn(Optional.of(action2));
+        when(actionRepository.findById(3L)).thenReturn(Optional.of(action3));
+        when(actionRepository.findById(4L)).thenReturn(Optional.of(action4));
 
         // Act: Call the method under test
         ArrayList<Description> result = actionService.getAllDesc(Lang.EN);
@@ -374,7 +374,7 @@ public class ActionServiceTest {
         user.setVolunteer(volunteer);
 
         Action action = new Action();
-        ID actionId = new ID(1);
+        Long actionId = 1L;
         action.setActionId(actionId);
 
         when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
@@ -403,7 +403,7 @@ public class ActionServiceTest {
         user.setVolunteer(volunteer);
 
         Action action = new Action();
-        ID actionId = new ID(1);
+        Long actionId = 1L;
         action.setActionId(actionId);
 
         when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
@@ -432,7 +432,7 @@ public class ActionServiceTest {
         user.setVolunteer(volunteer);
 
         Action action = new Action();
-        ID actionId = new ID(1);
+        Long actionId = 1L;
         action.setActionId(actionId);
 
         when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
@@ -461,7 +461,7 @@ public class ActionServiceTest {
         user.setVolunteer(volunteer);
 
         Action action = new Action();
-        ID actionId = new ID(1);
+        Long actionId = 1L;
         action.setActionId(actionId);
 
         when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
@@ -485,7 +485,7 @@ public class ActionServiceTest {
         volunteer.setPreferences(new Preferences());
         user.setVolunteer(volunteer);
 
-        ID actionId = new ID(1);
+        Long actionId = 1L;
 
         when(actionRepository.findById(actionId)).thenReturn(Optional.empty());
 
@@ -503,7 +503,7 @@ public class ActionServiceTest {
         Preferences preferences = mock(Preferences.class);
         Set<Action> stronglyMineSet = new HashSet<>();
         Action action = new Action();
-        action.setActionId(new ID(1));
+        action.setActionId(1L);
         Description description = new Description();
         description.setFullName("Strongly Mine Action");
         action.getDescr().put(Lang.UK, description);
@@ -528,7 +528,7 @@ public class ActionServiceTest {
     @Test
     public void testUpdateAction_Success() {
         // Arrange
-        ID actionId = new ID(1);
+        Long actionId = 1L;
         Action existingAction = new Action();
         existingAction.setActionId(actionId);
 
@@ -552,7 +552,7 @@ public class ActionServiceTest {
     @Test
     public void testUpdateAction_NotFound() {
         // Arrange
-        ID actionId = new ID(1);
+        Long actionId = 1L;
         Action newAction = new Action();
 
         when(actionRepository.findById(actionId)).thenReturn(Optional.empty());
@@ -569,12 +569,12 @@ public class ActionServiceTest {
         // Arrange
         // Create a mock volunteer and their preferences
         Volunteer volunteer = new Volunteer();
-        volunteer.setVolunteerId(new ID(1));
+        volunteer.setVolunteerId(1L);
         Preferences preferences = new Preferences();
 
         // Create a mock action with a valid description
         Action action = new Action();
-        action.setActionId(new ID(100));
+        action.setActionId(100L);
         Description description = new Description();
         description.setFullName("Weakly Mine Action");
         description.setValid(true);
@@ -609,7 +609,7 @@ public class ActionServiceTest {
         Preferences preferences = mock(Preferences.class);
         Set<Action> rejectedSet = new HashSet<>();
         Action action = new Action();
-        action.setActionId(new ID(1));
+        action.setActionId(1L);
         Description description = new Description();
         description.setFullName("Rejected Action");
         action.getDescr().put(Lang.UK, description);
@@ -637,7 +637,7 @@ public class ActionServiceTest {
         Preferences preferences = mock(Preferences.class);
         Set<Action> undecidedSet = new HashSet<>();
         Action action = new Action();
-        action.setActionId(new ID(1));
+        action.setActionId(1L);
         Description description = new Description();
         description.setFullName("Undecided Action");
         action.getDescr().put(Lang.UK, description);

@@ -1,6 +1,5 @@
 package com.example.demo.Volunteer.Availability.AvailabilityInterval;
 
-import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -15,7 +14,7 @@ public class AvailabilityInterval {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "interval_id")
-    private ID intervalId;
+    private Long intervalId;
 
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;

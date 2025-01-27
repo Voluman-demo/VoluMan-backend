@@ -42,7 +42,7 @@
 //
 //    @Test
 //    void testGetCandidates_ReturnsForbidden_WhenVolunteerIsNotRecruiter() {
-//        ID recruiterId = 1L;
+//        Long recruiterId = 1L;
 //
 //        when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(false);
 //
@@ -55,7 +55,7 @@
 //    @Test
 //    void testGetCandidates_ReturnsNotFound_WhenCandidateIsNotFound() {
 //        // Arrange
-//        ID recruiterId = 1L;
+//        Long recruiterId = 1L;
 //        when(volunteerRepository.existsByVolunteerIdAndRole(recruiterId, VolunteerRole.RECRUITER)).thenReturn(true);
 //        when(candidateRepository.findAll()).thenReturn(Collections.emptyList());
 //

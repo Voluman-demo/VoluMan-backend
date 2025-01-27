@@ -1,7 +1,7 @@
 package com.example.demo.Auth;
 
 import com.example.demo.Config.UserAuthenticationProvider;
-import com.example.demo.Model.ID;
+
 import com.example.demo.Volunteer.User.UserService;
 import org.springframework.stereotype.Service;
 
@@ -21,7 +21,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public String createToken(ID idAccount) {
+    public String createToken(Long idAccount) {
         return userAuthenticationProvider.createToken(idAccount);
     }
 }

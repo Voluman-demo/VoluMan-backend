@@ -84,7 +84,7 @@
 //
 //    @Test
 //    void testChoosePref_ReturnsNotFound_WhenActionNotFound() {
-//        ID actionId = 1L;
+//        Long actionId = 1L;
 //        ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 //
 //        when(actionRepository.existsById(actionId)).thenReturn(false);
@@ -96,7 +96,7 @@
 //
 //    @Test
 //    void testChoosePref_ReturnsNotFound_VolunteerNotFound() {
-//        ID actionId = 1L;
+//        Long actionId = 1L;
 //        ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 //
 //        when(actionRepository.existsById(actionId)).thenReturn(true);
@@ -109,7 +109,7 @@
 //
 ////    @Test
 ////    void testChoose_ReturnsOk_WhenSuccess() {
-////        ID actionId = 1L;
+////        Long actionId = 1L;
 ////        ActionPrefRequest request = new ActionPrefRequest(1L, "T");
 ////
 ////        when(actionRepository.existsById(actionId)).thenReturn(true);
@@ -124,7 +124,7 @@
 ////    void testChooseNeed_ReturnsOk_Success() throws Exception {
 ////        int year = 2024;
 ////        int week = 27;
-////        ID actionId = 1L;
+////        Long actionId = 1L;
 ////        ActionNeedRequest request = createActionNeedRequest();
 ////        request.setLeaderId(1L);
 ////
@@ -148,7 +148,7 @@
 ////        // Given
 ////        int year = 2024;
 ////        int week = 27;
-////        ID actionId = 1L;
+////        Long actionId = 1L;
 ////        ID VolunteerId = 1L;
 ////        ActionNeedRequest request = createActionNeedRequest();
 ////        request.setLeaderId(VolunteerId);

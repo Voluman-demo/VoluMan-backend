@@ -1,5 +1,5 @@
-package com.example.demo.Action.ActionDto;
-
-public record DescriptionResponse(
-   String description
-) {}
+//package com.example.demo.Action.ActionDto;
+//
+//public record DescriptionResponse(
+//   String description
+//) {}

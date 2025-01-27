@@ -1,7 +1,6 @@
 package com.example.demo.Volunteer.Preferences;
 
 import com.example.demo.Action.Action;
-import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Volunteer;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,7 +18,7 @@ public class Preferences {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "preference_id")
-    private ID preferenceId;
+    private Long preferenceId;
 
     // Strongly Mine: Actions the volunteer strongly wants to participate in
     @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)

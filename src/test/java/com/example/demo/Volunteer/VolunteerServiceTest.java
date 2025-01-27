@@ -1,12 +1,9 @@
 package com.example.demo.Volunteer;
 
-import com.example.demo.Action.Action;
 import com.example.demo.Action.ActionRepository;
 import com.example.demo.Action.ActionService;
 import com.example.demo.Model.Errors;
-import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Availability.Availability;
-import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Position.PositionService;
 import org.junit.jupiter.api.BeforeEach;
@@ -44,7 +41,7 @@ class VolunteerServiceTest {
 
         // Initialize a sample volunteer
         volunteer = new Volunteer();
-        volunteer.setVolunteerId(new ID(1));
+        volunteer.setVolunteerId(1L);
         volunteer.setFirstName("John");
         volunteer.setLastName("Doe");
 
@@ -57,16 +54,16 @@ class VolunteerServiceTest {
         // Mock the save operation to simulate saving and returning a volunteer with an ID
         when(volunteerRepository.save(any(Volunteer.class))).thenAnswer(invocation -> {
             Volunteer v = invocation.getArgument(0);
-            v.setVolunteerId(new ID(1)); // Assign a mock ID to the volunteer
+            v.setVolunteerId(1L); // Assign a mock ID to the volunteer
             return v;
         });
 
         // Call the service method
-        ID id = volunteerService.createVolunteer();
+        Long id = volunteerService.createVolunteer();
 
         // Assert that the ID is not null and matches the expected value
         assertNotNull(id);
-        assertEquals(1, id.getId());
+        assertEquals(1, id);
 
         // Verify that the repository's save method was called exactly once
         verify(volunteerRepository, times(1)).save(any(Volunteer.class));
@@ -75,15 +72,15 @@ class VolunteerServiceTest {
     @Test
     void testEditVolunteer_Success() {
 
-        PersonalData details = new PersonalData();
+        VolunteerRequest details = new VolunteerRequest();
         details.setFirstName("Jane");
         details.setLastName("Smith");
         details.setEmail("jane.smith@example.com");
 
-        when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.of(volunteer));
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.of(volunteer));
 
 
-        Errors result = volunteerService.editVolunteer(new ID(1), details);
+        Errors result = volunteerService.editVolunteer(1L, details);
 
 
         assertEquals(Errors.SUCCESS, result);
@@ -94,11 +91,11 @@ class VolunteerServiceTest {
 
     @Test
     void testEditVolunteer_NotFound() {
-        PersonalData details = new PersonalData();
-        when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.empty());
+        VolunteerRequest details = new VolunteerRequest();
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
 
-        Errors result = volunteerService.editVolunteer(new ID(1), details);
+        Errors result = volunteerService.editVolunteer(1L, details);
 
 
         assertEquals(Errors.NOT_FOUND, result);
@@ -108,9 +105,9 @@ class VolunteerServiceTest {
 
     @Test
     void testDeleteVolunteer_Success() {
-        when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.of(volunteer));
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.of(volunteer));
 
-        Errors result = volunteerService.deleteVolunteer(new ID(1));
+        Errors result = volunteerService.deleteVolunteer(1L);
 
         assertEquals(Errors.SUCCESS, result);
         assertFalse(volunteer.isValid());
@@ -119,9 +116,9 @@ class VolunteerServiceTest {
 
     @Test
     void testDeleteVolunteer_NotFound() {
-        when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.empty());
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        Errors result = volunteerService.deleteVolunteer(new ID(1));
+        Errors result = volunteerService.deleteVolunteer(1L);
 
         assertEquals(Errors.NOT_FOUND, result);
         verify(volunteerRepository, never()).save(any(Volunteer.class));
@@ -133,9 +130,9 @@ class VolunteerServiceTest {
         List<Availability> availabilities = new ArrayList<>();
         availabilities.add(new Availability());
 
-        when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.of(volunteer));
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.of(volunteer));
 
-        Errors result = volunteerService.setAvailabilities(new ID(1), availabilities);
+        Errors result = volunteerService.setAvailabilities(1L, availabilities);
 
         assertEquals(Errors.SUCCESS, result);
         assertEquals(availabilities, volunteer.getAvailabilities());
@@ -144,10 +141,10 @@ class VolunteerServiceTest {
 
     @Test
     void testSetAvailabilities_NotFound() {
-        when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.empty());
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
         List<Availability> availabilities = new ArrayList<>();
-        Errors result = volunteerService.setAvailabilities(new ID(1), availabilities);
+        Errors result = volunteerService.setAvailabilities(1L, availabilities);
 
         assertEquals(Errors.NOT_FOUND, result);
         verify(volunteerRepository, never()).save(any(Volunteer.class));
@@ -156,9 +153,9 @@ class VolunteerServiceTest {
 
     @Test
     void testAssignPosition_Success() {
-        when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.of(volunteer));
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.of(volunteer));
 
-        Errors result = volunteerService.assignPosition(new ID(1), Position.LEADER);
+        Errors result = volunteerService.assignPosition(1L, Position.LEADER);
 
         assertEquals(Errors.SUCCESS, result);
         verify(positionService, times(1)).assignRole(volunteer, Position.LEADER);
@@ -167,9 +164,9 @@ class VolunteerServiceTest {
 
     @Test
     void testAssignPosition_NotFound() {
-        when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.empty());
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        Errors result = volunteerService.assignPosition(new ID(1), Position.LEADER);
+        Errors result = volunteerService.assignPosition(1L, Position.LEADER);
 
         assertEquals(Errors.NOT_FOUND, result);
         verify(positionService, never()).assignRole(any(Volunteer.class), any(Position.class));
@@ -183,28 +180,28 @@ class VolunteerServiceTest {
         availabilities.add(new Availability());
         volunteer.setAvailabilities(availabilities);
 
-        when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.of(volunteer));
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.of(volunteer));
 
-        ArrayList<Availability> result = volunteerService.getAvailabilities(new ID(1));
+        ArrayList<Availability> result = volunteerService.getAvailabilities(1L);
 
         assertEquals(availabilities, result);
-        verify(volunteerRepository, times(1)).findById(new ID(1));
+        verify(volunteerRepository, times(1)).findById(1L);
     }
 
     @Test
     void testGetAvailabilities_NotFound() {
-        when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.empty());
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        ArrayList<Availability> result = volunteerService.getAvailabilities(new ID(1));
+        ArrayList<Availability> result = volunteerService.getAvailabilities(1L);
 
         assertNull(result);
-        verify(volunteerRepository, times(1)).findById(new ID(1));
+        verify(volunteerRepository, times(1)).findById(1L);
     }
     // Test: createAndEditVolunteer
     @Test
     void  testCreateAndEditVolunteer_Success() {
         // Given: Set up a PersonalData object and mock repository behavior
-        PersonalData details = new PersonalData();
+        VolunteerRequest details = new VolunteerRequest();
         details.setFirstName("John");
         details.setLastName("Doe");
         details.setEmail("john.doe@example.com");
@@ -212,19 +209,19 @@ class VolunteerServiceTest {
         // Mock the behavior of saving a new volunteer
         when(volunteerRepository.save(any(Volunteer.class))).thenAnswer(invocation -> {
             Volunteer v = invocation.getArgument(0);
-            v.setVolunteerId(new ID(1)); // Assign a mock ID to the volunteer
+            v.setVolunteerId(1L); // Assign a mock ID to the volunteer
             return v;
         });
 
         // Mock the behavior of finding a volunteer by ID
-        when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.of(new Volunteer()));
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.of(new Volunteer()));
 
         // When: Call the service method
-        ID result = volunteerService.createAndEditVolunteer(details);
+        Long result = volunteerService.createAndEditVolunteer(details);
 
         // Then: Assert that the result is not null and matches the expected ID
         assertNotNull(result);
-        assertEquals(1, result.getId());
+        assertEquals(1, result);
 
         // Verify that the repository's save method was called twice
         // (once during creation and once during editing)
@@ -235,20 +232,20 @@ class VolunteerServiceTest {
     @Test
     void testCreateAndEditVolunteer_FailsToEdit() {
         // Given: Set up a PersonalData object
-        PersonalData details = new PersonalData();
+        VolunteerRequest details = new VolunteerRequest();
 
         // Mock the behavior of saving a new volunteer
         when(volunteerRepository.save(any(Volunteer.class))).thenAnswer(invocation -> {
             Volunteer v = invocation.getArgument(0);
-            v.setVolunteerId(new ID(1)); // Assign a mock ID to the volunteer
+            v.setVolunteerId(1L); // Assign a mock ID to the volunteer
             return v;
         });
 
-        // Mock the behavior of not finding the volunteer by ID
-        when(volunteerRepository.findById(any(ID.class))).thenReturn(Optional.empty());
+        // Mock the behavior of not finding the volunteer by Long
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
         // When: Call the service method
-        ID result = volunteerService.createAndEditVolunteer(details);
+        Long result = volunteerService.createAndEditVolunteer(details);
 
         // Then: Assert that the result is null (indicating a failure to edit)
         assertNull(result);
@@ -286,69 +283,69 @@ class VolunteerServiceTest {
         assertFalse(result);
         verify(volunteerRepository, times(1)).existsByEmail(email);
     }
-    @Test
-    void testAssignDuty_Success() {
-        ID volunteerId = new ID(1);
-        Duty duty = new Duty();
-        Volunteer volunteer = new Volunteer();
-        volunteer.setDuties(new HashSet<>());
-
-        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
-
-        Errors result = volunteerService.assignDuty(volunteerId, duty);
-
-        assertEquals(Errors.SUCCESS, result);
-        assertTrue(volunteer.getDuties().contains(duty));
-        verify(volunteerRepository, times(1)).save(volunteer);
-    }
-
-    @Test
-    void testAssignDuty_NotFound() {
-        ID volunteerId = new ID(1);
-        Duty duty = new Duty();
-
-        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
-
-        Errors result = volunteerService.assignDuty(volunteerId, duty);
-
-        assertEquals(Errors.NOT_FOUND, result);
-        verify(volunteerRepository, never()).save(any(Volunteer.class));
-    }
-
-
-
-
-    @Test
-    void testGetDuties_Success() {
-        ID volunteerId = new ID(1);
-        Set<Duty> duties = Set.of(new Duty());
-        Volunteer volunteer = new Volunteer();
-        volunteer.setDuties(duties);
-
-        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
-
-        ArrayList<Duty> result = volunteerService.getDuties(volunteerId);
-
-        assertNotNull(result);
-        assertEquals(new ArrayList<>(duties), result);
-        verify(volunteerRepository, times(1)).findById(volunteerId);
-    }
-
-    @Test
-    void testGetDuties_NotFound() {
-        ID volunteerId = new ID(1);
-
-        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
-
-        ArrayList<Duty> result = volunteerService.getDuties(volunteerId);
-
-        assertNull(result);
-        verify(volunteerRepository, times(1)).findById(volunteerId);
-    }
+//    @Test
+//    void testAssignDuty_Success() {
+//        Long volunteerId = 1L;
+//        Duty duty = new Duty();
+//        Volunteer volunteer = new Volunteer();
+//        volunteer.setDuties(new HashSet<>());
+//
+//        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
+//
+//        Errors result = volunteerService.assignDuty(volunteerId, duty);
+//
+//        assertEquals(Errors.SUCCESS, result);
+//        assertTrue(volunteer.getDuties().contains(duty));
+//        verify(volunteerRepository, times(1)).save(volunteer);
+//    }
+//
+//    @Test
+//    void testAssignDuty_NotFound() {
+//        Long volunteerId = 1L;
+//        Duty duty = new Duty();
+//
+//        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
+//
+//        Errors result = volunteerService.assignDuty(volunteerId, duty);
+//        sitory, never()).save(any(Volunteer.class));
+//    }
+//
+//
+//
+//
+//
+//    assertEquals(Errors.NOT_FOUND, result);
+//        verify(volunteerRepo@Test
+//    void testGetDuties_Success() {
+//        Long volunteerId = 1L;
+//        Set<Duty> duties = Set.of(new Duty());
+//        Volunteer volunteer = new Volunteer();
+//        volunteer.setDuties(duties);
+//
+//        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
+//
+//        ArrayList<Duty> result = volunteerService.getDuties(volunteerId);
+//
+//        assertNotNull(result);
+//        assertEquals(new ArrayList<>(duties), result);
+//        verify(volunteerRepository, times(1)).findById(volunteerId);
+//    }
+//
+//    @Test
+//    void testGetDuties_NotFound() {
+//        Long volunteerId = 1L;
+//
+//        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
+//
+//        ArrayList<Duty> result = volunteerService.getDuties(volunteerId);
+//
+//        assertNull(result);
+//        verify(volunteerRepository, times(1)).findById(volunteerId);
+//    }
     @Test
     void testGetPosition_Success() {
         // Given
-        ID volunteerId = new ID(1);
+        Long volunteerId = 1L;
         Volunteer volunteer = new Volunteer();
         volunteer.setPosition(Position.LEADER);
 
@@ -366,7 +363,7 @@ class VolunteerServiceTest {
     @Test
     void testGetPosition_NotFound() {
         // Given
-        ID volunteerId = new ID(1);
+        Long volunteerId = 1L;
 
         when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
 

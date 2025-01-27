@@ -1,7 +1,6 @@
 package com.example.demo.Action;
 
 import com.example.demo.Model.Errors;
-import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.User.User;
 
 import java.time.LocalDate;
@@ -10,35 +9,35 @@ import java.util.ArrayList;
 public interface Actions {
     LocalDate noDate = LocalDate.of(1970, 1, 1);
 
-    ID create();
+    Long create();
 
-    Errors remove(ID aId);
+    Errors remove(Long aId);
 
-    Errors setBeg(ID aId, LocalDate beginDate);
+    Errors setBeg(Long aId, LocalDate beginDate);
 
-    Errors setEnd(ID aId, LocalDate endDate);
+    Errors setEnd(Long aId, LocalDate endDate);
 
-    LocalDate getBeg(ID aId);
+    LocalDate getBeg(Long aId);
 
-    LocalDate getEnd(ID aId);
+    LocalDate getEnd(Long aId);
 
-    Errors setDesc(ID aId, Lang l, Description desc);
+    Errors setDesc(Long aId, Lang l, Description desc);
 
-    Errors remDesc(ID aId, Lang l);
+    Errors remDesc(Long aId, Lang l);
 
-    Description getDesc(ID aId, Lang l);
+    Description getDesc(Long aId, Lang l);
 
-    ArrayList<ID> getAllIds();
+    ArrayList<Long> getAllIds();
 
     ArrayList<Description> getAllDesc(Lang l);
 
-    Errors setStronglyMine(User u, ID aId);
+    Errors setStronglyMine(User u, Long aId);
 
-    Errors setWeaklyMine(User u, ID aId);
+    Errors setWeaklyMine(User u, Long aId);
 
-    Errors setRejected(User u, ID aId);
+    Errors setRejected(User u, Long aId);
 
-    Errors setUndecided(User u, ID aId);
+    Errors setUndecided(User u, Long aId);
 
     ArrayList<Description> getStronglyMine(User u);
 

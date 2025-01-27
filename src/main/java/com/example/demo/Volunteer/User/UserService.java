@@ -2,7 +2,6 @@ package com.example.demo.Volunteer.User;
 
 import com.example.demo.Auth.AuthDto;
 import com.example.demo.Config.AppException;
-import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerService;
 import org.springframework.beans.factory.annotation.Value;
@@ -64,7 +63,7 @@ public class UserService {
         return userRepository.existsByEmailAndPassword(email,password);
     }
 
-    public AuthDto findByUserId(ID userId) {
+    public AuthDto findByUserId(Long userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
         return new AuthDto(user.getUserId(), null);

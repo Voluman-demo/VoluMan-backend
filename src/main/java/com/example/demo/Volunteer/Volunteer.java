@@ -1,30 +1,34 @@
 package com.example.demo.Volunteer;
 
 import com.example.demo.Action.Action;
-import com.example.demo.Model.ID;
+import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
 import com.example.demo.Volunteer.Availability.Availability;
-import com.example.demo.Volunteer.Duty.Duty;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Preferences.Preferences;
+import com.example.demo.Volunteer.User.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+
+//@AttributeOverride(name = "email", column = @Column(name = "email", unique = true, nullable = false, length = 50))
 
 @Entity
 @AllArgsConstructor
 @Getter
 @Setter
 @Table(name = "volunteers")
-@AttributeOverride(name = "email", column = @Column(name = "email", unique = true, nullable = false, length = 50))
 public class Volunteer extends PersonalData {
-    @EmbeddedId
-    private ID volunteerId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "volunteer_id")
+    private Long volunteerId;
 
     @Column(name = "valid", nullable = false)
     private boolean valid = false;
@@ -43,6 +47,10 @@ public class Volunteer extends PersonalData {
     @JoinColumn(name = "preferences_id")
     private Preferences preferences;
 
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
+    private User user;
+
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
     private ArrayList<Availability> availabilities;
 
@@ -54,8 +62,10 @@ public class Volunteer extends PersonalData {
     )
     private Set<Action> actions;
 
-    @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Duty> duties;
+
+
+    @ManyToMany(mappedBy = "assignedVolunteers", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    private Set<DemandInterval> assignedDemandIntervals = new HashSet<>();
 
     public Volunteer() {
         this.limitOfWeeklyHours = 0.0;
@@ -63,14 +73,21 @@ public class Volunteer extends PersonalData {
         this.preferences = new Preferences();
         this.availabilities = new ArrayList<>();
         this.actions = new HashSet<>();
-        this.duties = new HashSet<>();
     }
 
+
     public double calculateActualWeeklyHours(LocalDate startOfWeek, LocalDate endOfWeek) {
-        this.actualWeeklyHours = duties.stream()
-                .filter(duty -> !duty.getDate().isBefore(startOfWeek) && !duty.getDate().isAfter(endOfWeek))
-                .mapToDouble(Duty::getTotalDurationHours)
+        this.actualWeeklyHours = assignedDemandIntervals.stream()
+                .filter(interval -> {
+                    LocalDate intervalDate = interval.getDemand().getDate();
+                    return !intervalDate.isBefore(startOfWeek) && !intervalDate.isAfter(endOfWeek);
+                })
+                .mapToDouble(interval -> Duration.between(interval.getStartTime(), interval.getEndTime()).toMinutes() / 60.0)
                 .sum();
+
         return this.actualWeeklyHours;
     }
 }
+//    @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<Duty> duties;
+//        this.duties = new HashSet<>()

@@ -4,7 +4,6 @@ import com.example.demo.Auth.AuthDto;
 import com.example.demo.Auth.AuthenticationService;
 import com.example.demo.Auth.ErrorResponse;
 import com.example.demo.Auth.LoginRequest;
-import com.example.demo.Model.ID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -31,14 +30,14 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public User getUser(@PathVariable ID userId) {
+    public User getUser(@PathVariable Long userId) {
         return userRepository.findById(userId).orElse(null);
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> logIn(@RequestBody LoginRequest loginRequest) {
         if(authenticationService.authenticate(loginRequest.email(), loginRequest.password())){
-            ID userId = userRepository.findUserIdByEmailAndPassword(loginRequest.email(), loginRequest.password());
+            Long userId = userRepository.findUserIdByEmailAndPassword(loginRequest.email(), loginRequest.password());
             AuthDto authDto = new AuthDto(
                     userId,
                     authenticationService.createToken(userId)

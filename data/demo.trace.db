@@ -5091,3 +5091,53 @@ UPDATE TABLE VOLUNTEER
 SET (VOLUNTEER_DETAILS_ID)
 VALUES (3)
 WHERE VOLUNTEER_ID = 3 [42001-224]
+2025-01-26 14:31:47.064570+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Błąd składniowy w wyrażeniu SQL "create table descriptions (begin date, [*]end date, id integer not null, primary key (id))"; oczekiwano "identifier"
+Syntax error in SQL statement "create table descriptions (begin date, [*]end date, id integer not null, primary key (id))"; expected "identifier"; SQL statement:
+create table descriptions (begin date, end date, id integer not null, primary key (id)) [42001-224]
+2025-01-26 14:31:47.088632+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Tabela "DESCRIPTIONS" nie istnieje
+Table "DESCRIPTIONS" not found; SQL statement:
+alter table if exists action_descriptions add constraint FKhw18l97uygdwh6xssb4jke8s0 foreign key (description_id) references descriptions [42102-224]
+2025-01-26 14:34:58.086342+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Błąd składniowy w wyrażeniu SQL "create table descriptions (begin date, [*]end date, id integer not null, primary key (id))"; oczekiwano "identifier"
+Syntax error in SQL statement "create table descriptions (begin date, [*]end date, id integer not null, primary key (id))"; expected "identifier"; SQL statement:
+create table descriptions (begin date, end date, id integer not null, primary key (id)) [42001-224]
+2025-01-26 14:34:58.120867+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Tabela "DESCRIPTIONS" nie istnieje
+Table "DESCRIPTIONS" not found; SQL statement:
+alter table if exists action_descriptions add constraint FKhw18l97uygdwh6xssb4jke8s0 foreign key (description_id) references descriptions [42102-224]
+2025-01-26 14:48:58.681506+01:00 jdbc[13]: exception
+org.h2.jdbc.JdbcSQLSyntaxErrorException: Błąd składniowy w wyrażeniu SQL "[*]SESCHEDULE_ACTIONS LECT * FROM ACTIONS"; oczekiwano "SAVEPOINT, SCRIPT, SHUTDOWN"
+Syntax error in SQL statement "[*]SESCHEDULE_ACTIONS LECT * FROM ACTIONS"; expected "SAVEPOINT, SCRIPT, SHUTDOWN"; SQL statement:
+SESCHEDULE_ACTIONS LECT * FROM ACTIONS [42001-224]
+2025-01-27 20:24:56.797460+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: Obiekt jest zamknięty
+The object is already closed [90007-224]
+2025-01-27 20:25:10.398027+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: Obiekt jest zamknięty
+The object is already closed [90007-224]
+2025-01-27 20:27:29.186744+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: Obiekt jest zamknięty
+The object is already closed [90007-224]
+2025-01-27 20:27:33.989467+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: Obiekt jest zamknięty
+The object is already closed [90007-224]
+2025-01-27 20:30:39.707381+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: Obiekt jest zamknięty
+The object is already closed [90007-224]
+2025-01-27 20:31:48.040559+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: Obiekt jest zamknięty
+The object is already closed [90007-224]
+2025-01-27 20:32:09.119513+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: Obiekt jest zamknięty
+The object is already closed [90007-224]
+2025-01-27 20:32:18.682543+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: Obiekt jest zamknięty
+The object is already closed [90007-224]
+2025-01-27 20:39:12.394413+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: Obiekt jest zamknięty
+The object is already closed [90007-224]
+2025-01-27 20:41:49.184859+01:00 jdbc[3]: exception
+org.h2.jdbc.JdbcSQLNonTransientException: Obiekt jest zamknięty
+The object is already closed [90007-224]

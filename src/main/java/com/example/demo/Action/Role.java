@@ -1,6 +1,5 @@
 package com.example.demo.Action;
 
-import com.example.demo.Model.ID;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,8 +15,10 @@ import java.util.Objects;
 @AllArgsConstructor
 @Table(name = "action_roles")
 public class Role {
-    @EmbeddedId
-    private ID roleId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "role_id")
+    private Long roleId;
 
     private String name;
     private String duties;

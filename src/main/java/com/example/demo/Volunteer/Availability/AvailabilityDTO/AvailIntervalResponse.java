@@ -1,6 +1,5 @@
 package com.example.demo.Volunteer.Availability.AvailabilityDTO;
 
-import com.example.demo.Model.ID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,7 +8,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class AvailIntervalResponse {
-    private ID intervalId;
+    private Long intervalId;
     private String startTime;
     private String endTime;
 }

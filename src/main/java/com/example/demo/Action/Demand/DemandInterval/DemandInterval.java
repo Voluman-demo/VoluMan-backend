@@ -2,7 +2,7 @@ package com.example.demo.Action.Demand.DemandInterval;
 
 
 import com.example.demo.Action.Demand.Demand;
-import com.example.demo.Model.ID;
+import com.example.demo.Volunteer.Volunteer;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @AllArgsConstructor
@@ -22,7 +24,7 @@ public class DemandInterval {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "interval_id")
-    private ID intervalId;
+    private Long intervalId;
 
     @Column(name = "start_time", nullable = false)
     private LocalTime startTime;
@@ -33,18 +35,24 @@ public class DemandInterval {
     @Column(name = "need_max", nullable = false, length = 4)
     private Long needMax;
 
-    @Column(name = "current_volunteers_number", nullable = false, length = 4)
-    private Long currentVolunteersNumber;
+
+    @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "demand_interval_volunteers",
+            joinColumns = @JoinColumn(name = "interval_id"),
+            inverseJoinColumns = @JoinColumn(name = "volunteer_id", referencedColumnName = "volunteer_id")
+    )
+    private Set<Volunteer> assignedVolunteers = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "demand_id")
     @JsonBackReference
     private Demand demand;
-
-    @PrePersist
-    public void prePersist() {
-        if(this.currentVolunteersNumber == null){
-            this.currentVolunteersNumber = 0L;
-        }
-    }
 }
+//    @PrePersist
+//    public void prePersist() {
+//        if(this.currentVolunteersNumber == null){
+//            this.currentVolunteersNumber = 0L;
+//        }
+//    }
+//}

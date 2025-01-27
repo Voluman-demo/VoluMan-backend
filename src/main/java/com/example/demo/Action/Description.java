@@ -14,13 +14,14 @@ import java.time.LocalDate;
 @Getter
 @Setter
 @Table(name = "descriptions")
-public class Description extends Version {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "description_id")
+public class Description  extends Version {
+//    @EmbeddedId
 //    private ID descriptionId;
 
+    @Column(name = "start_date")
     private LocalDate begin;
+
+    @Column(name = "end_date")
     private LocalDate end;
 
 

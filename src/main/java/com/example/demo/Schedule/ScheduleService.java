@@ -4,21 +4,21 @@ import com.example.demo.Action.Action;
 import com.example.demo.Action.ActionRepository;
 import com.example.demo.Action.Demand.Demand;
 import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
+import com.example.demo.Action.Demand.DemandInterval.DemandIntervalRepository;
+import com.example.demo.Action.Demand.DemandRepository;
 import com.example.demo.Action.Demand.DemandService;
 import com.example.demo.Model.Errors;
-import com.example.demo.Model.ID;
+
+import com.example.demo.Schedule.ScheduleDto.ModificationType;
 import com.example.demo.Schedule.ScheduleDto.ModifyScheduleRequest;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
 import com.example.demo.Volunteer.Availability.AvailabilityService;
-import com.example.demo.Volunteer.Duty.Duty;
-import com.example.demo.Volunteer.Duty.DutyInterval.DutyInterval;
-import com.example.demo.Volunteer.Duty.DutyInterval.DutyIntervalStatus;
-import com.example.demo.Volunteer.Duty.DutyService;
 import com.example.demo.Volunteer.Preferences.Preferences;
 import com.example.demo.Volunteer.Volunteer;
 import com.example.demo.Volunteer.VolunteerRepository;
 import com.example.demo.Volunteer.VolunteerService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -34,28 +34,32 @@ public class ScheduleService implements Schedules {
     private final AvailabilityService availabilityService;
     private final VolunteerRepository volunteerRepository;
     private final ActionRepository actionRepository;
-    private final DutyService dutyService;
+//    private final DutyService dutyService;
     private final ScheduleRepository scheduleRepository;
     private final VolunteerService volunteerService;
+    private final DemandIntervalRepository demandIntervalRepository;
+    private final DemandRepository demandRepository;
 
     public ScheduleService(DemandService demandService,
                            AvailabilityService availabilityService,
                            VolunteerRepository volunteerRepository,
                            ActionRepository actionRepository,
-                           DutyService dutyService,
-                           ScheduleRepository scheduleRepository, VolunteerService volunteerService) {
+//                           DutyService dutyService,
+                           ScheduleRepository scheduleRepository, VolunteerService volunteerService, DemandIntervalRepository demandIntervalRepository, DemandRepository demandRepository) {
         this.demandService = demandService;
         this.availabilityService = availabilityService;
         this.volunteerRepository = volunteerRepository;
         this.actionRepository = actionRepository;
-        this.dutyService = dutyService;
+//        this.dutyService = dutyService;
         this.scheduleRepository = scheduleRepository;
         this.volunteerService = volunteerService;
+        this.demandIntervalRepository = demandIntervalRepository;
+        this.demandRepository = demandRepository;
     }
 
 
     @Override
-    public ID createSchedule(Action action, LocalDate startDate, LocalDate endDate) {
+    public Long createSchedule(Action action, LocalDate startDate, LocalDate endDate) {
         Errors validationResult = validateScheduleDates(startDate, endDate);
         if (validationResult != Errors.SUCCESS) {
             return null;
@@ -69,12 +73,12 @@ public class ScheduleService implements Schedules {
     }
 
     @Override
-    public Schedule getScheduleById(ID scheduleId) {
+    public Schedule getScheduleById(Long scheduleId) {
         return scheduleRepository.findById(scheduleId).orElse(null);
     }
 
     @Override
-    public Errors deleteSchedule(ID scheduleId) {
+    public Errors deleteSchedule(Long scheduleId) {
         if (scheduleRepository.existsById(scheduleId)) {
             scheduleRepository.deleteById(scheduleId);
             return Errors.SUCCESS;
@@ -87,19 +91,21 @@ public class ScheduleService implements Schedules {
         LocalDate startOfWeek = weekStart.with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
         LocalDate endOfWeek = startOfWeek.plusDays(6);
 
-        Schedule schedule = new Schedule(startOfWeek, endOfWeek);
-        List<Duty> generatedDuties = new ArrayList<>();
+        Long newSchedule = createSchedule(null, startOfWeek, endOfWeek);
+        Schedule schedule = getScheduleById(newSchedule);
+
+        if(schedule == null) {
+            return Errors.FAILURE;
+        }
         List<Action> allActions = actionRepository.findAll();
         schedule.setActions(allActions);
 
         for (LocalDate currentDay = startOfWeek; !currentDay.isAfter(endOfWeek); currentDay = currentDay.plusDays(1)) {
-            System.out.println("Processing date: " + currentDay);
 
             List<Availability> availabilities = availabilityService.getAvailabilitiesForDay(currentDay);
             List<Demand> demands = demandService.getDemandsForDay(currentDay);
 
             if (demands.isEmpty() || availabilities.isEmpty()) {
-                System.out.println("No demands or availabilities for " + currentDay);
                 continue;
             }
 
@@ -108,33 +114,30 @@ public class ScheduleService implements Schedules {
 
                 List<Availability> filteredAvailabilities = availabilities.stream()
                         .filter(availability -> interestedVolunteers.contains(availability.getVolunteer()))
-                        .collect(Collectors.toList());
+                        .toList();
 
                 for (DemandInterval demandInterval : demand.getDemandIntervals()) {
                     List<Availability> matchingAvailabilities = filteredAvailabilities.stream()
                             .filter(availability -> isAvailabilityMatchingInterval(availability, demandInterval))
-                            .collect(Collectors.toList());
+                            .toList();
 
                     for (Availability matchingAvailability : matchingAvailabilities) {
                         Volunteer volunteer = matchingAvailability.getVolunteer();
 
                         if (isWithinWeeklyLimit(volunteer, currentDay)) {
-                            Duty duty = createDutyInterval(volunteer, demandInterval);
-                            generatedDuties.add(duty);
-
-                            demandInterval.setCurrentVolunteersNumber(demandInterval.getCurrentVolunteersNumber() + 1);
+                            demandInterval.getAssignedVolunteers().add(volunteer);
 
                             System.out.println("Assigned volunteer " + volunteer.getVolunteerId() +
                                     " to demand interval on " + currentDay);
 
-                            if (demandInterval.getCurrentVolunteersNumber() >= demandInterval.getNeedMax()) {
-                                break;
+                            // Dodanie wolontariusza do harmonogramu
+                            if (!schedule.getVolunteers().contains(volunteer)) {
+                                schedule.getVolunteers().add(volunteer);
                             }
                         }
                     }
                 }
             }
-            schedule.setDuties(generatedDuties);
             scheduleRepository.save(schedule);
         }
 
@@ -151,25 +154,103 @@ public class ScheduleService implements Schedules {
     }
 
     @Override
-    public Errors modifySchedule(ID scheduleId, ModifyScheduleRequest modifications) {
+    public Errors modifySchedule(Long scheduleId, ModifyScheduleRequest modifications) {
+        // Znajdź harmonogram na podstawie Long
         Optional<Schedule> scheduleOpt = scheduleRepository.findById(scheduleId);
-        if (scheduleOpt.isPresent()) {
-            Schedule schedule = scheduleOpt.get();
-            // Implementacja modyfikacji harmonogramu
-            scheduleRepository.save(schedule);
-            return Errors.SUCCESS;
+        if (scheduleOpt.isEmpty()) {
+            return Errors.NOT_FOUND;
         }
-        return Errors.NOT_FOUND;
-    }
 
-    @Override
-    public Errors updateDemand(ID actionId, Demand demand) {
-        // Aktualizacja wymagań akcji
+        Schedule schedule = scheduleOpt.get();
+
+        // Znajdź wolontariusza na podstawie Long
+        Optional<Volunteer> volunteerOpt = volunteerRepository.findById(modifications.volunteerId());
+        if (volunteerOpt.isEmpty()) {
+            return Errors.NOT_FOUND;
+        }
+
+        Volunteer volunteer = volunteerOpt.get();
+
+        // Iteruj po liście Long interwałów zapotrzebowania
+        for (Long demandIntervalId : modifications.demandIntervalIds()) {
+            Optional<DemandInterval> intervalOpt = demandIntervalRepository.findById(demandIntervalId);
+            if (intervalOpt.isEmpty()) {
+                continue; // Jeśli interwał nie istnieje, pomiń go
+            }
+
+            DemandInterval demandInterval = intervalOpt.get();
+
+            // Modyfikacja interwału w zależności od typu
+            if (modifications.modificationType() == ModificationType.ADD) {
+                // Dodaj wolontariusza do interwału, jeśli go tam nie ma
+                if (!demandInterval.getAssignedVolunteers().contains(volunteer)) {
+                    demandInterval.getAssignedVolunteers().add(volunteer);
+
+                    // Dodaj wolontariusza do harmonogramu, jeśli jeszcze nie jest w harmonogramie
+                    if (!schedule.getVolunteers().contains(volunteer)) {
+                        schedule.getVolunteers().add(volunteer);
+                    }
+                }
+            } else if (modifications.modificationType() == ModificationType.REMOVE) {
+                // Usuń wolontariusza z interwału, jeśli tam jest
+                if (demandInterval.getAssignedVolunteers().contains(volunteer)) {
+                    demandInterval.getAssignedVolunteers().remove(volunteer);
+
+                    // Usuń wolontariusza z harmonogramu, jeśli nie jest przypisany do innych interwałów
+                    boolean isAssignedElsewhere = schedule.getDemands().stream()
+                            .flatMap(demand -> demand.getDemandIntervals().stream())
+                            .anyMatch(interval -> interval.getAssignedVolunteers().contains(volunteer));
+
+                    if (!isAssignedElsewhere) {
+                        schedule.getVolunteers().remove(volunteer);
+                    }
+                }
+            }
+        }
+
+        // Zapisz zmodyfikowany harmonogram i interwały
+        scheduleRepository.save(schedule);
+
         return Errors.SUCCESS;
     }
 
+
     @Override
-    public Errors adjustAssignments(ID scheduleId) {
+    public Errors updateDemand(Long actionId, Demand updatedDemand) {
+        Optional<Action> actionOpt = actionRepository.findById(actionId);
+        if (actionOpt.isEmpty()) {
+            return Errors.NOT_FOUND;
+        }
+
+        Action action = actionOpt.get();
+
+        // Znajdź istniejące zapotrzebowanie powiązane z akcją
+        Optional<Demand> existingDemandOpt = demandRepository.findByActionAndDate(action, updatedDemand.getDate());
+        if (existingDemandOpt.isPresent()) {
+            Demand existingDemand = existingDemandOpt.get();
+
+            // Usuń stare interwały zapotrzebowania
+            existingDemand.getDemandIntervals().clear();
+
+            // Zaktualizuj listę interwałów zapotrzebowania
+            for (DemandInterval newInterval : updatedDemand.getDemandIntervals()) {
+                newInterval.setDemand(existingDemand);
+                existingDemand.getDemandIntervals().add(newInterval);
+            }
+
+            // Zapisz zaktualizowane zapotrzebowanie
+            demandRepository.save(existingDemand);
+            return Errors.SUCCESS;
+        } else {
+            // Jeśli zapotrzebowanie nie istnieje, dodaj je jako nowe
+            updatedDemand.setAction(action);
+            demandRepository.save(updatedDemand);
+            return Errors.CREATED;
+        }
+    }
+
+    @Override
+    public Errors adjustAssignments(Long scheduleId) {
         Optional<Schedule> scheduleOpt = scheduleRepository.findById(scheduleId);
         if (scheduleOpt.isPresent()) {
             Schedule schedule = scheduleOpt.get();
@@ -181,41 +262,67 @@ public class ScheduleService implements Schedules {
     }
 
     @Override
-    public Errors assignVolunteerToDuty(ID volunteerId, Duty duty) {
+    public Errors assignVolunteerToDemand(Long volunteerId, Demand demand) {
         Optional<Volunteer> volunteerOpt = volunteerRepository.findById(volunteerId);
-        if (volunteerOpt.isPresent()) {
-            Volunteer volunteer = volunteerOpt.get();
-            volunteer.getDuties().add(duty);
-            volunteerRepository.save(volunteer);
-            return Errors.SUCCESS;
+        if (volunteerOpt.isEmpty()) {
+            return Errors.NOT_FOUND; // Jeśli wolontariusz nie istnieje
         }
-        return Errors.NOT_FOUND;
+
+        Volunteer volunteer = volunteerOpt.get();
+
+        // Przechodzimy przez wszystkie interwały zapotrzebowania w ramach zapotrzebowania (Demand)
+        for (DemandInterval demandInterval : demand.getDemandIntervals()) {
+            if (!demandInterval.getAssignedVolunteers().contains(volunteer)) {
+                demandInterval.getAssignedVolunteers().add(volunteer);
+
+
+                // Zapisz zmiany w bazie danych
+                demandIntervalRepository.save(demandInterval);
+            }
+        }
+
+        return Errors.SUCCESS;
     }
 
     @Override
-    public Errors removeVolunteerFromDuty(ID volunteerId, Duty duty) {
+    public Errors removeVolunteerFromDemand(Long volunteerId, Demand demand) {
         Optional<Volunteer> volunteerOpt = volunteerRepository.findById(volunteerId);
-        if (volunteerOpt.isPresent()) {
-            Volunteer volunteer = volunteerOpt.get();
-            volunteer.getDuties().remove(duty);
-            volunteerRepository.save(volunteer);
-            return Errors.SUCCESS;
+        if (volunteerOpt.isEmpty()) {
+            return Errors.NOT_FOUND; // Jeśli wolontariusz nie istnieje
         }
-        return Errors.NOT_FOUND;
+
+        Volunteer volunteer = volunteerOpt.get();
+
+        boolean removed = false;
+        for (DemandInterval demandInterval : demand.getDemandIntervals()) {
+            if (demandInterval.getAssignedVolunteers().contains(volunteer)) {
+                demandInterval.getAssignedVolunteers().remove(volunteer);
+
+                // Zapisz zmiany w bazie danych
+                demandIntervalRepository.save(demandInterval);
+                removed = true;
+            }
+        }
+
+        return removed ? Errors.SUCCESS : Errors.NOT_FOUND;
     }
 
     @Override
-    public List<Schedule> getVolunteerSchedules(ID volunteerId) {
+    public List<Schedule> getVolunteerSchedules(Long volunteerId) {
+        Volunteer volunteer = volunteerRepository.findById(volunteerId)
+                .orElseThrow(() -> new EntityNotFoundException("Volunteer not found"));
+
         return scheduleRepository.findAll().stream()
-                .filter(schedule -> schedule.getDuties().stream()
-                        .anyMatch(duty -> duty.getVolunteer().getVolunteerId().equals(volunteerId.getId())))
-                .toList();
+                .filter(schedule -> schedule.getDemands().stream()
+                        .flatMap(demand -> demand.getDemandIntervals().stream())
+                        .anyMatch(interval -> interval.getAssignedVolunteers().contains(volunteer)))
+                .collect(Collectors.toList());
     }
 
-    public List<Schedule> getActionSchedules(ID actionId) {
+    public List<Schedule> getActionSchedules(Long actionId) {
         return scheduleRepository.findAll().stream()
                 .filter(schedule -> schedule.getActions().stream()
-                        .anyMatch(action -> action.getActionId().equals(actionId.getId())))
+                        .anyMatch(action -> action.getActionId().equals(actionId)))
                 .toList();
     }
 
@@ -228,7 +335,7 @@ public class ScheduleService implements Schedules {
         return Errors.SUCCESS;
     }
 
-    private Set<Volunteer> getInterestedVolunteersForAction(ID actionId) {
+    private Set<Volunteer> getInterestedVolunteersForAction(Long actionId) {
         Optional<Action> actionOpt = actionRepository.findById(actionId);
 
         if (actionOpt.isPresent()) {
@@ -261,33 +368,35 @@ public class ScheduleService implements Schedules {
         double currentWeeklyLoad = volunteer.calculateActualWeeklyHours(startOfWeek, endOfWeek);
         return currentWeeklyLoad + 1 <= volunteer.getLimitOfWeeklyHours();
     }
-
-    private Duty createDutyInterval(Volunteer volunteer, DemandInterval demandInterval) {
-        Duty duty = volunteer.getDuties().stream()
-                .filter(d -> d.getDate().equals(demandInterval.getDemand().getDate()))
-                .findFirst()
-                .orElseGet(() -> {
-                    Duty newDuty = new Duty();
-                    newDuty.setVolunteer(volunteer);
-                    newDuty.setDate(demandInterval.getDemand().getDate());
-                    volunteer.getDuties().add(newDuty);
-                    return newDuty;
-                });
-
-        DutyInterval newInterval = new DutyInterval();
-        newInterval.setStartTime(demandInterval.getStartTime());
-        newInterval.setEndTime(demandInterval.getEndTime());
-        newInterval.setStatus(DutyIntervalStatus.ASSIGNED);
-        newInterval.setDuty(duty);
-
-        duty.getDutyIntervals().add(newInterval);
-        dutyService.addDutyInterval(newInterval, duty);
-
-        return duty;
-    }
-
-
 }
+
+
+//    private Duty createDutyInterval(Volunteer volunteer, DemandInterval demandInterval) {
+//        Duty duty = volunteer.getDuties().stream()
+//                .filter(d -> d.getDate().equals(demandInterval.getDemand().getDate()))
+//                .findFirst()
+//                .orElseGet(() -> {
+//                    Duty newDuty = new Duty();
+//                    newDuty.setVolunteer(volunteer);
+//                    newDuty.setDate(demandInterval.getDemand().getDate());
+//                    volunteer.getDuties().add(newDuty);
+//                    return newDuty;
+//                });
+//
+//        DutyInterval newInterval = new DutyInterval();
+//        newInterval.setStartTime(demandInterval.getStartTime());
+//        newInterval.setEndTime(demandInterval.getEndTime());
+//        newInterval.setStatus(DutyIntervalStatus.ASSIGNED);
+//        newInterval.setDuty(duty);
+//
+//        duty.getDutyIntervals().add(newInterval);
+//        dutyService.addDutyInterval(newInterval, duty);
+//
+//        return duty;
+//    }
+
+
+
 
 
 //
@@ -317,7 +426,7 @@ public class ScheduleService implements Schedules {
 //    }
 //
 //
-//    public void choosePref(ID actionId, ActionPrefRequest actionPrefRequest) {
+//    public void choosePref(Long actionId, ActionPrefRequest actionPrefRequest) {
 //        switch (actionPrefRequest.decision()) {
 //            case "T":
 //                actionService.addDetermined(actionId, actionPrefRequest.volunteerId());
@@ -338,7 +447,7 @@ public class ScheduleService implements Schedules {
 //    }
 //
 //
-//    public void scheduleNeedAction(ID actionId, int year, int week, ActionNeedRequest actionNeedRequest) throws Exception {
+//    public void scheduleNeedAction(Long actionId, int year, int week, ActionNeedRequest actionNeedRequest) throws Exception {
 //        // Validate leader
 //        if (!volunteerRepository.existsByVolunteerIdAndRole(actionNeedRequest.getLeaderId(), VolunteerRole.LEADER)) {
 //            throw new Exception("Leader not found or not authorized.");
@@ -387,8 +496,8 @@ public class ScheduleService implements Schedules {
 //            for (ActionNeedRequest.SlotRequest slotRequest : dayRequest.getSlots()) {
 //                LocalTime slotStart = slotRequest.getStartTime();
 //                LocalTime slotEnd = slotRequest.getEndTime();
-//                ID needMin = slotRequest.getNeedMin();
-//                ID needMax = slotRequest.getNeedMax();
+//                Long needMin = slotRequest.getNeedMin();
+//                Long needMax = slotRequest.getNeedMax();
 //
 //                // Check if an interval with the same times and needs already exists
 //                boolean intervalExists = false;
@@ -432,7 +541,7 @@ public class ScheduleService implements Schedules {
 //    }
 //
 //
-//    public Optional<SingleAction> getActionById(ID actionId) {
+//    public Optional<SingleAction> getActionById(Long actionId) {
 //        return actionRepository.findById(actionId);
 //    }
 //
@@ -443,7 +552,7 @@ public class ScheduleService implements Schedules {
 //                .plusWeeks(week - 1);
 //    }
 //
-//    public void chooseAvailabilities(ID volunteerId, int year, int week, VolunteerAvailRequest availRequest) throws Exception {
+//    public void chooseAvailabilities(Long volunteerId, int year, int week, VolunteerAvailRequest availRequest) throws Exception {
 //        // Validate volunteer
 //        Volunteer volunteer = volunteerRepository.findById(volunteerId)
 //                .orElseThrow(() -> new Exception("Volunteer not found"));
@@ -571,7 +680,7 @@ public class ScheduleService implements Schedules {
 //        volunteerRepository.save(updatedVolunteer);
 //    }
 //
-//    public Set<Volunteer> getInterestedVolunteersForAction(ID actionId) {
+//    public Set<Volunteer> getInterestedVolunteersForAction(Long actionId) {
 //        Optional<Action> actionOpt = actionRepository.findById(actionId);
 //
 //        if (actionOpt.isPresent()) {
@@ -701,7 +810,7 @@ public class ScheduleService implements Schedules {
 //        // Implementacja zależna od specyfiki Twojej aplikacji
 //    }
 //
-//    public ActionScheduleDto getScheduleByAction(ID actionId) {
+//    public ActionScheduleDto getScheduleByAction(Long actionId) {
 //        Action action = actionRepository.findById(actionId)
 //                .orElseThrow(() -> new IllegalArgumentException("Action not found"));
 //
@@ -754,7 +863,7 @@ public class ScheduleService implements Schedules {
 //
 //
 //    @Transactional
-//    public void modifySchedule(ID volunteerId, int year, int week, ModifyScheduleRequest modifyScheduleRequest) {
+//    public void modifySchedule(Long volunteerId, int year, int week, ModifyScheduleRequest modifyScheduleRequest) {
 //        Volunteer volunteer = volunteerRepository.findById(volunteerId)
 //                .orElseThrow(() -> new IllegalArgumentException("Volunteer not found"));
 //
@@ -805,7 +914,7 @@ public class ScheduleService implements Schedules {
 //        volunteerRepository.save(volunteer);
 //    }
 //
-//    public VolunteerScheduleDto getScheduleByVolunteer(ID volunteerId, int year, int week) {
+//    public VolunteerScheduleDto getScheduleByVolunteer(Long volunteerId, int year, int week) {
 //        Volunteer volunteer = volunteerRepository.findById(volunteerId)
 //                .orElseThrow(() -> new IllegalArgumentException("Volunteer not found"));
 //

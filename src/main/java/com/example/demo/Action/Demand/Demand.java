@@ -2,7 +2,7 @@ package com.example.demo.Action.Demand;
 
 import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
 import com.example.demo.Action.Action;
-import com.example.demo.Model.ID;
+import com.example.demo.Schedule.Schedule;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,7 +24,7 @@ public class Demand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "demand_id")
-    private ID demandId;
+    private Long demandId;
 
     @Column(name = "date",nullable = false)
     private LocalDate date;
@@ -38,5 +38,9 @@ public class Demand {
 
     @OneToMany(mappedBy = "demand", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<DemandInterval> demandIntervals = new HashSet<>();
+
+    @ManyToOne
+    @JoinColumn(name = "schedule_id")
+    private Schedule schedule;
 
 }

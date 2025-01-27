@@ -1,7 +1,6 @@
 package com.example.demo.Volunteer.User;
 
 
-import com.example.demo.Model.ID;
 import com.example.demo.Volunteer.Volunteer;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -22,7 +21,7 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private ID userId;
+    private Long userId;
 
     @Column(unique = true)
     private String email;
@@ -32,11 +31,11 @@ public class User {
     private LocalDate dateOfChangePassword;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "volunteer_id", referencedColumnName = "id")
+    @JoinColumn(name = "volunteer_id", referencedColumnName = "volunteer_id")
     @JsonIgnore
     private Volunteer volunteer;
 
-    public User(ID userId) {
+    public User(Long userId) {
         this.userId = userId;
     }
 }

@@ -1,7 +1,7 @@
 package com.example.demo.Action;
 
 import com.example.demo.Model.Errors;
-import com.example.demo.Model.ID;
+
 import com.example.demo.Volunteer.User.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,12 +21,12 @@ public class ActionController {
     }
 
     @GetMapping("")
-    public ResponseEntity<ArrayList<ID>> getActions() {
+    public ResponseEntity<ArrayList<Long>> getActions() {
         return ResponseEntity.ok(actionService.getAllIds());
     }
 
     @GetMapping("/{actionId}")
-    public ResponseEntity<Action> getAction(@PathVariable ID actionId) {
+    public ResponseEntity<Action> getAction(@PathVariable Long actionId) {
         Action action = actionService.getAction(actionId);
         if (action != null) {
             return ResponseEntity.ok(action);
@@ -35,7 +35,7 @@ public class ActionController {
     }
 
     @GetMapping("/{actionId}/desc")
-    public ResponseEntity<ArrayList<Version>> getActionDesc(@PathVariable ID actionId) {
+    public ResponseEntity<ArrayList<Version>> getActionDesc(@PathVariable Long actionId) {
         Action action = actionService.getAction(actionId);
         if (action != null) {
             return ResponseEntity.ok(new ArrayList<>(action.getDescr().values()));
@@ -44,7 +44,7 @@ public class ActionController {
     }
 
     @GetMapping("/{actionId}/heading")
-    public ResponseEntity<String> getActionHeading(@PathVariable ID actionId, @RequestParam Lang language) {
+    public ResponseEntity<String> getActionHeading(@PathVariable Long actionId, @RequestParam Lang language) {
         Description description = actionService.getDesc(actionId, language);
         if (description != null) {
             return ResponseEntity.ok(description.getFullName());
@@ -53,8 +53,8 @@ public class ActionController {
     }
 
     @PostMapping("")
-    public ResponseEntity<ID> addAction(@RequestBody Action newAction) {
-        ID id = actionService.create();
+    public ResponseEntity<Long> addAction(@RequestBody Action newAction) {
+        Long id = actionService.create();
         Errors result = actionService.updateAction(id, newAction);
         if(result == Errors.SUCCESS){
             return ResponseEntity.status(201).body(id);
@@ -63,7 +63,7 @@ public class ActionController {
     }
 
     @DeleteMapping("/{actionId}")
-    public ResponseEntity<Void> deleteAction(@PathVariable ID actionId) {
+    public ResponseEntity<Void> deleteAction(@PathVariable Long actionId) {
         Errors result = actionService.remove(actionId);
         if (result == Errors.SUCCESS) {
             return ResponseEntity.ok().build();
@@ -73,7 +73,7 @@ public class ActionController {
 
     @PutMapping("/{actionId}/desc")
     public ResponseEntity<String> changeDesc(
-            @PathVariable ID actionId,
+            @PathVariable Long actionId,
             @RequestParam Lang language,
             @RequestBody Description newDesc
     ) {
@@ -85,7 +85,7 @@ public class ActionController {
     }
 
     @PutMapping("/{actionId}/begin")
-    public ResponseEntity<String> setBegin(@PathVariable ID actionId, @RequestParam LocalDate begin) {
+    public ResponseEntity<String> setBegin(@PathVariable Long actionId, @RequestParam LocalDate begin) {
         Errors result = actionService.setBeg(actionId, begin);
         if (result == Errors.SUCCESS) {
             return ResponseEntity.ok("Begin date set successfully.");
@@ -94,7 +94,7 @@ public class ActionController {
     }
 
     @PutMapping("/{actionId}/end")
-    public ResponseEntity<String> setEnd(@PathVariable ID actionId, @RequestParam LocalDate end) {
+    public ResponseEntity<String> setEnd(@PathVariable Long actionId, @RequestParam LocalDate end) {
         Errors result = actionService.setEnd(actionId, end);
         if (result == Errors.SUCCESS) {
             return ResponseEntity.ok("End date set successfully.");
@@ -103,7 +103,7 @@ public class ActionController {
     }
 
     @PostMapping("/{actionId}/preferences/stronglymine")
-    public ResponseEntity<String> addStronglyMine(@PathVariable ID actionId, @RequestBody User user) {
+    public ResponseEntity<String> addStronglyMine(@PathVariable Long actionId, @RequestBody User user) {
         Errors result = actionService.setStronglyMine(user, actionId);
         if (result == Errors.SUCCESS) {
             return ResponseEntity.ok("Added to Strongly Mine successfully.");
@@ -112,7 +112,7 @@ public class ActionController {
     }
 
     @PostMapping("/{actionId}/preferences/weaklymine")
-    public ResponseEntity<String> addWeaklyMine(@PathVariable ID actionId, @RequestBody User user) {
+    public ResponseEntity<String> addWeaklyMine(@PathVariable Long actionId, @RequestBody User user) {
         Errors result = actionService.setWeaklyMine(user, actionId);
         if (result == Errors.SUCCESS) {
             return ResponseEntity.ok("Added to Weakly Mine successfully.");
@@ -121,7 +121,7 @@ public class ActionController {
     }
 
     @PostMapping("/{actionId}/preferences/rejected")
-    public ResponseEntity<String> addRejected(@PathVariable ID actionId, @RequestBody User user) {
+    public ResponseEntity<String> addRejected(@PathVariable Long actionId, @RequestBody User user) {
         Errors result = actionService.setRejected(user, actionId);
         if (result == Errors.SUCCESS) {
             return ResponseEntity.ok("Added to Rejected successfully.");
@@ -130,7 +130,7 @@ public class ActionController {
     }
 
     @PostMapping("/{actionId}/preferences/undecided")
-    public ResponseEntity<String> addUndecided(@PathVariable ID actionId, @RequestBody User user) {
+    public ResponseEntity<String> addUndecided(@PathVariable Long actionId, @RequestBody User user) {
         Errors result = actionService.setUndecided(user, actionId);
         if (result == Errors.SUCCESS) {
             return ResponseEntity.ok("Added to Undecided successfully.");
