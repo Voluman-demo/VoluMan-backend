@@ -1,8 +1,8 @@
 package com.example.demo.Schedule;
 
 import com.example.demo.Action.Action;
-import com.example.demo.Action.Demand.Demand;
-import com.example.demo.Action.Demand.UpdateNeedDto;
+import com.example.demo.Action.ActionDemand.ActionDemand;
+import com.example.demo.Action.ActionDemand.UpdateNeedDto;
 import com.example.demo.Model.Errors;
 import com.example.demo.Schedule.ScheduleDto.ModifyScheduleRequest;
 import com.example.demo.Volunteer.Volunteer;
@@ -20,7 +20,7 @@ public interface Schedules {
 
     Errors generateSchedule(LocalDate date);
 
-    Errors applyHeuristic(Action action, List<Volunteer> volunteers, List<Demand> demands);
+    Errors applyHeuristic(Action action, List<Volunteer> volunteers, List<ActionDemand> actionDemands);
 
     Errors modifySchedule(Long scheduleId, ModifyScheduleRequest modifications);
 
@@ -28,9 +28,9 @@ public interface Schedules {
 
     Errors adjustAssignments(Long scheduleId);
 
-    Errors assignVolunteerToDemand(Long volunteerId, Demand demand);
+    Errors assignVolunteerToDemand(Long volunteerId, ActionDemand actionDemand);
 
-    Errors removeVolunteerFromDemand(Long volunteerId, Demand demand);
+    Errors removeVolunteerFromDemand(Long volunteerId, ActionDemand actionDemand);
 
 
     List<Schedule> getVolunteerSchedules(Long volunteerId);

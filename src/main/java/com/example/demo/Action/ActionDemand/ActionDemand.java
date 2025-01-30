@@ -1,9 +1,8 @@
-package com.example.demo.Action.Demand;
+package com.example.demo.Action.ActionDemand;
 
-import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
+import com.example.demo.Action.ActionDemand.ActionDemandInterval.ActionDemandInterval;
 import com.example.demo.Action.Action;
 import com.example.demo.Schedule.Schedule;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,8 +18,8 @@ import java.util.Set;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "demand")
-public class Demand {
+@Table(name = "action_demand")
+public class ActionDemand {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "demand_id")
@@ -35,8 +34,8 @@ public class Demand {
     private Action action;
 
 
-    @OneToMany(mappedBy = "demand", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<DemandInterval> demandIntervals = new HashSet<>();
+    @OneToMany(mappedBy = "actionDemand", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ActionDemandInterval> actionDemandIntervals = new HashSet<>();
 
     @ManyToOne
     @JoinColumn(name = "schedule_id")

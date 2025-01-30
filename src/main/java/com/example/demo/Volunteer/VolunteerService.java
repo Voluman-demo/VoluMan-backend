@@ -6,13 +6,15 @@ import com.example.demo.Action.Lang;
 import com.example.demo.Model.Errors;
 
 import com.example.demo.Volunteer.Availability.Availability;
+import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Position.PositionService;
 import com.example.demo.Volunteer.Preferences.Preferences;
-import com.example.demo.Volunteer.VolunteerDto.AdminRequest;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class VolunteerService implements Volunteers {
@@ -52,6 +54,38 @@ public class VolunteerService implements Volunteers {
             vol.setAddress(request.getAddress());
             vol.setSex(request.getSex());
             vol.setPosition(request.getPosition());
+            vol.setLimitOfWeeklyHours(request.getLimitOfWeeklyHours());
+            volunteerRepository.save(vol);
+            return Errors.SUCCESS;
+        }
+        return Errors.FAILURE;
+    }
+
+    public Errors editVolunteerDetails(Long volunteerId, VolunteerRequest details) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+        if (volunteer.isPresent()) {
+            Volunteer vol = volunteer.get();
+            if(details.getFirstName() != null){
+                vol.setFirstName(details.getFirstName());
+            }
+            if(details.getLastName() != null){
+                vol.setLastName(details.getLastName());
+            }
+            if(details.getEmail() != null){
+                vol.setEmail(details.getEmail());
+            }
+            if(details.getPhone() != null){
+                vol.setPhone(details.getPhone());
+            }
+            if(details.getDateOfBirth() != null){
+                vol.setDateOfBirth(details.getDateOfBirth());
+            }
+            if(details.getAddress() != null){
+                vol.setAddress(details.getAddress());
+            }
+            if(details.getSex() != null){
+                vol.setSex(details.getSex());
+            }
             volunteerRepository.save(vol);
             return Errors.SUCCESS;
         }
@@ -63,8 +97,7 @@ public class VolunteerService implements Volunteers {
         Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
         if (volunteer.isPresent()) {
             Volunteer vol = volunteer.get();
-            vol.setValid(false);
-            volunteerRepository.save(vol);
+            volunteerRepository.delete(vol);
             return Errors.SUCCESS;
         }
         return Errors.NOT_FOUND;
@@ -107,30 +140,6 @@ public class VolunteerService implements Volunteers {
         return Errors.NOT_FOUND;
     }
 
-    /*@Override
-    public List<Availability> getAvailabilities(Long volunteerId) {
-        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
-        return volunteer.map(Volunteer::getAvailabilities).orElse(null);
-    }*/
-
-//    @Override
-//    public Errors assignDuty(Long volunteerId, Duty duty) {
-//        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
-//        if (volunteer.isPresent()) {
-//            Volunteer vol = volunteer.get();
-//            vol.getDuties().add(duty);
-//            volunteerRepository.save(vol);
-//            return Errors.SUCCESS;
-//        }
-//        return Errors.NOT_FOUND;
-//    }
-//
-//    @Override
-//    public ArrayList<Duty> getDuties(Long volunteerId) {
-//        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
-//        return volunteer.map(vol -> new ArrayList<>(vol.getDuties())).orElse(null);
-//    }
-
     public Long createAndEditVolunteer(VolunteerRequest request) {
         if (request.getEmail() == null || request.getEmail().isEmpty()) {
             throw new IllegalArgumentException("Email cannot be null or empty.");
@@ -170,7 +179,7 @@ public class VolunteerService implements Volunteers {
         return null;
     }
 
-    public List<PersonalData> getPersData(Position position) {
+    public List<PersonalData> getAllPersData(Position position) {
         List<Volunteer> volunteers = volunteerRepository.findAllByPosition(position);
         return volunteers.stream()
                 .map(volunteer -> {
@@ -210,5 +219,24 @@ public class VolunteerService implements Volunteers {
 
     public List<Volunteer> getAllCandidates() {
         return volunteerRepository.findAllByPosition(Position.CANDIDATE);
+    }
+
+    public Availability convertToAvailability(AvailabilityRequest request, Long volId) {
+        Availability availability = new Availability();
+        availability.setDate(request.getDate());
+        availability.setVolunteer(volunteerRepository.findById(volId).get());
+
+        Set<AvailabilityInterval> intervals = request.getSlots().stream()
+                .map(slot -> {
+                    AvailabilityInterval interval = new AvailabilityInterval();
+                    interval.setStartTime(LocalTime.parse(slot.getStartTime()));
+                    interval.setEndTime(LocalTime.parse(slot.getEndTime()));
+                    interval.setAvailability(availability);
+                    return interval;
+                })
+                .collect(Collectors.toSet());
+
+        availability.setSlots(intervals);
+        return availability;
     }
 }

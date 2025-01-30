@@ -23,6 +23,10 @@ public class Role {
     private String name;
     private String duties;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "description_id", nullable = false)
+    private Description description;
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

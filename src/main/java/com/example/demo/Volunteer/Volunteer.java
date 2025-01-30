@@ -1,7 +1,7 @@
 package com.example.demo.Volunteer;
 
 import com.example.demo.Action.Action;
-import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
+import com.example.demo.Action.ActionDemand.ActionDemandInterval.ActionDemandInterval;
 import com.example.demo.Action.Lang;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Position.Position;
@@ -31,7 +31,7 @@ public class Volunteer extends PersonalData {
     private Long volunteerId;
 
     @Column(name = "valid", nullable = false)
-    private boolean valid = false;
+    private boolean valid = false; //TODO usunac
 
     @Enumerated(EnumType.STRING)
     @Column(name = "language", nullable = false)
@@ -69,7 +69,7 @@ public class Volunteer extends PersonalData {
 
 
     @ManyToMany(mappedBy = "assignedVolunteers", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    private Set<DemandInterval> assignedDemandIntervals = new HashSet<>();
+    private Set<ActionDemandInterval> assignedActionDemandIntervals = new HashSet<>();
 
     public Volunteer() {
         this.setFirstName("");
@@ -87,9 +87,9 @@ public class Volunteer extends PersonalData {
 
 
     public double calculateActualWeeklyHours(LocalDate startOfWeek, LocalDate endOfWeek) {
-        this.actualWeeklyHours = assignedDemandIntervals.stream()
+        this.actualWeeklyHours = assignedActionDemandIntervals.stream()
                 .filter(interval -> {
-                    LocalDate intervalDate = interval.getDemand().getDate();
+                    LocalDate intervalDate = interval.getActionDemand().getDate();
                     return !intervalDate.isBefore(startOfWeek) && !intervalDate.isAfter(endOfWeek);
                 })
                 .mapToDouble(interval -> Duration.between(interval.getStartTime(), interval.getEndTime()).toMinutes() / 60.0)

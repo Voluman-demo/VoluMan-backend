@@ -1,5 +1,6 @@
 package com.example.demo.Action;
 
+import com.example.demo.Action.ActionDto.ActionRequest;
 import com.example.demo.Model.Errors;
 
 import com.example.demo.Volunteer.Preferences.Preferences;
@@ -358,8 +359,6 @@ public class ActionServiceTest {
         assertEquals("Description 1", result.get(0).getFullName(), "First description should match");
         assertEquals("Description 2", result.get(1).getFullName(), "Second description should match");
 
-        // Debugging Output
-        System.out.println("Descriptions returned: " + result);
     }
     @Test
     public void testSetStronglyMine_Success() {
@@ -550,7 +549,7 @@ public class ActionServiceTest {
         Action existingAction = new Action();
         existingAction.setActionId(actionId);
 
-        Action newAction = new Action();
+        ActionRequest newAction = new ActionRequest();
         newAction.setBegin(LocalDate.of(2025, 1, 1));
         newAction.setEnd(LocalDate.of(2025, 12, 31));
         newAction.setDescr(new HashMap<>());
@@ -571,7 +570,7 @@ public class ActionServiceTest {
     public void testUpdateAction_NotFound() {
         // Arrange
         Long actionId = 1L;
-        Action newAction = new Action();
+        ActionRequest newAction = new ActionRequest();
 
         when(actionRepository.findById(actionId)).thenReturn(Optional.empty());
 

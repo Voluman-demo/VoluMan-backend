@@ -1,7 +1,7 @@
-package com.example.demo.Action.Demand.DemandInterval;
+package com.example.demo.Action.ActionDemand.ActionDemandInterval;
 
 
-import com.example.demo.Action.Demand.Demand;
+import com.example.demo.Action.ActionDemand.ActionDemand;
 import com.example.demo.Volunteer.Volunteer;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -20,7 +20,7 @@ import java.util.Set;
 @Getter
 @Setter
 @Table(name = "demand_interval")
-public class DemandInterval {
+public class ActionDemandInterval {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "interval_id")
@@ -38,7 +38,7 @@ public class DemandInterval {
 
     @ManyToMany(cascade = {CascadeType.MERGE, CascadeType.PERSIST}, fetch = FetchType.LAZY)
     @JoinTable(
-            name = "demand_interval_volunteers",
+            name = "action_demand_interval_volunteers",
             joinColumns = @JoinColumn(name = "interval_id"),
             inverseJoinColumns = @JoinColumn(name = "volunteer_id", referencedColumnName = "volunteer_id")
     )
@@ -47,12 +47,5 @@ public class DemandInterval {
     @ManyToOne
     @JoinColumn(name = "demand_id")
     @JsonBackReference
-    private Demand demand;
+    private ActionDemand actionDemand;
 }
-//    @PrePersist
-//    public void prePersist() {
-//        if(this.currentVolunteersNumber == null){
-//            this.currentVolunteersNumber = 0L;
-//        }
-//    }
-//}

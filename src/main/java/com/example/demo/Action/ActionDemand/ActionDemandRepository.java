@@ -1,4 +1,4 @@
-package com.example.demo.Action.Demand;
+package com.example.demo.Action.ActionDemand;
 
 import com.example.demo.Action.Action;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,13 +9,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface DemandRepository extends JpaRepository<Demand, Long> {
+public interface ActionDemandRepository extends JpaRepository<ActionDemand, Long> {
 
-    List<Demand> findAllByDate(LocalDate date);
+    List<ActionDemand> findAllByDate(LocalDate date);
 
-    List<Demand> findAllByAction_ActionId(Long actionId);
+    List<ActionDemand> findAllByAction_ActionId(Long actionId);
 
-    Optional<Demand> findByActionAndDate(Action action, LocalDate date);
+    Optional<ActionDemand> findByActionAndDate(Action action, LocalDate date);
 
 //    List<Demand> findByDateBetween(LocalDate startDate, LocalDate endDate);
 }

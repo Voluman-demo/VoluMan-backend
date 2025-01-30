@@ -1,6 +1,9 @@
 package com.example.demo.Action;
 
+import com.example.demo.Action.ActionDto.ActionRequest;
 import com.example.demo.Model.Errors;
+import com.example.demo.Volunteer.Position.Position;
+import com.example.demo.Volunteer.VolunteerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,18 +17,26 @@ import java.util.List;
 public class ActionController {
 
     private final ActionService actionService;
+    private final VolunteerRepository volunteerRepository;
 
-    public ActionController(ActionService actionService) {
+    public ActionController(ActionService actionService, VolunteerRepository volunteerRepository) {
         this.actionService = actionService;
+        this.volunteerRepository = volunteerRepository;
     }
 
     @GetMapping("")
-    public ResponseEntity<ArrayList<Long>> getActions() {
+    public ResponseEntity<ArrayList<Long>> getAllIds(@RequestParam Long volunteerId) {
+        if (!volunteerRepository.existsByVolunteerIdAndPosition(volunteerId, Position.ADMIN) && !volunteerRepository.existsByVolunteerIdAndPosition(volunteerId, Position.LEADER)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         return ResponseEntity.ok(actionService.getAllIds());
     }
 
     @GetMapping("/{actionId}")
-    public ResponseEntity<Action> getAction(@PathVariable Long actionId) {
+    public ResponseEntity<Action> getAction(@PathVariable Long actionId, @RequestParam Long volunteerId) {
+        if (!volunteerRepository.existsById(volunteerId) || volunteerRepository.existsByVolunteerIdAndPosition(volunteerId, Position.CANDIDATE)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Action action = actionService.getAction(actionId);
         if (action != null) {
             return ResponseEntity.ok(action);
@@ -34,10 +45,13 @@ public class ActionController {
     }
 
     @GetMapping("/{actionId}/desc")
-    public ResponseEntity<ArrayList<Version>> getActionDesc(@PathVariable Long actionId) {
+    public ResponseEntity<ArrayList<Description>> getActionDesc(@PathVariable Long actionId, @RequestParam Long volunteerId) {
+        if (!volunteerRepository.existsById(volunteerId) || volunteerRepository.existsByVolunteerIdAndPosition(volunteerId, Position.CANDIDATE)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Action action = actionService.getAction(actionId);
         if (action != null) {
-            return ResponseEntity.ok(new ArrayList<>(action.getDescr().values()));
+            return ResponseEntity.ok(new ArrayList<>(action.getDescr()));
         }
         return ResponseEntity.notFound().build();
     }
@@ -62,11 +76,16 @@ public class ActionController {
 
 
     @PostMapping("")
-    public ResponseEntity<Long> addAction(@RequestBody Action newAction) {
+    public ResponseEntity<Long> addAction(@RequestBody ActionRequest newAction, @RequestParam Long volunteerId) {
+        if (!volunteerRepository.existsByVolunteerIdAndPosition(volunteerId, Position.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Long id = actionService.create();
         Errors result = actionService.updateAction(id, newAction);
         if (result == Errors.SUCCESS) {
             return ResponseEntity.status(201).body(id);
+        } else if (result == Errors.FAILURE) {
+            return ResponseEntity.badRequest().body(id);
         }
         return ResponseEntity.internalServerError().body(id);
     }

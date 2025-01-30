@@ -1,7 +1,7 @@
 package com.example.demo.Schedule;
 
 import com.example.demo.Action.ActionRepository;
-import com.example.demo.Action.Demand.UpdateNeedDto;
+import com.example.demo.Action.ActionDemand.UpdateNeedDto;
 import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
 import com.example.demo.Model.Errors;
@@ -50,8 +50,8 @@ public class ScheduleController {
 
     @PutMapping("/{scheduleId}/modify")
     public ResponseEntity<?> modifySchedule(@PathVariable Long scheduleId, @RequestBody ModifyScheduleRequest modifyScheduleRequest) {
-        if (!volunteerRepository.existsById(modifyScheduleRequest.volunteerId())) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Volunteer not found.");
+        if (!volunteerRepository.existsById(modifyScheduleRequest.volunteerId()) || volunteerRepository.existsByVolunteerIdAndPosition(modifyScheduleRequest.volunteerId(), Position.CANDIDATE)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         Errors result = scheduleService.modifySchedule(scheduleId, modifyScheduleRequest);
@@ -64,7 +64,10 @@ public class ScheduleController {
     }
 
     @DeleteMapping("/{scheduleId}")
-    public ResponseEntity<?> deleteSchedule(@PathVariable Long scheduleId) {
+    public ResponseEntity<?> deleteSchedule(@PathVariable Long scheduleId, @RequestParam Long volunteerId) {
+        if (volunteerRepository.existsByVolunteerIdAndPosition(volunteerId, Position.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Errors result = scheduleService.deleteSchedule(scheduleId);
 
         if (result == Errors.SUCCESS) {

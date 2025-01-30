@@ -7,9 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 
 @Entity
@@ -29,24 +27,17 @@ public class Action {
     @Column(name = "end_date")
     private LocalDate end;
 
-    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JoinTable(
-            name = "action_descriptions",
-            joinColumns = @JoinColumn(name = "action_id"),
-            inverseJoinColumns = @JoinColumn(name = "description_id")
-    )
-    @MapKeyEnumerated(EnumType.STRING)
-    @MapKeyColumn(name = "language")
-    private HashMap<Lang, Description> descr;
+    @Column(name = "leader_id")
+    private Long leaderId;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "action", fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<Description> descr;
 
     @ManyToMany(mappedBy = "actions", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<Volunteer> volunteers = new HashSet<>();
 
     public Action() {
-        this.descr = new HashMap<>();
-        for (Lang lang : Lang.values()) {
-            this.descr.put(lang, new Description());
-        }
+        this.descr = new ArrayList<>();
         this.begin = Actions.noDate;
         this.end = Actions.noDate;
     }

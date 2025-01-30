@@ -1,4 +1,4 @@
-package com.example.demo.Action.Demand.DemandInterval;
+package com.example.demo.Action.ActionDemand.ActionDemandInterval;
 
 
 import com.example.demo.Volunteer.VolunteerDto.VolunteerDto;
@@ -7,7 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 
-public record DemandIntervalDto(
+public record ActionDemandIntervalDto(
         Long intervalId,
         LocalTime startTime,
         LocalTime endTime,

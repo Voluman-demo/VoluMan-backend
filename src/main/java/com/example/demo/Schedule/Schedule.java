@@ -1,7 +1,7 @@
 package com.example.demo.Schedule;
 
 import com.example.demo.Action.Action;
-import com.example.demo.Action.Demand.Demand;
+import com.example.demo.Action.ActionDemand.ActionDemand;
 
 import com.example.demo.Volunteer.Volunteer;
 import jakarta.persistence.*;
@@ -48,7 +48,7 @@ public class Schedule {
     private List<Volunteer> volunteers = new ArrayList<>();
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "schedule", orphanRemoval = true)
-    private List<Demand> demands = new ArrayList<>();
+    private List<ActionDemand> actionDemands = new ArrayList<>();
 
     public Schedule(LocalDate startDate, LocalDate endDate) {
         this.startDate = startDate != null ? startDate : LocalDate.now();

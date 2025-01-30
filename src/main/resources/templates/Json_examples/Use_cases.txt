@@ -348,7 +348,7 @@ RESPONSE:
         "email": "john.doe@example.com",
         "phone": "123456789"
     },
-    "demands": []
+    "actionDemands": []
 }
 
 
@@ -440,7 +440,7 @@ RESPONSE:
 
 
 ZH-3 deklarowanie zapotrzebowania
-POST http://localhost:8080/actions/1/demands?year=2024&week=51
+POST http://localhost:8080/actions/1/actionDemands?year=2024&week=51
 
 {
     "leaderId": 3,
@@ -533,7 +533,7 @@ RESPONSE:
     "actionId": 1,
     "heading": "tytul_akcji",
     "description": "opis_akcji",
-    "demands": [
+    "actionDemands": [
         {
             "demandId": 1,
             "date": [
