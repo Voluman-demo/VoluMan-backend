@@ -2,6 +2,7 @@ package com.example.demo.Schedule;
 
 import com.example.demo.Action.Action;
 import com.example.demo.Action.Demand.Demand;
+import com.example.demo.Action.Demand.UpdateNeedDto;
 import com.example.demo.Model.Errors;
 import com.example.demo.Schedule.ScheduleDto.ModifyScheduleRequest;
 import com.example.demo.Volunteer.Volunteer;
@@ -23,7 +24,7 @@ public interface Schedules {
 
     Errors modifySchedule(Long scheduleId, ModifyScheduleRequest modifications);
 
-    Errors updateDemand(Long actionId, Demand demand);
+    Errors updateDemand(Long actionId, UpdateNeedDto updateNeedDto);
 
     Errors adjustAssignments(Long scheduleId);
 

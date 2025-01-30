@@ -2,6 +2,7 @@ package com.example.demo.Volunteer.Preferences;
 
 import com.example.demo.Action.Action;
 import com.example.demo.Volunteer.Volunteer;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -57,7 +58,7 @@ public class Preferences {
     private Set<Action> U;
 
     @OneToOne(mappedBy = "preferences")
-
+    @JsonBackReference
     private Volunteer volunteer;
 
     @PrePersist

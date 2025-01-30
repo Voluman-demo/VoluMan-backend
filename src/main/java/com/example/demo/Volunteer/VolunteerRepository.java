@@ -5,6 +5,7 @@ import com.example.demo.Volunteer.Position.Position;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -17,4 +18,6 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Long> {
     Volunteer getVolunteerByVolunteerId(Long volId);
 
     Optional<Object> findByVolunteerIdAndPosition(Long volId, Position position);
+
+    List<Volunteer> findAllByPosition(Position position);
 }

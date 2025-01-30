@@ -2,11 +2,12 @@ package com.example.demo.Volunteer;
 
 import com.example.demo.Action.Action;
 import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
+import com.example.demo.Action.Lang;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Preferences.Preferences;
 import com.example.demo.Volunteer.User.User;
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,12 +15,9 @@ import lombok.Setter;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-//@AttributeOverride(name = "email", column = @Column(name = "email", unique = true, nullable = false, length = 50))
 
 @Entity
 @AllArgsConstructor
@@ -36,6 +34,10 @@ public class Volunteer extends PersonalData {
     private boolean valid = false;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "language", nullable = false)
+    private Lang language;
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "position", nullable = false)
     private Position position;
 
@@ -47,12 +49,11 @@ public class Volunteer extends PersonalData {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "preferences_id")
-    //TODO NAPRAWIC REKURENCJE
+    @JsonManagedReference
     private Preferences preferences;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
-
     private User user;
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -67,21 +68,21 @@ public class Volunteer extends PersonalData {
     private Set<Action> actions;
 
 
-
     @ManyToMany(mappedBy = "assignedVolunteers", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     private Set<DemandInterval> assignedDemandIntervals = new HashSet<>();
 
     public Volunteer() {
-        this.limitOfWeeklyHours = 0.0;
-        this.actualWeeklyHours = 0.0;
-        this.setEmail("");
         this.setFirstName("");
         this.setLastName("");
+        this.setEmail("");
         this.setPhone("");
         this.setDateOfBirth(LocalDate.now());
         this.setAddress("");
         this.setSex("");
-        this.position= Position.CANDIDATE;
+        this.limitOfWeeklyHours = 0.0;
+        this.actualWeeklyHours = 0.0;
+        this.position = Position.CANDIDATE;
+        this.language = Lang.PL;
     }
 
 
@@ -97,6 +98,3 @@ public class Volunteer extends PersonalData {
         return this.actualWeeklyHours;
     }
 }
-//    @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<Duty> duties;
-//        this.duties = new HashSet<>()

@@ -26,9 +26,6 @@ public interface Volunteers {
     // Availability and duties management
     Errors setAvailabilities(Long vId, List<Availability> availabilities);
 
-   /* ArrayList<Availability> getAvailabilities(Long vId);*/
-//
-//    Errors assignDuty(Long vId, Duty duty);
-//
-//    ArrayList<Duty> getDuties(Long vId);
+    List<Availability> getAvailabilities(Long vId);
+
 }

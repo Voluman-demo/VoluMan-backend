@@ -32,7 +32,6 @@ public class Demand {
 
     @ManyToOne
     @JoinColumn(name = "action_id")
-    @JsonBackReference
     private Action action;
 
 

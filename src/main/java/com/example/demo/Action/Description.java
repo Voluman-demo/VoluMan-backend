@@ -15,9 +15,6 @@ import java.time.LocalDate;
 @Setter
 @Table(name = "descriptions")
 public class Description  extends Version {
-//    @EmbeddedId
-//    private ID descriptionId;
-
     @Column(name = "start_date")
     private LocalDate begin;
 

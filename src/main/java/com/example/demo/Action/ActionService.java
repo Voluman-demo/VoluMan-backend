@@ -139,94 +139,45 @@ public class ActionService implements Actions {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-
-
-    @Override
-    public Errors setStronglyMine(User user, Long actionId) {
-        Volunteer volunteer = user.getVolunteer();
+    public Errors setPref(Long actionId, String preference, Long volunteerId) {
+        Optional<Volunteer> volunteerOpt = volunteerRepository.findById(volunteerId);
         Optional<Action> actionOpt = actionRepository.findById(actionId);
-        if (actionOpt.isPresent()) {
+        if (actionOpt.isPresent() && volunteerOpt.isPresent()) {
+            Volunteer volunteer = volunteerOpt.get();
             Action action = actionOpt.get();
-            volunteer.getPreferences().getS().add(action);
+            switch (preference) {
+                case "S" -> volunteer.getPreferences().getS().add(action);
+                case "W" -> volunteer.getPreferences().getW().add(action);
+                case "R" -> volunteer.getPreferences().getR().add(action);
+                default -> volunteer.getPreferences().getU().add(action);
+            }
             return Errors.SUCCESS;
         }
         return Errors.FAILURE;
     }
 
-    @Override
-    public Errors setWeaklyMine(User user, Long actionId) {
-        Volunteer volunteer = user.getVolunteer();
-        Optional<Action> actionOpt = actionRepository.findById(actionId);
-        if (actionOpt.isPresent()) {
-            Action action = actionOpt.get();
-            volunteer.getPreferences().getW().add(action);
-            return Errors.SUCCESS;
-        }
-        return Errors.FAILURE;
-    }
+    public List<Description> getPref(String preference, Long volunteerId) {
+        Volunteer volunteer = volunteerRepository.getVolunteerByVolunteerId(volunteerId);
+        Lang lang = volunteer.getLanguage();
 
-    @Override
-    public Errors setRejected(User user, Long actionId) {
-        Volunteer volunteer = user.getVolunteer();
-        Optional<Action> actionOpt = actionRepository.findById(actionId);
-        if (actionOpt.isPresent()) {
-            Action action = actionOpt.get();
-            volunteer.getPreferences().getR().add(action);
-            return Errors.SUCCESS;
-        }
-        return Errors.FAILURE;
-    }
-
-    @Override
-    public Errors setUndecided(User user, Long actionId) {
-        Volunteer volunteer = user.getVolunteer();
-        Optional<Action> actionOpt = actionRepository.findById(actionId);
-        if (actionOpt.isPresent()) {
-            Action action = actionOpt.get();
-            volunteer.getPreferences().getU().add(action);
-            return Errors.SUCCESS;
-        }
-        return Errors.FAILURE;
-    }
-
-
-
-
-    @Override
-    public ArrayList<Description> getWeaklyMine(User user) {
-        Volunteer volunteer = volunteerRepository.getVolunteerByVolunteerId(user.getVolunteer().getVolunteerId());
-        return volunteer.getPreferences().getW().stream()
-                .map(action -> action.getDescr().get(Lang.UK))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(ArrayList::new)); // Explicitly create an ArrayList
-    }
-
-
-    @Override
-    public ArrayList<Description> getRejected(User user) {
-        Volunteer volunteer = volunteerRepository.getVolunteerByVolunteerId(user.getVolunteer().getVolunteerId());
-        return volunteer.getPreferences().getR().stream()
-                .map(action -> action.getDescr().get(Lang.UK))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(ArrayList::new)); // Create an ArrayList explicitly
-    }
-
-    @Override
-    public ArrayList<Description> getUndecided(User user) {
-        Volunteer volunteer = volunteerRepository.getVolunteerByVolunteerId(user.getVolunteer().getVolunteerId());
-        return volunteer.getPreferences().getU().stream()
-                .map(action -> action.getDescr().get(Lang.UK))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(ArrayList::new)); // Create an ArrayList explicitly
-    }
-
-    @Override
-    public ArrayList<Description> getStronglyMine(User user) {
-        Volunteer volunteer = volunteerRepository.getVolunteerByVolunteerId(user.getVolunteer().getVolunteerId());
-        return volunteer.getPreferences().getS().stream()
-                .map(action -> action.getDescr().get(Lang.UK))
-                .filter(Objects::nonNull)
-                .collect(Collectors.toCollection(ArrayList::new)); // Create an ArrayList explicitly
+        return switch (preference) {
+            case "S" -> volunteer.getPreferences().getS().stream()
+                    .map(action -> action.getDescr().get(lang))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toCollection(ArrayList::new));
+            case "W" -> volunteer.getPreferences().getW().stream()
+                    .map(action -> action.getDescr().get(lang))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toCollection(ArrayList::new));
+            case "R" -> volunteer.getPreferences().getR().stream()
+                    .map(action -> action.getDescr().get(lang))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toCollection(ArrayList::new));
+            default -> volunteer.getPreferences().getU().stream()
+                    .map(action -> action.getDescr().get(lang))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toCollection(ArrayList::new));
+        };
     }
 
 
@@ -254,4 +205,14 @@ public class ActionService implements Actions {
     public List<Action> getAllActions() {
         return actionRepository.findAll();
     }
+
+
+    public List<String> getAllHeadings(Lang language) {
+        return actionRepository.findAll().stream()
+                .map(action -> getDesc(action.getActionId(), language).getFullName())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new));
+    }
+
+
 }

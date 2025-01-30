@@ -182,7 +182,7 @@ class VolunteerServiceTest {
 
         when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.of(volunteer));
 
-        ArrayList<Availability> result = volunteerService.getAvailabilities(1L);
+        List<Availability> result = volunteerService.getAvailabilities(1L);
 
         assertEquals(availabilities, result);
         verify(volunteerRepository, times(1)).findById(1L);
@@ -192,7 +192,7 @@ class VolunteerServiceTest {
     void testGetAvailabilities_NotFound() {
         when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        ArrayList<Availability> result = volunteerService.getAvailabilities(1L);
+        List<Availability> result = volunteerService.getAvailabilities(1L);
 
         assertNull(result);
         verify(volunteerRepository, times(1)).findById(1L);

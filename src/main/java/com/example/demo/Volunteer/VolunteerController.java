@@ -1,6 +1,7 @@
 package com.example.demo.Volunteer;
 
 
+import com.example.demo.Action.Lang;
 import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
 import com.example.demo.Model.Errors;
@@ -43,7 +44,7 @@ public class VolunteerController {
                 .body(createdVolunteerId);
     }
 
-    @DeleteMapping("/{volunteerId}/delete")
+    @DeleteMapping("/{volunteerId}")
     public ResponseEntity<Void> deleteVolunteer(@PathVariable Long volunteerId, @RequestBody AdminRequest request) {
         if (!volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
@@ -62,8 +63,20 @@ public class VolunteerController {
         return volunteer != null ? ResponseEntity.ok(volunteer) : ResponseEntity.notFound().build();
     }
 
-    @PutMapping("/{volunteerId}/roles")
-    public ResponseEntity<Void> changeRole(@PathVariable Long volunteerId, @RequestBody AdminRequest request, @RequestParam String role) {
+
+    @GetMapping("/{volunteerId}/candidates")
+    public ResponseEntity<List<Volunteer>> getAllCandidates(@PathVariable Long volunteerId) {
+        if (!volunteerRepository.existsByVolunteerIdAndPosition(volunteerId, Position.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<Volunteer> volunteers = volunteerService.getAllCandidates();
+        return volunteers.isEmpty() ?  ResponseEntity.notFound().build() : ResponseEntity.ok(volunteers);
+    }
+
+
+    @PostMapping("/{volunteerId}/positions")
+    public ResponseEntity<Position> getPosition(@PathVariable Long volunteerId, @RequestBody AdminRequest request) {
         if (!volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
@@ -71,7 +84,23 @@ public class VolunteerController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        Errors result = volunteerService.assignPosition(volunteerId, Position.valueOf(role));
+        Position result = volunteerService.getPosition(volunteerId);
+        if (result != null) {
+            return ResponseEntity.ok(result);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{volunteerId}/positions")
+    public ResponseEntity<Void> assignPosition(@PathVariable Long volunteerId, @RequestBody AdminRequest request, @RequestParam String position) {
+        if (!volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        if (!volunteerRepository.existsById(volunteerId)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Errors result = volunteerService.assignPosition(volunteerId, Position.valueOf(position));
         if (result == Errors.SUCCESS) {
             logService.logVolunteer(null, EventType.UPDATE, "Promoted by admin with id: " + request.adminId());
             return ResponseEntity.ok().build();
@@ -88,6 +117,15 @@ public class VolunteerController {
         return ResponseEntity.notFound().build();
     }
 
+    @PutMapping("/{volunteerId}/limit-of-weekly-hours")
+    public ResponseEntity<Void> updateVolunteerDetails(@PathVariable Long volunteerId, @RequestBody Double weeklyHours) {
+        Errors result = volunteerService.editVolunteerWeeklyHours(volunteerId, weeklyHours);
+        if (result == Errors.SUCCESS) {
+            return ResponseEntity.ok().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @PutMapping("/{volunteerId}/availabilities")
     public ResponseEntity<Void> setAvailabilities(@PathVariable Long volunteerId, @RequestBody List<Availability> availabilities) {
         Errors result = volunteerService.setAvailabilities(volunteerId, availabilities);
@@ -97,25 +135,35 @@ public class VolunteerController {
         return ResponseEntity.notFound().build();
     }
 
-    /*@GetMapping("/{volunteerId}/availabilities")
+    @GetMapping("/{volunteerId}/availabilities")
     public ResponseEntity<List<Availability>> getAvailabilities(@PathVariable Long volunteerId) {
         List<Availability> availabilities = volunteerService.getAvailabilities(volunteerId);
         return availabilities != null ? ResponseEntity.ok(availabilities) : ResponseEntity.notFound().build();
-    }*/
+    }
 
-//    @PutMapping("/{volunteerId}/duties")
-//    public ResponseEntity<Void> assignDuty(@PathVariable Long volunteerId, @RequestBody Duty duty) {
-//        Errors result = volunteerService.assignDuty(volunteerId, duty);
-//        if (result == Errors.SUCCESS) {
-//            return ResponseEntity.ok().build();
-//        }
-//        return ResponseEntity.notFound().build();
-//    }
-//
-//    @GetMapping("/{volunteerId}/duties")
-//    public ResponseEntity<List<Duty>> getDuties(@PathVariable Long volunteerId) {
-//        List<Duty> duties = volunteerService.getDuties(volunteerId);
-//        return duties != null ? ResponseEntity.ok(duties) : ResponseEntity.notFound().build();
-//    }
+    @GetMapping("/{volunteerId}/limit-of-weekly-hours")
+    public ResponseEntity<Double> getLimitOfWeeklyHours(@PathVariable Long volunteerId) {
+        Double limitOfWeeklyHours = volunteerService.getLimitOfWeeklyHours(volunteerId);
+        return limitOfWeeklyHours != null ? ResponseEntity.ok(limitOfWeeklyHours) : ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("")
+    public ResponseEntity<List<PersonalData>> getPersData(@RequestParam Position position, @RequestBody AdminRequest request) {
+        if (!volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        List<PersonalData> personalDataList = volunteerService.getPersData(position);
+        return personalDataList != null ? ResponseEntity.ok(personalDataList) : ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/{volunteerId}/lang")
+    public ResponseEntity<Lang> getLang(@PathVariable Long volunteerId, @RequestBody AdminRequest request) {
+        if (!volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.RECRUITER)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        Lang language = volunteerService.getLang(volunteerId);
+            return language != null ? ResponseEntity.ok(language) : ResponseEntity.notFound().build();
+    }
+
 
 }

@@ -1,7 +1,7 @@
 package com.example.demo.Schedule;
 
 import com.example.demo.Action.ActionRepository;
-import com.example.demo.Action.Demand.Demand;
+import com.example.demo.Action.Demand.UpdateNeedDto;
 import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
 import com.example.demo.Model.Errors;
@@ -14,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/schedules")
@@ -22,12 +23,14 @@ public class ScheduleController {
     private final ScheduleService scheduleService;
     private final ActionRepository actionRepository;
     private final VolunteerRepository volunteerRepository;
+    private final ScheduleRepository scheduleRepository;
 
-    public ScheduleController(ScheduleService scheduleService, ActionRepository actionRepository, VolunteerRepository volunteerRepository, LogService logService) {
+    public ScheduleController(ScheduleService scheduleService, ActionRepository actionRepository, VolunteerRepository volunteerRepository, LogService logService, ScheduleRepository scheduleRepository) {
         this.scheduleService = scheduleService;
         this.actionRepository = actionRepository;
         this.volunteerRepository = volunteerRepository;
         this.logService = logService;
+        this.scheduleRepository = scheduleRepository;
     }
 
     @PostMapping("/generate")
@@ -72,43 +75,57 @@ public class ScheduleController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Schedule not found.");
     }
 
+    @GetMapping("/{scheduleId}")
+    public Optional<Schedule> getScheduleById(@PathVariable Long scheduleId) {
+        return scheduleRepository.findById(scheduleId);
+    }
+
     @GetMapping("/actions/{actionId}")
-    public ResponseEntity<?> getScheduleByAction(@PathVariable Long actionId) {
+    public ResponseEntity<?> getScheduleByAction(@PathVariable Long actionId, @RequestParam Long volunteerId) {
+        if (!volunteerRepository.existsByVolunteerIdAndPosition(volunteerId, Position.LEADER)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         if (!actionRepository.existsById(actionId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Action not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         List<Schedule> schedules = scheduleService.getActionSchedules(actionId);
         if (!schedules.isEmpty()) {
             return ResponseEntity.ok(schedules);
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Schedule not found for the action.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @GetMapping("/volunteers/{volunteerId}")
     public ResponseEntity<?> getScheduleByVolunteer(@PathVariable Long volunteerId) {
         if (!volunteerRepository.existsById(volunteerId)) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Volunteer not found.");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         List<Schedule> schedules = scheduleService.getVolunteerSchedules(volunteerId);
         if (!schedules.isEmpty()) {
             return ResponseEntity.ok(schedules);
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Schedule not found for the volunteer.");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @PutMapping("/actions/{actionId}/demands")
-    public ResponseEntity<String> updateDemand(
+    public ResponseEntity<String> updateNeed(
             @PathVariable Long actionId,
-            @RequestBody Demand updatedDemand
+            @RequestBody UpdateNeedDto updateNeedDto
     ) {
-        Errors result = scheduleService.updateDemand(actionId, updatedDemand);
-        if (result == Errors.SUCCESS) {
-            return ResponseEntity.ok("Demand updated successfully.");
-        } else if (result == Errors.CREATED) {
-            return ResponseEntity.status(HttpStatus.CREATED).body("New demand created successfully.");
+        if (!volunteerRepository.existsByVolunteerIdAndPosition(updateNeedDto.getVolunteerId(), Position.LEADER)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Action not found.");
+
+        Errors result = scheduleService.updateDemand(actionId, updateNeedDto);
+        if (result == Errors.SUCCESS) {
+            return ResponseEntity.ok().build();
+        } else if (result == Errors.CREATED) {
+            return ResponseEntity.status(HttpStatus.CREATED).build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
+
 }

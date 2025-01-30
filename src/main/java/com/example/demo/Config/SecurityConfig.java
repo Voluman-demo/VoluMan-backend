@@ -37,7 +37,6 @@ public class SecurityConfig {
                         .requestMatchers("/volunteers/**").permitAll()
                         .requestMatchers("/actions/**").permitAll()
                         .requestMatchers("/schedules/**").permitAll()
-                        .requestMatchers("/rpc/**").permitAll()
                         .anyRequest().authenticated())
         ;
         return http.build();

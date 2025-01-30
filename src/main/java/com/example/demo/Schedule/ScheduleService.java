@@ -7,6 +7,7 @@ import com.example.demo.Action.Demand.DemandInterval.DemandInterval;
 import com.example.demo.Action.Demand.DemandInterval.DemandIntervalRepository;
 import com.example.demo.Action.Demand.DemandRepository;
 import com.example.demo.Action.Demand.DemandService;
+import com.example.demo.Action.Demand.UpdateNeedDto;
 import com.example.demo.Model.Errors;
 
 import com.example.demo.Schedule.ScheduleDto.ModificationType;
@@ -216,33 +217,43 @@ public class ScheduleService implements Schedules {
 
 
     @Override
-    public Errors updateDemand(Long actionId, Demand updatedDemand) {
+    public Errors updateDemand(Long actionId, UpdateNeedDto updateNeedDto) {
         Optional<Action> actionOpt = actionRepository.findById(actionId);
         if (actionOpt.isEmpty()) {
             return Errors.NOT_FOUND;
         }
 
         Action action = actionOpt.get();
+        Demand updatedDemand = updateNeedDto.getDemand();
 
         // Znajdź istniejące zapotrzebowanie powiązane z akcją
         Optional<Demand> existingDemandOpt = demandRepository.findByActionAndDate(action, updatedDemand.getDate());
         if (existingDemandOpt.isPresent()) {
             Demand existingDemand = existingDemandOpt.get();
 
-            // Usuń stare interwały zapotrzebowania
-            existingDemand.getDemandIntervals().clear();
+            for (DemandInterval updatedInterval : updatedDemand.getDemandIntervals()) {
+                // Znajdź pasujący interwał w istniejącym zapotrzebowaniu
+                Optional<DemandInterval> matchingIntervalOpt = existingDemand.getDemandIntervals().stream()
+                        .filter(interval -> interval.getStartTime().equals(updatedInterval.getStartTime())
+                                && interval.getEndTime().equals(updatedInterval.getEndTime()))
+                        .findFirst();
 
-            // Zaktualizuj listę interwałów zapotrzebowania
-            for (DemandInterval newInterval : updatedDemand.getDemandIntervals()) {
-                newInterval.setDemand(existingDemand);
-                existingDemand.getDemandIntervals().add(newInterval);
+                if (matchingIntervalOpt.isPresent()) {
+                    // Aktualizuj minimalne i maksymalne potrzeby w istniejącym interwale
+                    DemandInterval matchingInterval = matchingIntervalOpt.get();
+                    matchingInterval.setNeedMin(updatedInterval.getNeedMin());
+                    matchingInterval.setNeedMax(updatedInterval.getNeedMax());
+                } else {
+                    // Dodaj nowy interwał, jeśli nie istnieje
+                    updatedInterval.setDemand(existingDemand);
+                    existingDemand.getDemandIntervals().add(updatedInterval);
+                }
             }
 
             // Zapisz zaktualizowane zapotrzebowanie
             demandRepository.save(existingDemand);
             return Errors.SUCCESS;
         } else {
-            // Jeśli zapotrzebowanie nie istnieje, dodaj je jako nowe
             updatedDemand.setAction(action);
             demandRepository.save(updatedDemand);
             return Errors.CREATED;

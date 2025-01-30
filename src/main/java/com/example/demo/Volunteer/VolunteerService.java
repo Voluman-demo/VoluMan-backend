@@ -2,12 +2,14 @@ package com.example.demo.Volunteer;
 
 import com.example.demo.Action.Action;
 import com.example.demo.Action.ActionRepository;
+import com.example.demo.Action.Lang;
 import com.example.demo.Model.Errors;
 
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Position.PositionService;
 import com.example.demo.Volunteer.Preferences.Preferences;
+import com.example.demo.Volunteer.VolunteerDto.AdminRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -49,10 +51,11 @@ public class VolunteerService implements Volunteers {
             vol.setDateOfBirth(request.getDateOfBirth());
             vol.setAddress(request.getAddress());
             vol.setSex(request.getSex());
+            vol.setPosition(request.getPosition());
             volunteerRepository.save(vol);
             return Errors.SUCCESS;
         }
-        return Errors.NOT_FOUND;
+        return Errors.FAILURE;
     }
 
     @Override
@@ -129,6 +132,13 @@ public class VolunteerService implements Volunteers {
 //    }
 
     public Long createAndEditVolunteer(VolunteerRequest request) {
+        if (request.getEmail() == null || request.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be null or empty.");
+        }
+
+        if (volunteerRepository.existsByEmail(request.getEmail())) {
+            throw new IllegalArgumentException("Email already exists: " + request.getEmail());
+        }
         Long newVolunteerId = createVolunteer();
 
         Errors result = editVolunteer(newVolunteerId, request);
@@ -142,4 +152,63 @@ public class VolunteerService implements Volunteers {
         return volunteerRepository.existsByEmail(email);
     }
 
+    public List<Availability> getAvailabilities(Long volunteerId) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+        if (volunteer.isPresent()) {
+            Volunteer vol = volunteer.get();
+            return vol.getAvailabilities();
+        }
+        return null;
+    }
+
+    public Double getLimitOfWeeklyHours(Long volunteerId) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+        if (volunteer.isPresent()) {
+            Volunteer vol = volunteer.get();
+            return vol.getLimitOfWeeklyHours();
+        }
+        return null;
+    }
+
+    public List<PersonalData> getPersData(Position position) {
+        List<Volunteer> volunteers = volunteerRepository.findAllByPosition(position);
+        return volunteers.stream()
+                .map(volunteer -> {
+                    PersonalData data = new PersonalData();
+                    data.setFirstName(volunteer.getFirstName());
+                    data.setLastName(volunteer.getLastName());
+                    data.setEmail(volunteer.getEmail());
+                    data.setPhone(volunteer.getPhone());
+                    data.setDateOfBirth(volunteer.getDateOfBirth());
+                    data.setAddress(volunteer.getAddress());
+                    data.setSex(volunteer.getSex());
+                    return data;
+                })
+                .toList();
+    }
+
+    public Lang getLang(Long volunteerId) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+        if (volunteer.isPresent()) {
+            Volunteer vol = volunteer.get();
+            return vol.getLanguage();
+        }
+        return null;
+    }
+
+    public Errors editVolunteerWeeklyHours(Long volunteerId, Double weeklyHours) {
+        Optional<Volunteer> volunteer = volunteerRepository.findById(volunteerId);
+        if (volunteer.isPresent()) {
+            Volunteer vol = volunteer.get();
+            vol.setLimitOfWeeklyHours(weeklyHours);
+
+            volunteerRepository.save(vol);
+            return Errors.SUCCESS;
+        }
+        return Errors.FAILURE;
+    }
+
+    public List<Volunteer> getAllCandidates() {
+        return volunteerRepository.findAllByPosition(Position.CANDIDATE);
+    }
 }

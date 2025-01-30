@@ -5,6 +5,7 @@ import com.example.demo.Volunteer.User.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 public interface Actions {
     LocalDate noDate = LocalDate.of(1970, 1, 1);
@@ -31,21 +32,9 @@ public interface Actions {
 
     ArrayList<Description> getAllDesc(Lang l);
 
-    Errors setStronglyMine(User u, Long aId);
+    Errors setPref(Long aId, String pref, Long volId);
 
-    Errors setWeaklyMine(User u, Long aId);
-
-    Errors setRejected(User u, Long aId);
-
-    Errors setUndecided(User u, Long aId);
-
-    ArrayList<Description> getStronglyMine(User u);
-
-    ArrayList<Description> getWeaklyMine(User u);
-
-    ArrayList<Description> getRejected(User u);
-
-    ArrayList<Description> getUndecided(User user);
+    List<Description> getPref(String pref , Long volId);
 
     Errors isError();
 }

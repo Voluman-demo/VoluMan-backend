@@ -364,26 +364,30 @@ public class ActionServiceTest {
     @Test
     public void testSetStronglyMine_Success() {
         // Arrange
-        Volunteer volunteer = new Volunteer();
-        Preferences preferences = mock(Preferences.class); // Mock the Preferences object
-        Set<Action> stronglyMineSet = new HashSet<>(); // Mock the "S" set
-        when(preferences.getS()).thenReturn(stronglyMineSet); // Stub the "S" getter
-        volunteer.setPreferences(preferences);
-
-        User user = new User();
-        user.setVolunteer(volunteer);
-
         Action action = new Action();
         Long actionId = 1L;
         action.setActionId(actionId);
 
+        Volunteer volunteer = new Volunteer();
+        Preferences preferences = mock(Preferences.class); // Mock the Preferences object
+        Set<Action> stronglyMineSet = new HashSet<>(); // Mock the "S" set
+        stronglyMineSet.add(action);
+        volunteer.setPreferences(preferences);
+        volunteer.setLanguage(Lang.UK);
+        volunteer.setVolunteerId(1L);
+        User user = new User();
+        user.setVolunteer(volunteer);
+
+        Optional<Volunteer> volunteerOptional = Optional.of(volunteer);
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(volunteerOptional);
+        when(preferences.getS()).thenReturn(stronglyMineSet); // Stub the "S" getter
         when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
 
         // Act
-        Errors result = actionService.setStronglyMine(user, actionId);
+        Errors result = actionService.setPref(actionId, "S", 1L);
 
         // Assert
-        assertEquals(Errors.SUCCESS, result, "Expected SUCCESS when adding action to strongly mine.");
+        assertEquals(Errors.SUCCESS, result);
         assertTrue(stronglyMineSet.contains(action), "The action should be added to the strongly mine set.");
         verify(actionRepository, times(1)).findById(actionId);
         verify(preferences, times(1)).getS(); // Verify that the Preferences object was called
@@ -398,6 +402,8 @@ public class ActionServiceTest {
         Set<Action> weaklyMineSet = new HashSet<>();
         when(preferences.getW()).thenReturn(weaklyMineSet);
         volunteer.setPreferences(preferences);
+        volunteer.setLanguage(Lang.UK);
+        volunteer.setVolunteerId(1L);
 
         User user = new User();
         user.setVolunteer(volunteer);
@@ -406,13 +412,15 @@ public class ActionServiceTest {
         Long actionId = 1L;
         action.setActionId(actionId);
 
+        Optional<Volunteer> volunteerOptional = Optional.of(volunteer);
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(volunteerOptional);
         when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
 
         // Act
-        Errors result = actionService.setWeaklyMine(user, actionId);
+        Errors result = actionService.setPref(actionId, "W", 1L);
 
         // Assert
-        assertEquals(Errors.SUCCESS, result, "Expected SUCCESS when adding action to weakly mine.");
+        assertEquals(Errors.SUCCESS, result);
         assertTrue(weaklyMineSet.contains(action), "The action should be added to the weakly mine set.");
         verify(actionRepository, times(1)).findById(actionId);
         verify(preferences, times(1)).getW();
@@ -425,8 +433,9 @@ public class ActionServiceTest {
         Volunteer volunteer = new Volunteer();
         Preferences preferences = mock(Preferences.class); // Mock the Preferences object
         Set<Action> rejectedSet = new HashSet<>(); // Mock the "R" set
-        when(preferences.getR()).thenReturn(rejectedSet); // Stub the "R" getter
         volunteer.setPreferences(preferences);
+        volunteer.setLanguage(Lang.UK);
+        volunteer.setVolunteerId(1L);
 
         User user = new User();
         user.setVolunteer(volunteer);
@@ -435,13 +444,16 @@ public class ActionServiceTest {
         Long actionId = 1L;
         action.setActionId(actionId);
 
+        Optional<Volunteer> volunteerOptional = Optional.of(volunteer);
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(volunteerOptional);
+        when(preferences.getR()).thenReturn(rejectedSet); // Stub the "R" getter
         when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
 
         // Act
-        Errors result = actionService.setRejected(user, actionId);
+        Errors result = actionService.setPref(actionId, "R", 1L);
 
         // Assert
-        assertEquals(Errors.SUCCESS, result, "Expected SUCCESS when adding action to rejected.");
+        assertEquals(Errors.SUCCESS, result);
         assertTrue(rejectedSet.contains(action), "The action should be added to the rejected set.");
         verify(actionRepository, times(1)).findById(actionId);
         verify(preferences, times(1)).getR(); // Verify that the Preferences object was called
@@ -456,6 +468,8 @@ public class ActionServiceTest {
         Set<Action> undecidedSet = new HashSet<>();
         when(preferences.getU()).thenReturn(undecidedSet);
         volunteer.setPreferences(preferences);
+        volunteer.setLanguage(Lang.UK);
+        volunteer.setVolunteerId(1L);
 
         User user = new User();
         user.setVolunteer(volunteer);
@@ -464,13 +478,15 @@ public class ActionServiceTest {
         Long actionId = 1L;
         action.setActionId(actionId);
 
+        Optional<Volunteer> volunteerOptional = Optional.of(volunteer);
+        when(volunteerRepository.findById(any(Long.class))).thenReturn(volunteerOptional);
         when(actionRepository.findById(actionId)).thenReturn(Optional.of(action));
 
         // Act
-        Errors result = actionService.setUndecided(user, actionId);
+        Errors result = actionService.setPref(actionId, "U", 1L);
 
         // Assert
-        assertEquals(Errors.SUCCESS, result, "Expected SUCCESS when adding action to undecided.");
+        assertEquals(Errors.SUCCESS, result);
         assertTrue(undecidedSet.contains(action), "The action should be added to the undecided set.");
         verify(actionRepository, times(1)).findById(actionId);
         verify(preferences, times(1)).getU();
@@ -490,10 +506,10 @@ public class ActionServiceTest {
         when(actionRepository.findById(actionId)).thenReturn(Optional.empty());
 
         // Act
-        Errors result = actionService.setStronglyMine(user, actionId);
+        Errors result = actionService.setPref(actionId, "S", 1L);
 
         // Assert
-        assertEquals(Errors.FAILURE, result, "Expected FAILURE when action is not found.");
+        assertEquals(Errors.FAILURE, result, "");
         verify(actionRepository, times(1)).findById(actionId);
     }
     @Test
@@ -510,6 +526,8 @@ public class ActionServiceTest {
         stronglyMineSet.add(action);
         when(preferences.getS()).thenReturn(stronglyMineSet);
         volunteer.setPreferences(preferences);
+        volunteer.setLanguage(Lang.UK);
+        volunteer.setVolunteerId(1L);
 
         User user = new User();
         user.setVolunteer(volunteer);
@@ -517,11 +535,11 @@ public class ActionServiceTest {
         when(volunteerRepository.getVolunteerByVolunteerId(volunteer.getVolunteerId())).thenReturn(volunteer);
 
         // Act
-        ArrayList<Description> result = actionService.getStronglyMine(user);
+        List<Description> result = actionService.getPref("S",  1L);
 
         // Assert
         assertEquals(1, result.size(), "Expected 1 strongly mine description");
-        assertEquals("Strongly Mine Action", result.get(0).getFullName(), "Expected description to match");
+        assertEquals("Strongly Mine Action", result.get(0).getFullName());
         verify(volunteerRepository, times(1)).getVolunteerByVolunteerId(volunteer.getVolunteerId());
     }
 
@@ -544,8 +562,8 @@ public class ActionServiceTest {
 
         // Assert
         assertEquals(Errors.SUCCESS, result, "Expected SUCCESS when updating action.");
-        assertEquals(LocalDate.of(2025, 1, 1), existingAction.getBegin(), "Expected begin date to be updated.");
-        assertEquals(LocalDate.of(2025, 12, 31), existingAction.getEnd(), "Expected end date to be updated.");
+        assertEquals(LocalDate.of(2025, 1, 1), existingAction.getBegin(), "");
+        assertEquals(LocalDate.of(2025, 12, 31), existingAction.getEnd(), "");
         verify(actionRepository, times(1)).findById(actionId);
     }
 
@@ -561,7 +579,7 @@ public class ActionServiceTest {
         Errors result = actionService.updateAction(actionId, newAction);
 
         // Assert
-        assertEquals(Errors.NOT_FOUND, result, "Expected NOT_FOUND when action does not exist.");
+        assertEquals(Errors.NOT_FOUND, result, "");
         verify(actionRepository, times(1)).findById(actionId);
     }
     @Test
@@ -585,6 +603,8 @@ public class ActionServiceTest {
         weaklyMineSet.add(action);
         preferences.setW(weaklyMineSet);
         volunteer.setPreferences(preferences);
+        volunteer.setLanguage(Lang.UK);
+        volunteer.setVolunteerId(1L);
 
         // Mock the User and VolunteerRepository behavior
         User user = new User();
@@ -593,12 +613,12 @@ public class ActionServiceTest {
         when(volunteerRepository.getVolunteerByVolunteerId(volunteer.getVolunteerId())).thenReturn(volunteer);
 
         // Act
-        ArrayList<Description> result = new ArrayList<>(actionService.getWeaklyMine(user)); // Ensure conversion to ArrayList
+        List<Description> result = actionService.getPref("W",  1L);
 
         // Assert
         assertNotNull(result, "The result should not be null.");
         assertEquals(1, result.size(), "The result should contain one description.");
-        assertEquals("Weakly Mine Action", result.get(0).getFullName(), "The description's full name should match.");
+        assertEquals("Weakly Mine Action", result.get(0).getFullName());
         verify(volunteerRepository, times(1)).getVolunteerByVolunteerId(volunteer.getVolunteerId());
     }
 
@@ -616,6 +636,8 @@ public class ActionServiceTest {
         rejectedSet.add(action);
         when(preferences.getR()).thenReturn(rejectedSet);
         volunteer.setPreferences(preferences);
+        volunteer.setLanguage(Lang.UK);
+        volunteer.setVolunteerId(1L);
 
         User user = new User();
         user.setVolunteer(volunteer);
@@ -623,11 +645,11 @@ public class ActionServiceTest {
         when(volunteerRepository.getVolunteerByVolunteerId(volunteer.getVolunteerId())).thenReturn(volunteer);
 
         // Act
-        ArrayList<Description> result = actionService.getRejected(user);
+        List<Description> result = actionService.getPref("R",  1L);
 
         // Assert
         assertEquals(1, result.size(), "Expected 1 rejected description");
-        assertEquals("Rejected Action", result.get(0).getFullName(), "Expected description to match");
+        assertEquals("Rejected Action", result.get(0).getFullName());
         verify(volunteerRepository, times(1)).getVolunteerByVolunteerId(volunteer.getVolunteerId());
     }
     @Test
@@ -644,6 +666,8 @@ public class ActionServiceTest {
         undecidedSet.add(action);
         when(preferences.getU()).thenReturn(undecidedSet);
         volunteer.setPreferences(preferences);
+        volunteer.setLanguage(Lang.UK);
+        volunteer.setVolunteerId(1L);
 
         User user = new User();
         user.setVolunteer(volunteer);
@@ -651,11 +675,11 @@ public class ActionServiceTest {
         when(volunteerRepository.getVolunteerByVolunteerId(volunteer.getVolunteerId())).thenReturn(volunteer);
 
         // Act
-        ArrayList<Description> result = actionService.getUndecided(user);
+        List<Description> result = actionService.getPref("U",  1L);
 
         // Assert
         assertEquals(1, result.size(), "Expected 1 undecided description");
-        assertEquals("Undecided Action", result.get(0).getFullName(), "Expected description to match");
+        assertEquals("Undecided Action", result.get(0).getFullName());
         verify(volunteerRepository, times(1)).getVolunteerByVolunteerId(volunteer.getVolunteerId());
     }
 

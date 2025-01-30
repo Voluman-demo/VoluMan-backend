@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -149,8 +150,8 @@ public class ActionControllerTest {
 
         ResponseEntity<String> response = actionController.changeDesc(1L, Lang.EN, newDescription);
 
+        assertEquals(null, response.getBody());
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Description updated successfully.", response.getBody());
     }
 
     @Test
@@ -190,7 +191,7 @@ public class ActionControllerTest {
         ResponseEntity<String> response = actionController.changeDesc(1L, Lang.EN, newDescription);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Description updated successfully.", response.getBody());
+        assertEquals(null, response.getBody());
         verify(actionService).setDesc(1L, Lang.EN, newDescription);
     }
 
@@ -212,7 +213,7 @@ public class ActionControllerTest {
         ResponseEntity<String> response = actionController.setBegin(1L, LocalDate.of(2025, 1, 1));
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Begin date set successfully.", response.getBody());
+        assertEquals(null, response.getBody());
         verify(actionService).setBeg(1L, LocalDate.of(2025, 1, 1));
     }
 
@@ -233,7 +234,7 @@ public class ActionControllerTest {
         ResponseEntity<String> response = actionController.setEnd(1L, LocalDate.of(2025, 12, 31));
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("End date set successfully.", response.getBody());
+        assertEquals(null, response.getBody());
         verify(actionService).setEnd(1L, LocalDate.of(2025, 12, 31));
     }
 
@@ -248,357 +249,146 @@ public class ActionControllerTest {
     }
     @Test
     public void testAddStronglyMine_ReturnsOk_WhenPreferenceAddedSuccessfully() {
-        User user = new User();
-        when(actionService.setStronglyMine(user, 1L)).thenReturn(Errors.SUCCESS);
+        when(actionService.setPref(1L, "S", 1L)).thenReturn(Errors.SUCCESS);
 
-        ResponseEntity<String> response = actionController.addStronglyMine(1L, user);
+        ResponseEntity<Errors> response = actionController.setPref(1L, "S", 1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Added to Strongly Mine successfully.", response.getBody());
-        verify(actionService).setStronglyMine(user, 1L);
+        assertEquals(null, response.getBody());
+        verify(actionService).setPref(1L, "S", 1L);;
     }
 
     @Test
     public void testAddStronglyMine_ReturnsInternalServerError_WhenPreferenceAdditionFails() {
-        User user = new User();
-        when(actionService.setStronglyMine(user, 1L)).thenReturn(Errors.FAILURE);
+        when(actionService.setPref(1L, "S", 1L)).thenReturn(Errors.FAILURE);
 
-        ResponseEntity<String> response = actionController.addStronglyMine(1L, user);
+        ResponseEntity<Errors> response = actionController.setPref(1L, "S", 1L);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Failed to add to Strongly Mine.", response.getBody());
-        verify(actionService).setStronglyMine(user, 1L);
+        assertEquals(null, response.getBody());
+        verify(actionService).setPref(1L, "S", 1L);
     }
 
     @Test
     public void testAddWeaklyMine_ReturnsOk_WhenPreferenceAddedSuccessfully() {
-        User user = new User();
-        when(actionService.setWeaklyMine(user, 1L)).thenReturn(Errors.SUCCESS);
+        when(actionService.setPref(1L, "W", 1L)).thenReturn(Errors.SUCCESS);
 
-        ResponseEntity<String> response = actionController.addWeaklyMine(1L, user);
+        ResponseEntity<Errors> response = actionController.setPref(1L, "W", 1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Added to Weakly Mine successfully.", response.getBody());
-        verify(actionService).setWeaklyMine(user, 1L);
+        assertEquals(null, response.getBody());
+        verify(actionService).setPref(1L, "W", 1L);
     }
 
     @Test
     public void testAddWeaklyMine_ReturnsInternalServerError_WhenPreferenceAdditionFails() {
-        User user = new User();
-        when(actionService.setWeaklyMine(user, 1L)).thenReturn(Errors.FAILURE);
+        when(actionService.setPref(1L, "W", 1L)).thenReturn(Errors.FAILURE);
 
-        ResponseEntity<String> response = actionController.addWeaklyMine(1L, user);
+        ResponseEntity<Errors> response = actionController.setPref(1L, "W", 1L);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Failed to add to Weakly Mine.", response.getBody());
-        verify(actionService).setWeaklyMine(user, 1L);
+        assertEquals(null, response.getBody());
+        verify(actionService).setPref(1L, "W", 1L);
     }
 
     @Test
     public void testAddRejected_ReturnsOk_WhenPreferenceAddedSuccessfully() {
-        User user = new User();
-        when(actionService.setRejected(user, 1L)).thenReturn(Errors.SUCCESS);
+        when(actionService.setPref(1L, "R", 1L)).thenReturn(Errors.SUCCESS);
 
-        ResponseEntity<String> response = actionController.addRejected(1L, user);
+        ResponseEntity<Errors> response = actionController.setPref(1L, "R", 1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Added to Rejected successfully.", response.getBody());
-        verify(actionService).setRejected(user, 1L);
+        assertEquals(null, response.getBody());
+        verify(actionService).setPref(1L, "R", 1L);
     }
 
     @Test
     public void testAddRejected_ReturnsInternalServerError_WhenPreferenceAdditionFails() {
-        User user = new User();
-        when(actionService.setRejected(user, 1L)).thenReturn(Errors.FAILURE);
+        when(actionService.setPref(1L, "R", 1L)).thenReturn(Errors.FAILURE);
 
-        ResponseEntity<String> response = actionController.addRejected(1L, user);
+        ResponseEntity<Errors> response = actionController.setPref(1L, "R", 1L);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Failed to add to Rejected.", response.getBody());
-        verify(actionService).setRejected(user, 1L);
+        assertEquals(null, response.getBody());
+        verify(actionService).setPref(1L, "R", 1L);
     }
 
     @Test
     public void testAddUndecided_ReturnsOk_WhenPreferenceAddedSuccessfully() {
-        User user = new User();
-        when(actionService.setUndecided(user, 1L)).thenReturn(Errors.SUCCESS);
+        when(actionService.setPref(1L, "U", 1L)).thenReturn(Errors.SUCCESS);
 
-        ResponseEntity<String> response = actionController.addUndecided(1L, user);
+        ResponseEntity<Errors> response = actionController.setPref(1L, "U", 1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("Added to Undecided successfully.", response.getBody());
-        verify(actionService).setUndecided(user, 1L);
+        assertEquals(null, response.getBody());
+        verify(actionService).setPref(1L, "U", 1L);
     }
 
     @Test
     public void testAddUndecided_ReturnsInternalServerError_WhenPreferenceAdditionFails() {
-        User user = new User();
-        when(actionService.setUndecided(user, 1L)).thenReturn(Errors.FAILURE);
+        when(actionService.setPref(1L, "U", 1L)).thenReturn(Errors.FAILURE);
 
-        ResponseEntity<String> response = actionController.addUndecided(1L, user);
+        ResponseEntity<Errors> response = actionController.setPref(1L, "U", 1L);
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Failed to add to Undecided.", response.getBody());
-        verify(actionService).setUndecided(user, 1L);
+        assertEquals(null, response.getBody());
+        verify(actionService).setPref(1L, "U", 1L);
     }
 
     @Test
     public void testGetStronglyMine_ReturnsOk_WhenPreferencesExist() {
-        User user = new User();
         ArrayList<Description> descriptions = new ArrayList<>();
         descriptions.add(new Description());
 
-        when(actionService.getStronglyMine(user)).thenReturn(descriptions);
+        when(actionService.getPref("S", 1L)).thenReturn(descriptions);
 
-        ResponseEntity<ArrayList<Description>> response = actionController.getStronglyMine(user);
+        ResponseEntity<List<Description>> response = actionController.getPref("S", 1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(descriptions, response.getBody());
-        verify(actionService).getStronglyMine(user);
+        verify(actionService).getPref("S", 1L);
     }
 
     @Test
     public void testGetWeaklyMine_ReturnsOk_WhenPreferencesExist() {
-        User user = new User();
         ArrayList<Description> descriptions = new ArrayList<>();
         descriptions.add(new Description());
 
-        when(actionService.getWeaklyMine(user)).thenReturn(descriptions);
+        when(actionService.getPref("W", 1L)).thenReturn(descriptions);
 
-        ResponseEntity<ArrayList<Description>> response = actionController.getWeaklyMine(user);
+        ResponseEntity<List<Description>> response = actionController.getPref("W", 1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(descriptions, response.getBody());
-        verify(actionService).getWeaklyMine(user);
+        verify(actionService).getPref("W", 1L);
     }
 
     @Test
     public void testGetRejected_ReturnsOk_WhenPreferencesExist() {
-        User user = new User();
         ArrayList<Description> descriptions = new ArrayList<>();
         descriptions.add(new Description());
 
-        when(actionService.getRejected(user)).thenReturn(descriptions);
+        when(actionService.getPref("R", 1L)).thenReturn(descriptions);
 
-        ResponseEntity<ArrayList<Description>> response = actionController.getRejected(user);
+        ResponseEntity<List<Description>> response = actionController.getPref("R", 1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(descriptions, response.getBody());
-        verify(actionService).getRejected(user);
+        verify(actionService).getPref("R", 1L);
     }
 
     @Test
     public void testGetUndecided_ReturnsOk_WhenPreferencesExist() {
-        User user = new User();
         ArrayList<Description> descriptions = new ArrayList<>();
         descriptions.add(new Description());
 
-        when(actionService.getUndecided(user)).thenReturn(descriptions);
+        when(actionService.getPref("U", 1L)).thenReturn(descriptions);
 
-        ResponseEntity<ArrayList<Description>> response = actionController.getUndecided(user);
+        ResponseEntity<List<Description>> response = actionController.getPref("U", 1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(descriptions, response.getBody());
-        verify(actionService).getUndecided(user);
+        verify(actionService).getPref("U", 1L);
     }
 
 }
-
-//
-//public class ActionControllerTest {
-//
-//    @InjectMocks
-//    private ActionController actionController;
-//
-//    @Mock
-//    private ActionService actionService;
-//
-//    @Mock
-//    private ActionRepository actionRepository;
-//
-//    @Mock
-//    private VolunteerRepository volunteerRepository;
-//
-//    @BeforeEach
-//    public void setUp() {
-//        MockitoAnnotations.openMocks(this);
-//    }
-//
-//    //TODO DODAĆ TESTY DO HEADING
-//
-//    @Test
-//    public void testGetActions_ReturnsOk_WhenActionsListExists() {
-//        List<Action> actions = List.of(new Action());
-//        when(actionService.getAllActions()).thenReturn(actions);
-//
-//        ResponseEntity<List<Action>> response = actionController.getActions();
-//
-//        assertEquals(HttpStatus.OK, response.getStatusCode());
-//        assertEquals(actions, response.getBody());
-//    }
-//
-//    @Test
-//    public void testGetAction_ReturnsOk_WhenActionExists() {
-//        Action action = new Action();
-//        when(actionService.getActionById(1L)).thenReturn(Optional.of(action));
-//
-//        ResponseEntity<Action> response = actionController.getAction(1L);
-//
-//        assertEquals(HttpStatus.OK, response.getStatusCode());
-//        assertEquals(action, response.getBody());
-//    }
-//
-//    @Test
-//    public void testGetAction_ReturnsNotFound_WhenActionNotExist() {
-//        when(actionService.getActionById(1L)).thenReturn(Optional.empty());
-//
-//        ResponseEntity<Action> response = actionController.getAction(1L);
-//
-//        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-//    }
-//
-//    @Test
-//    public void testGetActionDesc_ReturnsOk_WhenActionDescExists() {
-//        String description = "Description";
-//        when(actionService.getActionDescription(1L)).thenReturn(Optional.of(description));
-//
-//        ResponseEntity<DescriptionResponse> response = actionController.getActionDesc(1L);
-//
-//        assertEquals(HttpStatus.OK, response.getStatusCode());
-//        assertEquals(description, Objects.requireNonNull(response.getBody()).description());
-//    }
-//
-//    @Test
-//    public void testGetActionDesc_ReturnsNotFound_WhenActionDescNotExist() {
-//        when(actionService.getActionDescription(1L)).thenReturn(Optional.empty());
-//
-//        ResponseEntity<DescriptionResponse> response = actionController.getActionDesc(1L);
-//
-//        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-//    }
-//
-////    @TestonStatus.OPEN,
-////                LocalDate.now(),
-////                LocalDate.now().plusDays(1),
-////                2L
-////        );
-////        Action action = new Action();
-////        when(actionService.get
-//    ////    public void testAddAction_ReturnsCreated_WhenSuccess() {
-//    ////        AddActionRequest request = new AddActionRequest(
-//    ////                1L,
-//    ////                "Heading",
-//    ////                "Description",
-//    ////                ActiLeader(2L)).thenReturn(Optional.of(new Volunteer()));
-////        when(actionService.createAndAddAction(request)).thenReturn(action);
-////
-////        ResponseEntity<?> response = actionController.addAction(request);
-////
-////        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-////        assertEquals(action, response.getBody());
-////    }
-//
-////    @Test
-////    public void testAddAction_ReturnsForbidden_WhenLeaderNotFound() {
-////        AddActionRequest request = new AddActionRequest(
-////                1L,
-////                "Heading",
-////                "Description",
-////                ActionStatus.OPEN,
-////                LocalDate.now(),
-////                LocalDate.now().plusDays(1),
-////                2L
-////        );
-////        when(actionService.getLeader(2L)).thenReturn(Optional.empty());
-////
-////        ResponseEntity<?> response = actionController.addAction(request);
-////
-////        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-////    }
-//
-////    @Test
-////    public void testAddAction_ReturnsBadRequest_WhenExceptionThrown() {
-////        AddActionRequest request = new AddActionRequest(
-////                1L,
-////                "Heading",
-////                "Description",
-////                ActionStatus.OPEN,
-////                LocalDate.now(),
-////                LocalDate.now().plusDays(1),
-////                2L
-////        );
-////        when(actionService.getLeader(2L)).thenReturn(Optional.of(new Volunteer()));
-////        when(actionService.createAndAddAction(request)).thenThrow(new RuntimeException("Some error message"));
-////
-////        ResponseEntity<?> response = actionController.addAction(request);
-////
-////        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-////        assertEquals("Some error message", response.getBody());
-////    }
-//
-////    @Test
-////    public void testChangeDescription_ReturnsOk_WhenSuccess() {
-////        ChangeDescriptionRequest request = new ChangeDescriptionRequest(1L, "New Description");
-////        when(volunteerRepository.existsByVolunteerIdAndRole(1L, VolunteerRole.LEADER)).thenReturn(true);
-////        when(actionRepository.existsById(1L)).thenReturn(true);
-////
-////        ResponseEntity<?> response = actionController.changeDescription(1L, request);
-////
-////        assertEquals(HttpStatus.OK, response.getStatusCode());
-////        verify(actionService).changeDescription(1L, "New Description");
-////    }
-//
-//    @Test
-//    public void testChangeDescription_ReturnsForbidden_WhenLeaderNotFound() {
-//        ChangeDescriptionRequest request = new ChangeDescriptionRequest(1L, "New Description");
-//        when(volunteerRepository.existsByVolunteerIdAndRole(1L, VolunteerRole.LEADER)).thenReturn(false);
-//
-//        ResponseEntity<?> response = actionController.changeDescription(1L, request);
-//
-//        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-//    }
-//
-//    @Test
-//    public void testChangeDescription_ReturnsNotFound_WhenActionNotFound() {
-//        ChangeDescriptionRequest request = new ChangeDescriptionRequest(1L, "New Description");
-//        when(volunteerRepository.existsByVolunteerIdAndRole(1L, VolunteerRole.LEADER)).thenReturn(true);
-//        when(actionRepository.existsById(1L)).thenReturn(false);
-//
-//        ResponseEntity<?> response = actionController.changeDescription(1L, request);
-//
-//        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-//    }
-//
-////    @Test
-////    public void testCloseAction_ReturnsOk_WhenSuccess() {
-////        CloseActionRequest request = new CloseActionRequest(1L);
-////        when(volunteerRepository.existsByVolunteerIdAndRole(1L, VolunteerRole.ADMIN)).thenReturn(true);
-////        when(actionRepository.existsById(1L)).thenReturn(true);
-////
-////        ResponseEntity<?> response = actionController.closeAction(1L, request);
-////
-////        assertEquals(HttpStatus.OK, response.getStatusCode());
-////        verify(actionService).closeAction(1L, 1L);
-////    }
-//
-//    @Test
-//    public void testCloseAction_ReturnsForbidden_WhenAdminNotFound() {
-//        CloseActionRequest request = new CloseActionRequest(1L);
-//        when(volunteerRepository.existsByVolunteerIdAndRole(1L, VolunteerRole.ADMIN)).thenReturn(false);
-//
-//        ResponseEntity<?> response = actionController.closeAction(1L, request);
-//
-//        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-//    }
-//
-//    @Test
-//    public void testCloseAction_ReturnsNotFound_WhenActionNotFound() {
-//        CloseActionRequest request = new CloseActionRequest(1L);
-//        when(volunteerRepository.existsByVolunteerIdAndRole(1L, VolunteerRole.ADMIN)).thenReturn(true);
-//        when(actionRepository.existsById(1L)).thenReturn(false);
-//
-//        ResponseEntity<?> response = actionController.closeAction(1L, request);
-//
-//        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-//    }
-//}

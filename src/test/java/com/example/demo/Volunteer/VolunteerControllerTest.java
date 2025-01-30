@@ -17,7 +17,6 @@ import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -284,7 +283,7 @@ public class VolunteerControllerTest {
 //        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
 //    }
     @Test
-    public void testChangeRole_ReturnsForbidden_WhenRequesterNotAdmin() {
+    public void testassignPosition_ReturnsForbidden_WhenRequesterNotAdmin() {
         // Arrange
         Long volunteerId = 1L;
         AdminRequest request = new AdminRequest(2L); // Admin Long: 2
@@ -294,7 +293,7 @@ public class VolunteerControllerTest {
         when(volunteerRepository.existsByVolunteerIdAndPosition(request.adminId(), Position.ADMIN)).thenReturn(false);
 
         // Act
-        ResponseEntity<Void> response = volunteerController.changeRole(volunteerId, request, role);
+        ResponseEntity<Void> response = volunteerController.assignPosition(volunteerId, request, role);
 
         // Assert
         assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
@@ -303,7 +302,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testChangeRole_ReturnsNotFound_WhenVolunteerDoesNotExist() {
+    public void testassignPosition_ReturnsNotFound_WhenVolunteerDoesNotExist() {
         // Arrange
         Long volunteerId = 1L;
         AdminRequest request = new AdminRequest(2L); // Admin Long: 2
@@ -316,7 +315,7 @@ public class VolunteerControllerTest {
         when(volunteerRepository.existsById(volunteerId)).thenReturn(false);
 
         // Act
-        ResponseEntity<Void> response = volunteerController.changeRole(volunteerId, request, role);
+        ResponseEntity<Void> response = volunteerController.assignPosition(volunteerId, request, role);
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
@@ -326,7 +325,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testChangeRole_ReturnsOk_WhenRoleChangedSuccessfully() {
+    public void testChangeRole_ReturnsOk_WhenPositionChangedSuccessfully() {
         // Arrange
         Long volunteerId = 1L;
         AdminRequest request = new AdminRequest(2L); // Admin Long: 2
@@ -342,7 +341,7 @@ public class VolunteerControllerTest {
         when(volunteerService.assignPosition(volunteerId, Position.valueOf(role))).thenReturn(Errors.SUCCESS);
 
         // Act
-        ResponseEntity<Void> response = volunteerController.changeRole(volunteerId, request, role);
+        ResponseEntity<Void> response = volunteerController.assignPosition(volunteerId, request, role);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -357,7 +356,7 @@ public class VolunteerControllerTest {
     }
 
     @Test
-    public void testChangeRole_ReturnsNotFound_WhenAssignRoleFails() {
+    public void testChangeRole_ReturnsNotFound_WhenAssignPositionFails() {
         // Arrange
         Long volunteerId = 1L;
         AdminRequest request = new AdminRequest(2L); // Admin Long: 2
@@ -373,7 +372,7 @@ public class VolunteerControllerTest {
         when(volunteerService.assignPosition(volunteerId, Position.valueOf(role))).thenReturn(Errors.NOT_FOUND);
 
         // Act
-        ResponseEntity<Void> response = volunteerController.changeRole(volunteerId, request, role);
+        ResponseEntity<Void> response = volunteerController.assignPosition(volunteerId, request, role);
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
