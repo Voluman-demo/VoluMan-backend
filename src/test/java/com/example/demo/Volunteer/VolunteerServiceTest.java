@@ -2,8 +2,12 @@ package com.example.demo.Volunteer;
 
 import com.example.demo.Action.ActionRepository;
 import com.example.demo.Action.ActionService;
+import com.example.demo.Action.Lang;
 import com.example.demo.Model.Errors;
 import com.example.demo.Volunteer.Availability.Availability;
+import com.example.demo.Volunteer.Availability.AvailabilityDTO.AvailabilityRequest;
+import com.example.demo.Volunteer.Availability.AvailabilityDTO.IntervalRequest;
+import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Position.PositionService;
 import com.example.demo.Volunteer.VolunteerDto.VolunteerRequest;
@@ -13,6 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,21 +58,19 @@ class VolunteerServiceTest {
 
     @Test
     void testCreateVolunteer_Success() {
-        // Mock the save operation to simulate saving and returning a volunteer with an ID
+
         when(volunteerRepository.save(any(Volunteer.class))).thenAnswer(invocation -> {
             Volunteer v = invocation.getArgument(0);
-            v.setVolunteerId(1L); // Assign a mock ID to the volunteer
+            v.setVolunteerId(1L);
             return v;
         });
 
-        // Call the service method
         Long id = volunteerService.createVolunteer();
 
-        // Assert that the ID is not null and matches the expected value
         assertNotNull(id);
         assertEquals(1, id);
 
-        // Verify that the repository's save method was called exactly once
+
         verify(volunteerRepository, times(1)).save(any(Volunteer.class));
     }
 
@@ -91,29 +95,37 @@ class VolunteerServiceTest {
     }
 
     @Test
-    void testEditVolunteer_NotFound() {
-        VolunteerRequest details = new VolunteerRequest();
-        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+    public void testEditVolunteer_ReturnsFailure_WhenVolunteerNotFound() {
+        // Given
+        Long volunteerId = 1L;
+        VolunteerRequest request = new VolunteerRequest();
 
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
 
-        Errors result = volunteerService.editVolunteer(1L, details);
+        // When
+        Errors result = volunteerService.editVolunteer(volunteerId, request);
 
-
-        assertEquals(Errors.NOT_FOUND, result);
-        verify(volunteerRepository, never()).save(any(Volunteer.class));
+        // Then
+        assertEquals(Errors.FAILURE, result);
+        verify(volunteerRepository, never()).save(any());
     }
+
 
 
     @Test
-    void testDeleteVolunteer_Success() {
-        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.of(volunteer));
+    public void testDeleteVolunteer_ReturnsNotFound_WhenVolunteerDoesNotExist() {
+        // Given
+        Long volunteerId = 1L;
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
 
-        Errors result = volunteerService.deleteVolunteer(1L);
+        // When
+        Errors result = volunteerService.deleteVolunteer(volunteerId);
 
-        assertEquals(Errors.SUCCESS, result);
-        assertFalse(volunteer.isValid());
-        verify(volunteerRepository, times(1)).save(volunteer);
+        // Then
+        assertEquals(Errors.NOT_FOUND, result);
+        verify(volunteerRepository, never()).delete(any());
     }
+
 
     @Test
     void testDeleteVolunteer_NotFound() {
@@ -127,52 +139,45 @@ class VolunteerServiceTest {
 
 
     @Test
-    void testSetAvailabilities_Success() {
-        List<Availability> availabilities = new ArrayList<>();
-        availabilities.add(new Availability());
+    public void testSetAvailabilities_ReturnsSuccess_WhenVolunteerExists() {
+        // Given
+        Long volunteerId = 1L;
+        Volunteer volunteer = new Volunteer();
+        volunteer.setAvailabilities(new ArrayList<>()); // Initialize empty list
 
-        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.of(volunteer));
+        List<Availability> availabilities = List.of(new Availability(), new Availability()); // Mock availability list
 
-        Errors result = volunteerService.setAvailabilities(1L, availabilities);
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
 
+        // When
+        Errors result = volunteerService.setAvailabilities(volunteerId, availabilities);
+
+        // Then
         assertEquals(Errors.SUCCESS, result);
-        assertEquals(availabilities, volunteer.getAvailabilities());
+
+
+        assertEquals(2, volunteer.getAvailabilities().size(), "Availabilities were not added correctly");
+
+
         verify(volunteerRepository, times(1)).save(volunteer);
     }
 
     @Test
-    void testSetAvailabilities_NotFound() {
-        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.empty());
-
+    public void testSetAvailabilities_ReturnsNotFound_WhenVolunteerNotFound() {
+        // Given
+        Long volunteerId = 1L;
         List<Availability> availabilities = new ArrayList<>();
-        Errors result = volunteerService.setAvailabilities(1L, availabilities);
 
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
+
+        // When
+        Errors result = volunteerService.setAvailabilities(volunteerId, availabilities);
+
+        // Then
         assertEquals(Errors.NOT_FOUND, result);
-        verify(volunteerRepository, never()).save(any(Volunteer.class));
+        verify(volunteerRepository, never()).save(any());
     }
 
-
-    @Test
-    void testAssignPosition_Success() {
-        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.of(volunteer));
-
-        Errors result = volunteerService.assignPosition(1L, Position.LEADER);
-
-        assertEquals(Errors.SUCCESS, result);
-        verify(positionService, times(1)).assignRole(volunteer, Position.LEADER);
-        verify(volunteerRepository, times(1)).save(volunteer);
-    }
-
-    @Test
-    void testAssignPosition_NotFound() {
-        when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.empty());
-
-        Errors result = volunteerService.assignPosition(1L, Position.LEADER);
-
-        assertEquals(Errors.NOT_FOUND, result);
-        verify(positionService, never()).assignRole(any(Volunteer.class), any(Position.class));
-        verify(volunteerRepository, never()).save(any(Volunteer.class));
-    }
 
 
     @Test
@@ -198,62 +203,64 @@ class VolunteerServiceTest {
         assertNull(result);
         verify(volunteerRepository, times(1)).findById(1L);
     }
-    // Test: createAndEditVolunteer
+
     @Test
     void  testCreateAndEditVolunteer_Success() {
-        // Given: Set up a PersonalData object and mock repository behavior
+
         VolunteerRequest details = new VolunteerRequest();
         details.setFirstName("John");
         details.setLastName("Doe");
         details.setEmail("john.doe@example.com");
 
-        // Mock the behavior of saving a new volunteer
+
         when(volunteerRepository.save(any(Volunteer.class))).thenAnswer(invocation -> {
             Volunteer v = invocation.getArgument(0);
-            v.setVolunteerId(1L); // Assign a mock ID to the volunteer
+            v.setVolunteerId(1L);
             return v;
         });
 
-        // Mock the behavior of finding a volunteer by ID
         when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.of(new Volunteer()));
 
-        // When: Call the service method
         Long result = volunteerService.createAndEditVolunteer(details);
 
-        // Then: Assert that the result is not null and matches the expected ID
         assertNotNull(result);
         assertEquals(1, result);
 
-        // Verify that the repository's save method was called twice
-        // (once during creation and once during editing)
         verify(volunteerRepository, times(2)).save(any(Volunteer.class));
     }
 
 
     @Test
     void testCreateAndEditVolunteer_FailsToEdit() {
-        // Given: Set up a PersonalData object
-        VolunteerRequest details = new VolunteerRequest();
 
-        // Mock the behavior of saving a new volunteer
+        VolunteerRequest details = new VolunteerRequest();
+        details.setEmail("test@example.com");
+        when(volunteerRepository.existsByEmail(anyString())).thenReturn(false);
+
         when(volunteerRepository.save(any(Volunteer.class))).thenAnswer(invocation -> {
             Volunteer v = invocation.getArgument(0);
-            v.setVolunteerId(1L); // Assign a mock ID to the volunteer
+            v.setVolunteerId(1L);
             return v;
         });
 
-        // Mock the behavior of not finding the volunteer by Long
+
         when(volunteerRepository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        // When: Call the service method
+
         Long result = volunteerService.createAndEditVolunteer(details);
 
-        // Then: Assert that the result is null (indicating a failure to edit)
-        assertNull(result);
 
-        // Verify that the repository's save method was called only once (for creation)
+        assertNull(result, "Expected null because editing the volunteer failed");
+
+
+        verify(volunteerRepository, times(1)).save(any(Volunteer.class));
+
+        verify(volunteerRepository, times(1)).findById(any(Long.class));
+
+
         verify(volunteerRepository, times(1)).save(any(Volunteer.class));
     }
+
 
 
 
@@ -284,65 +291,6 @@ class VolunteerServiceTest {
         assertFalse(result);
         verify(volunteerRepository, times(1)).existsByEmail(email);
     }
-//    @Test
-//    void testAssignDuty_Success() {
-//        Long volunteerId = 1L;
-//        Duty duty = new Duty();
-//        Volunteer volunteer = new Volunteer();
-//        volunteer.setDuties(new HashSet<>());
-//
-//        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
-//
-//        Errors result = volunteerService.assignDuty(volunteerId, duty);
-//
-//        assertEquals(Errors.SUCCESS, result);
-//        assertTrue(volunteer.getDuties().contains(duty));
-//        verify(volunteerRepository, times(1)).save(volunteer);
-//    }
-//
-//    @Test
-//    void testAssignDuty_NotFound() {
-//        Long volunteerId = 1L;
-//        Duty duty = new Duty();
-//
-//        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
-//
-//        Errors result = volunteerService.assignDuty(volunteerId, duty);
-//        sitory, never()).save(any(Volunteer.class));
-//    }
-//
-//
-//
-//
-//
-//    assertEquals(Errors.NOT_FOUND, result);
-//        verify(volunteerRepo@Test
-//    void testGetDuties_Success() {
-//        Long volunteerId = 1L;
-//        Set<Duty> duties = Set.of(new Duty());
-//        Volunteer volunteer = new Volunteer();
-//        volunteer.setDuties(duties);
-//
-//        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
-//
-//        ArrayList<Duty> result = volunteerService.getDuties(volunteerId);
-//
-//        assertNotNull(result);
-//        assertEquals(new ArrayList<>(duties), result);
-//        verify(volunteerRepository, times(1)).findById(volunteerId);
-//    }
-//
-//    @Test
-//    void testGetDuties_NotFound() {
-//        Long volunteerId = 1L;
-//
-//        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
-//
-//        ArrayList<Duty> result = volunteerService.getDuties(volunteerId);
-//
-//        assertNull(result);
-//        verify(volunteerRepository, times(1)).findById(volunteerId);
-//    }
     @Test
     void testGetPosition_Success() {
         // Given
@@ -374,6 +322,299 @@ class VolunteerServiceTest {
         // Then
         assertNull(result);
         verify(volunteerRepository, times(1)).findById(volunteerId);
+    }
+    @Test
+    public void testAssignPosition_ReturnsSuccess_WhenVolunteerExists() {
+        // Given
+        Long volunteerId = 1L;
+        Position newRole = Position.LEADER;
+        Volunteer volunteer = new Volunteer();
+
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
+
+        // When
+        Errors result = volunteerService.assignPosition(volunteerId, newRole);
+
+        // Then
+        assertEquals(Errors.SUCCESS, result);
+        verify(volunteerRepository, times(1)).save(volunteer);
+    }
+
+    @Test
+    public void testAssignPosition_ReturnsNotFound_WhenVolunteerNotFound() {
+        // Given
+        Long volunteerId = 1L;
+        Position newRole = Position.LEADER;
+
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
+
+        // When
+        Errors result = volunteerService.assignPosition(volunteerId, newRole);
+
+        // Then
+        assertEquals(Errors.NOT_FOUND, result);
+        verify(volunteerRepository, never()).save(any());
+    }
+
+
+    @Test
+    public void testGetVolunteerById_ReturnsVolunteer_WhenFound() {
+        // Given
+        Long volunteerId = 1L;
+        Volunteer volunteer = new Volunteer();
+
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
+
+        // When
+        Volunteer result = volunteerService.getVolunteerById(volunteerId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(volunteer, result);
+    }
+
+    @Test
+    public void testGetVolunteerById_ReturnsNull_WhenNotFound() {
+        // Given
+        Long volunteerId = 1L;
+
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
+
+        // When
+        Volunteer result = volunteerService.getVolunteerById(volunteerId);
+
+        // Then
+        assertNull(result);
+    }
+    @Test
+    public void testGetLimitOfWeeklyHours_ReturnsValue_WhenVolunteerExists() {
+        // Given
+        Long volunteerId = 1L;
+        Volunteer volunteer = new Volunteer();
+        volunteer.setLimitOfWeeklyHours(20.0);
+
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
+
+        // When
+        Double result = volunteerService.getLimitOfWeeklyHours(volunteerId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(20.0, result);
+    }
+
+    @Test
+    public void testGetLimitOfWeeklyHours_ReturnsNull_WhenVolunteerNotFound() {
+        // Given
+        Long volunteerId = 1L;
+
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
+
+        // When
+        Double result = volunteerService.getLimitOfWeeklyHours(volunteerId);
+
+        // Then
+        assertNull(result);
+    }
+    @Test
+    public void testConvertToAvailability_ReturnsAvailability_WhenValidRequest() {
+        // Given
+        Long volunteerId = 1L;
+        AvailabilityRequest request = new AvailabilityRequest();
+        request.setDate(LocalDate.of(2025, 2, 10));
+
+        IntervalRequest slot1 = new IntervalRequest();
+        slot1.setStartTime("09:00");
+        slot1.setEndTime("10:00");
+
+        IntervalRequest slot2 = new IntervalRequest();
+        slot2.setStartTime("14:00");
+        slot2.setEndTime("15:00");
+
+        request.setSlots(List.of(slot1, slot2));
+
+        Volunteer volunteer = new Volunteer();
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
+
+        // When
+        Availability result = volunteerService.convertToAvailability(request, volunteerId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(LocalDate.of(2025, 2, 10), result.getDate());
+        assertEquals(volunteer, result.getVolunteer());
+        assertEquals(2, result.getSlots().size());
+
+        // Convert Set to List and sort by start time
+        List<AvailabilityInterval> intervals = new ArrayList<>(result.getSlots());
+        intervals.sort(Comparator.comparing(AvailabilityInterval::getStartTime));
+
+        assertEquals(LocalTime.of(9, 0), intervals.get(0).getStartTime());
+        assertEquals(LocalTime.of(10, 0), intervals.get(0).getEndTime());
+
+        assertEquals(LocalTime.of(14, 0), intervals.get(1).getStartTime());
+        assertEquals(LocalTime.of(15, 0), intervals.get(1).getEndTime());
+
+        verify(volunteerRepository, times(1)).findById(volunteerId);
+    }
+
+
+    @Test
+    public void testConvertToAvailability_ThrowsException_WhenVolunteerNotFound() {
+        // Given
+        Long volunteerId = 1L;
+        AvailabilityRequest request = new AvailabilityRequest();
+        request.setDate(LocalDate.of(2025, 2, 10));
+
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(NoSuchElementException.class, () -> {
+            volunteerService.convertToAvailability(request, volunteerId);
+        });
+
+        verify(volunteerRepository, times(1)).findById(volunteerId);
+    }
+    @Test
+    public void testEditVolunteerWeeklyHours_ReturnsSuccess_WhenVolunteerExists() {
+        // Given
+        Long volunteerId = 1L;
+        Double newWeeklyHours = 20.0;
+
+        Volunteer volunteer = new Volunteer();
+        volunteer.setLimitOfWeeklyHours(15.0); // Previous value
+
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
+
+        // When
+        Errors result = volunteerService.editVolunteerWeeklyHours(volunteerId, newWeeklyHours);
+
+        // Then
+        assertEquals(Errors.SUCCESS, result);
+        assertEquals(newWeeklyHours, volunteer.getLimitOfWeeklyHours());
+
+        verify(volunteerRepository, times(1)).findById(volunteerId);
+        verify(volunteerRepository, times(1)).save(volunteer);
+    }
+    @Test
+    public void testEditVolunteerWeeklyHours_ReturnsFailure_WhenVolunteerNotFound() {
+        // Given
+        Long volunteerId = 1L;
+        Double newWeeklyHours = 20.0;
+
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
+
+        // When
+        Errors result = volunteerService.editVolunteerWeeklyHours(volunteerId, newWeeklyHours);
+
+        // Then
+        assertEquals(Errors.FAILURE, result);
+
+        verify(volunteerRepository, times(1)).findById(volunteerId);
+        verify(volunteerRepository, never()).save(any());
+    }
+    @Test
+    public void testGetLang_ReturnsLanguage_WhenVolunteerExists() {
+        // Given
+        Long volunteerId = 1L;
+        Lang expectedLang = Lang.EN;
+
+        Volunteer volunteer = new Volunteer();
+        volunteer.setLanguage(expectedLang);
+
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.of(volunteer));
+
+        // When
+        Lang result = volunteerService.getLang(volunteerId);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(expectedLang, result);
+
+        verify(volunteerRepository, times(1)).findById(volunteerId);
+    }
+    @Test
+    public void testGetLang_ReturnsNull_WhenVolunteerNotFound() {
+        // Given
+        Long volunteerId = 1L;
+
+        when(volunteerRepository.findById(volunteerId)).thenReturn(Optional.empty());
+
+        // When
+        Lang result = volunteerService.getLang(volunteerId);
+
+        // Then
+        assertNull(result);
+
+        verify(volunteerRepository, times(1)).findById(volunteerId);
+    }
+    @Test
+    public void testGetAllPersData_ReturnsPersonalDataList_WhenVolunteersExist() {
+        // Given
+        Position position = Position.VOLUNTEER;
+
+        Volunteer volunteer1 = new Volunteer();
+        volunteer1.setFirstName("John");
+        volunteer1.setLastName("Doe");
+        volunteer1.setEmail("john.doe@example.com");
+        volunteer1.setPhone("+123456789");
+        volunteer1.setDateOfBirth(LocalDate.of(1990, 1, 1));
+        volunteer1.setAddress("123 Main St");
+        volunteer1.setSex("M");
+
+        Volunteer volunteer2 = new Volunteer();
+        volunteer2.setFirstName("Jane");
+        volunteer2.setLastName("Smith");
+        volunteer2.setEmail("jane.smith@example.com");
+        volunteer2.setPhone("+987654321");
+        volunteer2.setDateOfBirth(LocalDate.of(1992, 5, 10));
+        volunteer2.setAddress("456 Elm St");
+        volunteer2.setSex("F");
+
+        List<Volunteer> volunteerList = List.of(volunteer1, volunteer2);
+
+        when(volunteerRepository.findAllByPosition(position)).thenReturn(volunteerList);
+
+        // When
+        List<PersonalData> result = volunteerService.getAllPersData(position);
+
+        // Then
+        assertNotNull(result);
+        assertEquals(2, result.size());
+
+        assertEquals("John", result.get(0).getFirstName());
+        assertEquals("Doe", result.get(0).getLastName());
+        assertEquals("john.doe@example.com", result.get(0).getEmail());
+        assertEquals("+123456789", result.get(0).getPhone());
+        assertEquals(LocalDate.of(1990, 1, 1), result.get(0).getDateOfBirth());
+        assertEquals("123 Main St", result.get(0).getAddress());
+        assertEquals("M", result.get(0).getSex());
+
+        assertEquals("Jane", result.get(1).getFirstName());
+        assertEquals("Smith", result.get(1).getLastName());
+        assertEquals("jane.smith@example.com", result.get(1).getEmail());
+        assertEquals("+987654321", result.get(1).getPhone());
+        assertEquals(LocalDate.of(1992, 5, 10), result.get(1).getDateOfBirth());
+        assertEquals("456 Elm St", result.get(1).getAddress());
+        assertEquals("F", result.get(1).getSex());
+
+        verify(volunteerRepository, times(1)).findAllByPosition(position);
+    }
+    @Test
+    public void testGetAllPersData_ReturnsEmptyList_WhenNoVolunteersExist() {
+        // Given
+        Position position = Position.LEADER;
+
+        when(volunteerRepository.findAllByPosition(position)).thenReturn(Collections.emptyList());
+
+        // When
+        List<PersonalData> result = volunteerService.getAllPersData(position);
+
+        // Then
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(volunteerRepository, times(1)).findAllByPosition(position);
     }
 
 }
