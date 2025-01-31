@@ -3,10 +3,13 @@ package com.example.demo.Volunteer;
 import com.example.demo.Action.Action;
 import com.example.demo.Action.ActionDemand.ActionDemandInterval.ActionDemandInterval;
 import com.example.demo.Action.Lang;
+import com.example.demo.Schedule.Schedule;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Preferences.Preferences;
 import com.example.demo.Volunteer.User.User;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -15,6 +18,7 @@ import lombok.Setter;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -54,9 +58,11 @@ public class Volunteer extends PersonalData {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
+    @JsonManagedReference
     private User user;
 
     @OneToMany(mappedBy = "volunteer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Availability> availabilities;
 
     @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
@@ -65,11 +71,16 @@ public class Volunteer extends PersonalData {
             joinColumns = @JoinColumn(name = "volunteer_id"),
             inverseJoinColumns = @JoinColumn(name = "action_id")
     )
+    @JsonIgnore
     private Set<Action> actions;
 
 
     @ManyToMany(mappedBy = "assignedVolunteers", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @JsonIgnore
     private Set<ActionDemandInterval> assignedActionDemandIntervals = new HashSet<>();
+
+    @ManyToMany(mappedBy = "volunteers", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    private List<Schedule> schedules = new ArrayList<>();
 
     public Volunteer() {
         this.setFirstName("");

@@ -4,6 +4,9 @@ import com.example.demo.Action.Action;
 import com.example.demo.Action.ActionDemand.ActionDemand;
 
 import com.example.demo.Volunteer.Volunteer;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,6 +34,7 @@ public class Schedule {
             joinColumns = @JoinColumn(name = "schedule_id"),
             inverseJoinColumns = @JoinColumn(name = "action_id")
     )
+    @JsonIgnore
     private List<Action> actions = new ArrayList<>();
 
     @Column(name = "start_date", nullable = false)
@@ -45,9 +49,11 @@ public class Schedule {
             joinColumns = @JoinColumn(name = "schedule_id"),
             inverseJoinColumns = @JoinColumn(name = "volunteer_id")
     )
+    @JsonIgnore
     private List<Volunteer> volunteers = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "schedule", orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "schedule")
+    @JsonManagedReference
     private List<ActionDemand> actionDemands = new ArrayList<>();
 
     public Schedule(LocalDate startDate, LocalDate endDate) {

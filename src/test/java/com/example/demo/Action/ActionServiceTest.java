@@ -1,6 +1,7 @@
 package com.example.demo.Action;
 
 import com.example.demo.Action.ActionDto.ActionRequest;
+import com.example.demo.Action.ActionDto.DescriptionRequest;
 import com.example.demo.Model.Errors;
 
 import com.example.demo.Volunteer.Preferences.Preferences;
@@ -123,7 +124,7 @@ public class ActionServiceTest {
     @Test
     public void testSetDesc_ActionExists() {
         Lang language = Lang.EN;
-        Description description = new Description();
+        DescriptionRequest description = new DescriptionRequest();
         description.setFullName("Test Action Description");
 
         when(actionRepository.findById(testActionId)).thenReturn(Optional.of(mockAction));
@@ -131,15 +132,15 @@ public class ActionServiceTest {
         Errors result = actionService.setDesc(testActionId, language, description);
 
         assertEquals(Errors.SUCCESS, result);
-        assertEquals(description, mockAction.getDescr().get(language));
-        assertTrue(mockAction.getDescr().get(language).isValid());
+        assertEquals(description, mockAction.getDescr().contains(language));
+        assertTrue(mockAction.getDescr().stream().filter(desc -> desc.getLang().equals(language)).findFirst().get().isValid());
         verify(actionRepository, times(1)).save(mockAction);
     }
 
     @Test
     public void testSetDesc_ActionNotFound() {
         Lang language = Lang.EN;
-        Description description = new Description();
+        DescriptionRequest description = new DescriptionRequest();
 
         when(actionRepository.findById(testActionId)).thenReturn(Optional.empty());
 

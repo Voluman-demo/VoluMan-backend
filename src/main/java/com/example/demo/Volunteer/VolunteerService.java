@@ -6,10 +6,12 @@ import com.example.demo.Action.Lang;
 import com.example.demo.Model.Errors;
 
 import com.example.demo.Volunteer.Availability.Availability;
+import com.example.demo.Volunteer.Availability.AvailabilityDTO.AvailabilityRequest;
 import com.example.demo.Volunteer.Availability.AvailabilityInterval.AvailabilityInterval;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Position.PositionService;
 import com.example.demo.Volunteer.Preferences.Preferences;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalTime;

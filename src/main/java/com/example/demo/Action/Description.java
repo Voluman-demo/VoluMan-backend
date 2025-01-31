@@ -1,5 +1,7 @@
 package com.example.demo.Action;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,13 +31,15 @@ public class Description extends Version{
     private LocalDate end;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "lang", unique = true)
+    @Column(name = "lang", nullable = false)
     private Lang lang;
 
     @OneToMany(mappedBy = "description", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
     private List<Role> roles = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "action_id")
+    @JsonIgnore
     private Action action;
 }

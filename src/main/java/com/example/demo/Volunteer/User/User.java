@@ -2,7 +2,9 @@ package com.example.demo.Volunteer.User;
 
 
 import com.example.demo.Volunteer.Volunteer;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,7 +34,7 @@ public class User {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "volunteer_id", referencedColumnName = "volunteer_id")
-    @JsonIgnore
+    @JsonBackReference
     private Volunteer volunteer;
 
     public User(Long userId) {

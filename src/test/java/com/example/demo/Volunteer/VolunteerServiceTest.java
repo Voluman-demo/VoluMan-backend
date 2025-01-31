@@ -6,6 +6,7 @@ import com.example.demo.Model.Errors;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.Position.PositionService;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

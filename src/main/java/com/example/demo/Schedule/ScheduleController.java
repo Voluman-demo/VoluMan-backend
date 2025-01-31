@@ -1,7 +1,7 @@
 package com.example.demo.Schedule;
 
 import com.example.demo.Action.ActionRepository;
-import com.example.demo.Action.ActionDemand.UpdateNeedDto;
+import com.example.demo.Action.ActionDemand.Dto.ActionNeedRequest;
 import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
 import com.example.demo.Model.Errors;
@@ -65,7 +65,7 @@ public class ScheduleController {
 
     @DeleteMapping("/{scheduleId}")
     public ResponseEntity<?> deleteSchedule(@PathVariable Long scheduleId, @RequestParam Long volunteerId) {
-        if (volunteerRepository.existsByVolunteerIdAndPosition(volunteerId, Position.ADMIN)) {
+        if (!volunteerRepository.existsByVolunteerIdAndPosition(volunteerId, Position.ADMIN)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         Errors result = scheduleService.deleteSchedule(scheduleId);
@@ -114,15 +114,15 @@ public class ScheduleController {
     }
 
     @PutMapping("/actions/{actionId}/demands")
-    public ResponseEntity<String> updateNeed(
+    public ResponseEntity<String> updateDemands(
             @PathVariable Long actionId,
-            @RequestBody UpdateNeedDto updateNeedDto
+            @RequestBody ActionNeedRequest actionNeedRequest
     ) {
-        if (!volunteerRepository.existsByVolunteerIdAndPosition(updateNeedDto.getVolunteerId(), Position.LEADER)) {
+        if (!volunteerRepository.existsByVolunteerIdAndPosition(actionNeedRequest.getLeaderId(), Position.LEADER)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        Errors result = scheduleService.updateDemand(actionId, updateNeedDto);
+        Errors result = scheduleService.updateDemand(actionId, actionNeedRequest);
         if (result == Errors.SUCCESS) {
             return ResponseEntity.ok().build();
         } else if (result == Errors.CREATED) {

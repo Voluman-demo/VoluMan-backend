@@ -1,21 +1,24 @@
 package com.example.demo.Volunteer;
 
 
+import com.example.demo.Action.ActionService;
+import com.example.demo.Action.Description;
 import com.example.demo.Action.Lang;
 import com.example.demo.Log.EventType;
 import com.example.demo.Log.LogService;
 import com.example.demo.Model.Errors;
 
 import com.example.demo.Volunteer.Availability.Availability;
+import com.example.demo.Volunteer.Availability.AvailabilityDTO.SetAvailRequest;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.VolunteerDto.AdminRequest;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRequest;
+import com.example.demo.Volunteer.VolunteerDto.WeeklyHoursRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @RestController
 @RequestMapping("/volunteers")
@@ -23,11 +26,13 @@ public class VolunteerController {
     private final VolunteerRepository volunteerRepository;
     private final VolunteerService volunteerService;
     private final LogService logService;
+    private final ActionService actionService;
 
-    public VolunteerController(VolunteerRepository volunteerRepository, VolunteerService volunteerService, LogService logService) {
+    public VolunteerController(VolunteerRepository volunteerRepository, VolunteerService volunteerService, LogService logService, ActionService actionService) {
         this.volunteerRepository = volunteerRepository;
         this.volunteerService = volunteerService;
         this.logService = logService;
+        this.actionService = actionService;
     }
 
     @GetMapping("")
@@ -147,7 +152,7 @@ public class VolunteerController {
         if (!volunteerRepository.existsById(volunteerId) || volunteerRepository.existsByVolunteerIdAndPosition(volunteerId, Position.CANDIDATE)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        Errors result = volunteerService.editVolunteerWeeklyHours(volunteerId, weeklyHours.limitOfWeeklyHours);
+        Errors result = volunteerService.editVolunteerWeeklyHours(volunteerId, weeklyHours.getLimitOfWeeklyHours());
         if (result == Errors.SUCCESS) {
             return ResponseEntity.ok().build();
         }
@@ -205,5 +210,11 @@ public class VolunteerController {
             return language != null ? ResponseEntity.ok(language) : ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/{volunteerId}/preferences/{preference}")
+    public ResponseEntity<List<Description>> getPref(@PathVariable Long volunteerId, @PathVariable String preference) {
+        List<Description> prefList = actionService.getPref(preference, volunteerId);
+
+        return prefList.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(prefList);
+    }
 
 }

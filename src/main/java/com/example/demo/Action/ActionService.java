@@ -64,40 +64,64 @@ public class ActionService implements Actions {
         return Errors.NOT_FOUND;
     }
 
-    @Override
-    public LocalDate getBeg(Long actionId) {
-        return actionRepository.findById(actionId)
-                .map(Action::getBegin)
-                .orElse(null);
-    }
+
 
     @Override
-    public LocalDate getEnd(Long actionId) {
-        return actionRepository.findById(actionId)
-                .map(Action::getEnd)
-                .orElse(null);
-    }
-
-    @Override
-    public Errors setDesc(Long actionId, Lang language, Description description) {
+    public Errors setDesc(Long actionId, Lang language, DescriptionRequest descriptionRequest) {
         Optional<Action> actionOpt = actionRepository.findById(actionId);
         if (actionOpt.isPresent()) {
             Action action = actionOpt.get();
 
-            // Usuń istniejący opis w tym języku, jeśli istnieje
-            action.getDescr().removeIf(desc -> desc.getLang() == language);
+            // Znajdź istniejący opis w danym języku
+            Description description = action.getDescr().stream()
+                    .filter(desc -> desc.getLang() == language)
+                    .findFirst()
+                    .orElse(null);
 
-            // Dodaj nowy opis i przypisz go do akcji
-            description.setLang(language);
-            description.setAction(action);
-            description.setValid(true);
-            action.getDescr().add(description);
+            if (description == null) {
+                // Jeśli opis nie istnieje, utwórz nowy i przypisz do akcji
+                description = new Description();
+                description.setLang(language);
+                description.setAction(action);
+                action.getDescr().add(description);
+            }
 
+            // Aktualizuj tylko dane zawarte w żądaniu
+            if (descriptionRequest.getBegin() != null) {
+                description.setBegin(descriptionRequest.getBegin());
+            }
+            if (descriptionRequest.getEnd() != null) {
+                description.setEnd(descriptionRequest.getEnd());
+            }
+            if (descriptionRequest.getFullName() != null) {
+                description.setFullName(descriptionRequest.getFullName());
+            }
+            if (descriptionRequest.getShortName() != null) {
+                description.setShortName(descriptionRequest.getShortName());
+            }
+            if (descriptionRequest.getPlace() != null) {
+                description.setPlace(descriptionRequest.getPlace());
+            }
+            if (descriptionRequest.getAddress() != null) {
+                description.setAddress(descriptionRequest.getAddress());
+            }
+            if (descriptionRequest.getDescription() != null) {
+                description.setDescription(descriptionRequest.getDescription());
+            }
+            if (descriptionRequest.getHours() != null) {
+                description.setHours(descriptionRequest.getHours());
+            }
+            if (descriptionRequest.getRoles() != null) {
+                updateRoles(description, descriptionRequest.getRoles());
+            }
+
+            // Zapisz zmiany w repozytorium
             actionRepository.save(action);
             return Errors.SUCCESS;
         }
         return Errors.NOT_FOUND;
     }
+
 
     @Override
     public Errors remDesc(Long actionId, Lang language) {
@@ -157,6 +181,8 @@ public class ActionService implements Actions {
                 case "R" -> volunteer.getPreferences().getR().add(action);
                 default -> volunteer.getPreferences().getU().add(action);
             }
+
+            volunteerRepository.save(volunteer);
             return Errors.SUCCESS;
         }
         return Errors.FAILURE;
@@ -203,14 +229,11 @@ public class ActionService implements Actions {
             action.setEnd(actionRequest.getEnd());
             action.setLeaderId(actionRequest.getLeaderId());
 
-            // Przekształć istniejące opisy na mapę dla łatwego dostępu
+            // Przekształć istniejące opisy na mapę (lang jako klucz)
             Map<Lang, Description> existingDescriptionsMap = action.getDescr().stream()
                     .collect(Collectors.toMap(Description::getLang, desc -> desc));
 
-            // Nowa lista opisów
-            List<Description> updatedDescriptions = new ArrayList<>();
-
-            // Przejdź przez opisy z żądania
+            // Przechodzenie przez opisy z żądania i aktualizacja istniejących lub dodawanie nowych
             for (DescriptionRequest descReq : actionRequest.getDescr()) {
                 Description description;
                 if (existingDescriptionsMap.containsKey(descReq.getLang())) {
@@ -219,7 +242,8 @@ public class ActionService implements Actions {
                 } else {
                     // Dodanie nowego opisu
                     description = new Description();
-                    description.setAction(action); // Ustawienie relacji z akcją
+                    description.setAction(action);
+                    action.getDescr().add(description);  // Dodajemy nowy opis do istniejącej kolekcji
                 }
 
                 // Aktualizacja danych opisu
@@ -234,23 +258,25 @@ public class ActionService implements Actions {
                 description.setDescription(descReq.getDescription());
                 description.setHours(descReq.getHours());
 
-                // Aktualizacja ról w opisie
+                // Aktualizacja ról
                 updateRoles(description, descReq.getRoles());
-
-                // Dodanie opisu do zaktualizowanej listy
-                updatedDescriptions.add(description);
             }
 
-            // Ustawienie zaktualizowanej listy opisów w akcji
-            action.setDescr(updatedDescriptions);
+            // Usunięcie opisów, które nie zostały przesłane w żądaniu
+            Set<Lang> requestedLangs = actionRequest.getDescr().stream()
+                    .map(DescriptionRequest::getLang)
+                    .collect(Collectors.toSet());
 
-            // Zapisz zmiany w repozytorium
+            action.getDescr().removeIf(desc -> !requestedLangs.contains(desc.getLang()));
+
+            // Zapisanie zmian w repozytorium
             actionRepository.save(action);
 
             return Errors.SUCCESS;
         }
         return Errors.NOT_FOUND;
     }
+
 
     private void updateRoles(Description description, List<RoleRequest> roleRequests) {
         Map<String, Role> existingRolesMap = description.getRoles().stream()
@@ -350,6 +376,13 @@ public class ActionService implements Actions {
 
     public Action getAction(Long actionId) {
         return actionRepository.findById(actionId).get();
+    }
+
+    public Action getActionTmp(Long actionId) {
+        Action action = actionRepository.findById(actionId).get();
+
+//        action.getDescr().get().g
+        return action;
     }
 
     public List<Action> getAllActions() {

@@ -1,6 +1,8 @@
 package com.example.demo.Action;
 
+import com.example.demo.Action.ActionDto.ActionPrefRequest;
 import com.example.demo.Action.ActionDto.ActionRequest;
+import com.example.demo.Action.ActionDto.DescriptionRequest;
 import com.example.demo.Model.Errors;
 import com.example.demo.Volunteer.Position.Position;
 import com.example.demo.Volunteer.VolunteerRepository;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/actions")
@@ -42,6 +45,11 @@ public class ActionController {
             return ResponseEntity.ok(action);
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/{actionId}/tmp")
+    public ResponseEntity<Action> getActionTmp (@PathVariable Long actionId){
+        return  ResponseEntity.ok(actionService.getActionTmp(actionId));
     }
 
     @GetMapping("/{actionId}/desc")
@@ -103,7 +111,7 @@ public class ActionController {
     public ResponseEntity<String> changeDesc(
             @PathVariable Long actionId,
             @RequestParam Lang language,
-            @RequestBody Description newDesc
+            @RequestBody DescriptionRequest newDesc
     ) {
         Errors result = actionService.setDesc(actionId, language, newDesc);
         if (result == Errors.SUCCESS) {
@@ -113,7 +121,8 @@ public class ActionController {
     }
 
     @PutMapping("/{actionId}/begin")
-    public ResponseEntity<String> setBegin(@PathVariable Long actionId, @RequestParam LocalDate begin) {
+    public ResponseEntity<String> setBegin(@PathVariable Long actionId, @RequestBody Map<String, LocalDate> requestBody) {
+        LocalDate begin = requestBody.get("begin");
         Errors result = actionService.setBeg(actionId, begin);
         if (result == Errors.SUCCESS) {
             return ResponseEntity.ok().build();
@@ -122,7 +131,9 @@ public class ActionController {
     }
 
     @PutMapping("/{actionId}/end")
-    public ResponseEntity<String> setEnd(@PathVariable Long actionId, @RequestParam LocalDate end) {
+    public ResponseEntity<String> setEnd(@PathVariable Long actionId, @RequestBody Map<String, LocalDate> requestBody
+    ) {
+        LocalDate end = requestBody.get("end");
         Errors result = actionService.setEnd(actionId, end);
         if (result == Errors.SUCCESS) {
             return ResponseEntity.ok().build();
@@ -130,64 +141,18 @@ public class ActionController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/{actionId}/preferences/{preference}/volunteers/{volunteerId}")
-    public ResponseEntity<Errors> setPref(@PathVariable Long actionId, @PathVariable String preference, @PathVariable Long volunteerId) {
+    @PostMapping("/{actionId}/preferences")
+    public ResponseEntity<Errors> setPref(@PathVariable Long actionId, @RequestBody ActionPrefRequest actionPrefRequest) {
 
-        Errors result = actionService.setPref(actionId, preference, volunteerId);
+        Errors result = actionService.setPref(actionId, actionPrefRequest.getDecision(), actionPrefRequest.getVolunteerId());
         if (result == Errors.SUCCESS) {
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 
-//    @PostMapping("/{actionId}/preferences/weakly-mine")
-//    public ResponseEntity<String> addWeaklyMine(@PathVariable Long actionId, @RequestBody User user) {
-//        Errors result = actionService.setWeaklyMine(user, actionId);
-//        if (result == Errors.SUCCESS) {
-//            return ResponseEntity.ok("Added to Weakly Mine successfully.");
-//        }
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//    }
-//
-//    @PostMapping("/{actionId}/preferences/rejected")
-//    public ResponseEntity<String> addRejected(@PathVariable Long actionId, @RequestBody User user) {
-//        Errors result = actionService.setRejected(user, actionId);
-//        if (result == Errors.SUCCESS) {
-//            return ResponseEntity.ok().build();
-//        }
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//    }
-//
-//    @PostMapping("/{actionId}/preferences/undecided")
-//    public ResponseEntity<String> addUndecided(@PathVariable Long actionId, @RequestBody User user) {
-//        Errors result = actionService.setUndecided(user, actionId);
-//        if (result == Errors.SUCCESS) {
-//            return ResponseEntity.ok().build();
-//        }
-//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-//    }
-
-    @GetMapping("/preferences/{preference}/volunteers/{volunteerId}")
-    public ResponseEntity<List<Description>> getPref(@PathVariable String preference, @PathVariable Long volunteerId) {
-        List<Description> prefList = actionService.getPref(preference, volunteerId);
-
-        return prefList.isEmpty() ? ResponseEntity.notFound().build() : ResponseEntity.ok(prefList);
-    }
-
-//    @GetMapping("/preferences/weakly-mine")
-//    public ResponseEntity<ArrayList<Description>> getWeaklyMine(@RequestBody User user) {
-//        return ResponseEntity.ok(actionService.getWeaklyMine(user));
-//    }
-//
-//    @GetMapping("/preferences/rejected")
-//    public ResponseEntity<ArrayList<Description>> getRejected(@RequestBody User user) {
-//        return ResponseEntity.ok(actionService.getRejected(user));
-//    }
-//
-//    @GetMapping("/preferences/undecided")
-//    public ResponseEntity<ArrayList<Description>> getUndecided(@RequestBody User user) {
-//        return ResponseEntity.ok(actionService.getUndecided(user));
-//    }
 
 
+
+    //TODO dodać getDemands for an Action
 }

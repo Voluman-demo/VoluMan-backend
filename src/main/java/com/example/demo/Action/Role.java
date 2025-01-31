@@ -1,5 +1,7 @@
 package com.example.demo.Action;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +27,7 @@ public class Role {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "description_id", nullable = false)
+    @JsonBackReference
     private Description description;
 
     @Override

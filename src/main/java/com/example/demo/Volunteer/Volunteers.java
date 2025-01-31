@@ -3,8 +3,8 @@ package com.example.demo.Volunteer;
 import com.example.demo.Model.Errors;
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Position.Position;
+import com.example.demo.Volunteer.VolunteerDto.VolunteerRequest;
 
-import java.util.ArrayList;
 import java.util.List;
 
 

@@ -1,4 +1,4 @@
-package com.example.demo.Volunteer;
+package com.example.demo.Volunteer.Availability.AvailabilityDTO;
 
 import lombok.Data;
 

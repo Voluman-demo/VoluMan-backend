@@ -4,6 +4,7 @@ package com.example.demo.Action.ActionDemand.ActionDemandInterval;
 import com.example.demo.Action.ActionDemand.ActionDemand;
 import com.example.demo.Volunteer.Volunteer;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,6 +43,7 @@ public class ActionDemandInterval {
             joinColumns = @JoinColumn(name = "interval_id"),
             inverseJoinColumns = @JoinColumn(name = "volunteer_id", referencedColumnName = "volunteer_id")
     )
+
     private Set<Volunteer> assignedVolunteers = new HashSet<>();
 
     @ManyToOne

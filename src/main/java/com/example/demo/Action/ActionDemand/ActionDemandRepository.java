@@ -17,5 +17,4 @@ public interface ActionDemandRepository extends JpaRepository<ActionDemand, Long
 
     Optional<ActionDemand> findByActionAndDate(Action action, LocalDate date);
 
-//    List<Demand> findByDateBetween(LocalDate startDate, LocalDate endDate);
 }

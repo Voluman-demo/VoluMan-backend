@@ -1,4 +1,4 @@
-package com.example.demo.Volunteer;
+package com.example.demo.Volunteer.VolunteerDto;
 
 import com.example.demo.Volunteer.Availability.Availability;
 import com.example.demo.Volunteer.Position.Position;

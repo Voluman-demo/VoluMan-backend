@@ -1,7 +1,7 @@
 package com.example.demo.Action;
 
+import com.example.demo.Action.ActionDto.DescriptionRequest;
 import com.example.demo.Model.Errors;
-import com.example.demo.Volunteer.User.User;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -18,11 +18,7 @@ public interface Actions {
 
     Errors setEnd(Long aId, LocalDate endDate);
 
-    LocalDate getBeg(Long aId);
-
-    LocalDate getEnd(Long aId);
-
-    Errors setDesc(Long aId, Lang l, Description desc);
+    Errors setDesc(Long aId, Lang l, DescriptionRequest desc);
 
     Errors remDesc(Long aId, Lang l);
 

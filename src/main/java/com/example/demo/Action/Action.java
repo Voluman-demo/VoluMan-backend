@@ -1,6 +1,10 @@
 package com.example.demo.Action;
 
+import com.example.demo.Action.ActionDemand.ActionDemand;
+import com.example.demo.Schedule.Schedule;
 import com.example.demo.Volunteer.Volunteer;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,11 +34,21 @@ public class Action {
     @Column(name = "leader_id")
     private Long leaderId;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "action", fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "action", fetch = FetchType.LAZY)
+//    @JsonManagedReference
     private List<Description> descr;
+
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "action", fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<ActionDemand> actionDemands;
 
     @ManyToMany(mappedBy = "actions", cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private Set<Volunteer> volunteers = new HashSet<>();
+
+
+    @ManyToMany(mappedBy = "actions", cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+//    @JsonBackReference
+    private List<Schedule> schedules = new ArrayList<>();
 
     public Action() {
         this.descr = new ArrayList<>();
