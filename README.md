@@ -11,7 +11,7 @@ VoluMan-backend is a backend application for the VoluMan system. It is built wit
 - Lombok
 
 ### Documentation
-For a comprehensive overview of the system design, architecture, and detailed use case descriptions, please refer to the Bachelor Thesis document included in this repository. This thesis provides in-depth documentation of the VoluMan system, covering topics such as:
+For a comprehensive overview of the system design, architecture, and detailed use case descriptions, please refer to the [Bachelor Thesis](documents/VoluMan_Bachelor_Thesis_2025.pdf) document included in this repository. This thesis provides in-depth documentation of the VoluMan system, covering topics such as:
 - System Logic and Use Cases: Detailed explanations of volunteer status management, action scheduling, and more.
 - Technical Details: Architectural decisions, API design, security implementations, and module descriptions.
 - Implementation: Code structure, design patterns, and operation of the server endpoints.
