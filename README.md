@@ -1,7 +1,7 @@
-#VoluMan-backend
+# VoluMan-backend
 VoluMan-backend is a backend application for the VoluMan system. It is built with Spring Boot and provides RESTful APIs to handle business logic and data operations.
 
-###Technologies
+### Technologies
 - Java 17
 - Spring Boot 3.3.1
 - Spring Data JPA
@@ -10,7 +10,7 @@ VoluMan-backend is a backend application for the VoluMan system. It is built wit
 - Java JWT
 - Lombok
 
-###Documentation
+### Documentation
 For a comprehensive overview of the system design, architecture, and detailed use case descriptions, please refer to the Bachelor Thesis document included in this repository. This thesis provides in-depth documentation of the VoluMan system, covering topics such as:
 - System Logic and Use Cases: Detailed explanations of volunteer status management, action scheduling, and more.
 - Technical Details: Architectural decisions, API design, security implementations, and module descriptions.
